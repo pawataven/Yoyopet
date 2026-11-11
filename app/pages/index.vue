@@ -10,5 +10,6 @@ useSeoMeta({
     <PromoBannerCarousel />
     <RecommendedRewards />
     <TopSpenderAndTier />
+    <PetsAndReferral />
   </div>
 </template>
