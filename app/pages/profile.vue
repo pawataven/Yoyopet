@@ -15,21 +15,7 @@ const isFormDataReady = computed(() => preferences.value !== null && !isAddresse
 
 <template>
   <div class="page-container pt-5 pb-12 xl:pt-9 xl:pb-16">
-    <nav aria-label="breadcrumb" class="text-sm text-muted xl:text-[1.0625rem]">
-      <ol class="flex items-center gap-1.5">
-        <li>
-          <NuxtLink to="/" class="hover:text-primary-dark hover:underline">
-            หน้าแรก
-          </NuxtLink>
-        </li>
-        <li aria-hidden="true">
-          ›
-        </li>
-        <li aria-current="page">
-          โปรไฟล์ของฉัน
-        </li>
-      </ol>
-    </nav>
+    <PageBreadcrumb current-label="โปรไฟล์ของฉัน" />
 
     <header class="mt-3 xl:mt-4">
       <h1 class="text-[1.75rem] leading-tight xl:text-[3.5rem]">

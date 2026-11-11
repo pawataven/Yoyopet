@@ -36,6 +36,7 @@ watch(() => route.path, () => {
 
       <div class="ml-auto flex items-center gap-(--nav-control-gap)">
         <NuxtLink
+          v-if="isLoggedIn"
           to="/orders/submit"
           class="hidden h-(--nav-control-height) items-center gap-2.5 rounded-full bg-white px-(--nav-button-px) text-(length:--nav-control-font-size) font-medium whitespace-nowrap text-ink transition-colors hover:bg-primary-soft md:flex"
         >
@@ -73,10 +74,10 @@ watch(() => route.path, () => {
         <NuxtLink
           v-else-if="!isLoggedIn"
           to="/login"
-          class="flex h-(--nav-control-height) items-center gap-2 rounded-full bg-white/15 px-(--nav-pill-px) text-(length:--nav-control-font-size) font-medium whitespace-nowrap transition-colors hover:bg-white/25"
+          class="flex h-(--nav-control-height) items-center rounded-full bg-white px-(--nav-button-px) text-(length:--nav-control-font-size) font-medium whitespace-nowrap text-primary-dark transition-colors hover:bg-primary-soft"
         >
-          <Icon name="lucide:log-in" class="size-(--nav-icon-size)" />
-          เข้าสู่ระบบ
+          <span class="sm:hidden">เข้าสู่ระบบ</span>
+          <span class="hidden sm:inline">เข้าสู่ระบบ / สมัครสมาชิก</span>
         </NuxtLink>
 
         <button
@@ -117,6 +118,7 @@ watch(() => route.path, () => {
           </li>
         </ul>
         <NuxtLink
+          v-if="isLoggedIn"
           to="/orders/submit"
           class="flex h-11 items-center justify-center gap-2 rounded-full bg-white text-sm font-medium text-ink md:hidden"
         >
