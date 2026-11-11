@@ -1,19 +1,11 @@
 <script setup lang="ts">
-import type { NavItem } from '~/types/navigation'
-
-const navItems: NavItem[] = [
-  { label: 'หน้าแรก', to: '/' },
-  { label: 'ของรางวัล', to: '/rewards' },
-  { label: 'คูปองของฉัน', to: '/coupons' },
-  { label: 'Top Spender', to: '/top-spender' }
-]
+const navItems = mainNavItems
 
 const { member, isLoggedIn, isLoading } = useMember()
 const route = useRoute()
 const isMobileMenuOpen = ref(false)
 
 const formattedPoints = computed(() => (member.value?.points ?? 0).toLocaleString('th-TH'))
-const hasUnreadNotifications = computed(() => (member.value?.unreadNotificationCount ?? 0) > 0)
 
 function isActive(to: string) {
   return to === '/' ? route.path === '/' : route.path.startsWith(to)
@@ -63,33 +55,9 @@ watch(() => route.path, () => {
           </NuxtLink>
 
           <div class="flex items-center gap-(--nav-avatar-gap)">
-            <NuxtLink
-              to="/notifications"
-              :aria-label="hasUnreadNotifications ? `การแจ้งเตือน (ใหม่ ${member.unreadNotificationCount} รายการ)` : 'การแจ้งเตือน'"
-              class="relative flex size-(--nav-bell-size) shrink-0 items-center justify-center rounded-full bg-white/15 transition-colors hover:bg-white/25"
-            >
-              <Icon name="lucide:bell" class="size-(--nav-icon-size)" />
-              <span
-                v-if="hasUnreadNotifications"
-                class="absolute top-[12%] right-[12%] size-[22%] rounded-full bg-gold"
-              />
-            </NuxtLink>
+            <NotificationBell />
 
-            <NuxtLink
-              to="/profile"
-              aria-label="โปรไฟล์ของฉัน"
-              class="flex size-(--nav-avatar-size) shrink-0 items-center justify-center overflow-hidden rounded-full bg-white"
-            >
-              <NuxtImg
-                v-if="member.avatarUrl"
-                :src="member.avatarUrl"
-                :alt="member.displayName"
-                width="62"
-                height="62"
-                class="size-full object-cover"
-              />
-              <CatAvatarIcon v-else class="aspect-[35/40] h-[62%] translate-y-[8%]" />
-            </NuxtLink>
+            <ProfileMenu :member="member" />
           </div>
         </template>
 

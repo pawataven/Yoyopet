@@ -11,5 +11,7 @@ useSeoMeta({
     <RecommendedRewards />
     <TopSpenderAndTier />
     <PetsAndReferral />
+    <PointsAndCoupons />
+    <ShopOnMarketplaces />
   </div>
 </template>

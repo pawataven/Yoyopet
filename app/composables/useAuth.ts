@@ -2,8 +2,14 @@
 export function useAuth() {
   const userId = useState<string | null>('auth-user-id', () => 'mock-member-id')
 
+  async function signOut() {
+    userId.value = null
+    await navigateTo('/')
+  }
+
   return {
     userId: readonly(userId),
-    isLoggedIn: computed(() => userId.value !== null)
+    isLoggedIn: computed(() => userId.value !== null),
+    signOut
   }
 }

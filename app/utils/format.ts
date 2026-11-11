@@ -33,3 +33,17 @@ export function formatPetAge(birthDate: string, now = new Date()) {
   if (ageInMonths < 12) return `${ageInMonths} เดือน`
   return `${Math.floor(ageInMonths / 12)} ปี`
 }
+
+export function formatRelativeTimeThai(isoDate: string, now = new Date()) {
+  const elapsedMinutes = Math.max(0, Math.floor((now.getTime() - new Date(isoDate).getTime()) / 60000))
+  if (elapsedMinutes < 1) return 'เมื่อสักครู่'
+  if (elapsedMinutes < 60) return `${elapsedMinutes} นาที`
+  const elapsedHours = Math.floor(elapsedMinutes / 60)
+  if (elapsedHours < 24) return `${elapsedHours} ชม.`
+  const elapsedDays = Math.floor(elapsedHours / 24)
+  if (elapsedDays === 1) return 'เมื่อวาน'
+  if (elapsedDays < 7) return `${elapsedDays} วันก่อน`
+  const elapsedWeeks = Math.floor(elapsedDays / 7)
+  if (elapsedWeeks < 5) return `${elapsedWeeks} สัปดาห์`
+  return formatThaiShortDate(isoDate)
+}

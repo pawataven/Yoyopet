@@ -1,11 +1,15 @@
 import { createMockBannerRepository } from './banner.repository'
+import { createMockCouponRepository } from './coupon.repository'
 import { createMockLeaderboardRepository } from './leaderboard.repository'
 import { createMockMemberRepository } from './member.repository'
+import { createMockNotificationRepository } from './notification.repository'
 import { createMockPetRepository } from './pet.repository'
+import { createMockPointsRepository } from './points.repository'
 import { createMockReferralRepository } from './referral.repository'
 import { createMockRewardRepository } from './reward.repository'
 
 const mockPetRepository = createMockPetRepository()
+const mockNotificationRepository = createMockNotificationRepository()
 
 // Single switch point for the data source: replace the mock factories with backend implementations when connecting
 export function useRepositories() {
@@ -14,8 +18,11 @@ export function useRepositories() {
     banner: createMockBannerRepository(),
     reward: createMockRewardRepository(),
     leaderboard: createMockLeaderboardRepository(),
-    // Shared instance so the mock remembers a claimed birthday coupon between calls
+    // Shared instances so the mocks remember writes (claimed coupon, read notifications) between calls
     pet: mockPetRepository,
-    referral: createMockReferralRepository()
+    notification: mockNotificationRepository,
+    referral: createMockReferralRepository(),
+    points: createMockPointsRepository(),
+    coupon: createMockCouponRepository()
   }
 }
