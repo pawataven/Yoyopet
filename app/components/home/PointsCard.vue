@@ -7,6 +7,8 @@ defineProps<{
   tierProgress: TierProgress
   expiringPoints: ExpiringPoints | null
 }>()
+
+const isMemberCardOpen = ref(false)
 </script>
 
 <template>
@@ -28,13 +30,15 @@ defineProps<{
         <span class="font-number text-[4.5rem] leading-none font-semibold xl:text-[7rem]">{{ formatNumber(points) }}</span>
         <span class="text-xl xl:text-[1.625rem]">แต้ม</span>
       </p>
-      <NuxtLink
-        to="/member-card"
+      <button
+        type="button"
         aria-label="แสดง QR บัตรสมาชิก"
+        aria-haspopup="dialog"
         class="mb-1 flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white text-primary transition-colors hover:bg-primary-soft xl:size-18"
+        @click="isMemberCardOpen = true"
       >
         <Icon name="lucide:qr-code" class="size-7 xl:size-9" />
-      </NuxtLink>
+      </button>
     </div>
 
     <div
@@ -70,5 +74,7 @@ defineProps<{
         ดูสิทธิ์ระดับ ›
       </NuxtLink>
     </div>
+
+    <MemberCardDialog v-model:open="isMemberCardOpen" />
   </section>
 </template>

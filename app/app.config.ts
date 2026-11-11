@@ -5,6 +5,12 @@ export default defineAppConfig({
     { id: 'tiktok-shop', name: 'TikTok Shop', logoUrl: '/marketplaces/tiktok-shop.svg', storeUrl: 'https://www.tiktok.com/' },
     { id: 'lazada', name: 'Lazada', logoUrl: '/marketplaces/lazada.png', storeUrl: 'https://www.lazada.co.th/' }
   ],
+  // TODO: confirm the LINE OA chat link and support hours
+  supportChat: {
+    lineId: '@yoyopet',
+    url: 'https://line.me/R/ti/p/@yoyopet',
+    hours: 'ตอบทุกวัน 09:00–18:00 น.'
+  },
   // TODO: confirm the real social account URLs
   socialLinks: [
     { label: 'Facebook: YoYo Pet Shop', url: 'https://www.facebook.com/' },

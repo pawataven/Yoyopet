@@ -1,6 +1,7 @@
 import { createMockAddressRepository } from './address.repository'
 import { createMockBannerRepository } from './banner.repository'
 import { createMockCouponRepository } from './coupon.repository'
+import { createMockHelpRepository } from './help.repository'
 import { createMockLeaderboardRepository } from './leaderboard.repository'
 import { createMockMemberRepository } from './member.repository'
 import { createMockNotificationRepository } from './notification.repository'
@@ -20,6 +21,7 @@ export function useRepositories() {
     banner: createMockBannerRepository(),
     reward: createMockRewardRepository(),
     leaderboard: createMockLeaderboardRepository(),
+    help: createMockHelpRepository(),
     // Shared instances so the mocks remember writes (profile edits, claimed coupon, read notifications) between calls
     member: mockMemberRepository,
     address: mockAddressRepository,

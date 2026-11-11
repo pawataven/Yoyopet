@@ -1,9 +1,11 @@
 import type {
   MemberDashboard,
+  MemberOnboarding,
   MemberProfile,
   MemberProfileUpdate,
   MemberSummary,
   NotificationPreferences,
+  OnboardingStatus,
   TierLevel
 } from '~/types/member'
 
@@ -16,55 +18,145 @@ export interface MemberRepository {
   uploadAvatar(memberId: string, file: File): Promise<MemberProfile>
   getNotificationPreferences(memberId: string): Promise<NotificationPreferences>
   updateNotificationPreferences(memberId: string, preferences: NotificationPreferences): Promise<NotificationPreferences>
+  getOnboardingStatus(memberId: string): Promise<OnboardingStatus>
+  // The welcome bonus is awarded by the backend; the result reports how many points were actually given
+  completeOnboarding(memberId: string, onboarding: MemberOnboarding): Promise<{ awardedPoints: number }>
+}
+
+export const MOCK_SEEDED_MEMBER_ID = 'mock-member-id'
+const MOCK_NEW_MEMBER_ID_PREFIX = 'mock-member-'
+const MOCK_WELCOME_BONUS_POINTS = 50
+
+interface MockMemberRecord {
+  profile: MemberProfile
+  notificationPreferences: NotificationPreferences
+  pointsBalance: number
+  onboardingCompletedAt: string | null
+}
+
+function createSeededMemberRecord(): MockMemberRecord {
+  return {
+    profile: {
+      id: MOCK_SEEDED_MEMBER_ID,
+      firstName: 'มายด์',
+      lastName: 'ใจดี',
+      phone: '081-234-4521',
+      isPhoneVerified: true,
+      email: null,
+      birthDate: '1996-02-14',
+      gender: 'female',
+      petOwnership: 'both',
+      avatarUrl: null,
+      memberCode: 'YY-204518',
+      tier: 'Buddy',
+      joinedAt: '2026-08-12',
+      isLineConnected: true
+    },
+    notificationPreferences: {
+      orderAndPointsUpdates: true,
+      pointsExpiry: true,
+      promotions: false,
+      petDataConsent: true
+    },
+    pointsBalance: 1280,
+    onboardingCompletedAt: '2026-08-12'
+  }
+}
+
+// A member who just signed up by phone: the backend has only the verified phone number so far
+function createNewMemberRecord(memberId: string, sequence: number): MockMemberRecord {
+  return {
+    profile: {
+      id: memberId,
+      firstName: '',
+      lastName: '',
+      phone: formatThaiMobile(memberId.slice(MOCK_NEW_MEMBER_ID_PREFIX.length)),
+      isPhoneVerified: true,
+      email: null,
+      birthDate: null,
+      gender: null,
+      petOwnership: null,
+      avatarUrl: null,
+      memberCode: `YY-${String(300000 + sequence)}`,
+      tier: 'Puppy',
+      joinedAt: new Date().toISOString().slice(0, 10),
+      isLineConnected: false
+    },
+    notificationPreferences: {
+      orderAndPointsUpdates: false,
+      pointsExpiry: false,
+      promotions: false,
+      petDataConsent: false
+    },
+    pointsBalance: 0,
+    onboardingCompletedAt: null
+  }
 }
 
 export function createMockMemberRepository(): MemberRepository {
-  let profile: MemberProfile = {
-    id: 'mock-member-id',
-    firstName: 'มายด์',
-    lastName: 'ใจดี',
-    phone: '081-234-4521',
-    isPhoneVerified: true,
-    email: null,
-    birthDate: '1996-02-14',
-    gender: 'female',
-    avatarUrl: null,
-    memberCode: 'YY-204518',
-    tier: 'Buddy',
-    joinedAt: '2026-08-12',
-    isLineConnected: true
-  }
+  const members = new Map<string, MockMemberRecord>([[MOCK_SEEDED_MEMBER_ID, createSeededMemberRecord()]])
 
-  let notificationPreferences: NotificationPreferences = {
-    orderAndPointsUpdates: true,
-    pointsExpiry: true,
-    promotions: false,
-    petDataConsent: true
+  function getMember(memberId: string) {
+    let member = members.get(memberId)
+    if (!member) {
+      member = createNewMemberRecord(memberId, members.size)
+      members.set(memberId, member)
+    }
+    return member
   }
 
   return {
-    async getProfile() {
-      return profile
+    async getOnboardingStatus(memberId) {
+      const isRequired = getMember(memberId).onboardingCompletedAt === null
+      return {
+        isRequired,
+        welcomeBonusPoints: isRequired ? MOCK_WELCOME_BONUS_POINTS : 0,
+        // Terms and privacy are accepted on the sign-in screen before an account can be created
+        hasAcceptedPrivacyPolicy: true
+      }
     },
 
-    async updateProfile(_memberId, update) {
-      profile = { ...profile, ...update }
-      return profile
+    async completeOnboarding(memberId, onboarding) {
+      const member = getMember(memberId)
+      if (member.onboardingCompletedAt) return { awardedPoints: 0 }
+
+      const { firstName, lastName, birthDate, petOwnership, lineNotificationsOptIn } = onboarding
+      member.profile = { ...member.profile, firstName, lastName, birthDate, petOwnership }
+      member.notificationPreferences = {
+        ...member.notificationPreferences,
+        orderAndPointsUpdates: lineNotificationsOptIn,
+        pointsExpiry: lineNotificationsOptIn
+      }
+      member.pointsBalance += MOCK_WELCOME_BONUS_POINTS
+      member.onboardingCompletedAt = new Date().toISOString()
+      return { awardedPoints: MOCK_WELCOME_BONUS_POINTS }
+    },
+
+    async getProfile(memberId) {
+      return getMember(memberId).profile
+    },
+
+    async updateProfile(memberId, update) {
+      const member = getMember(memberId)
+      member.profile = { ...member.profile, ...update }
+      return member.profile
     },
 
     // Mock only: a blob URL lives in this browser tab, the real upload goes to storage
-    async uploadAvatar(_memberId, file) {
-      profile = { ...profile, avatarUrl: URL.createObjectURL(file) }
-      return profile
+    async uploadAvatar(memberId, file) {
+      const member = getMember(memberId)
+      member.profile = { ...member.profile, avatarUrl: URL.createObjectURL(file) }
+      return member.profile
     },
 
-    async getNotificationPreferences() {
-      return notificationPreferences
+    async getNotificationPreferences(memberId) {
+      return getMember(memberId).notificationPreferences
     },
 
-    async updateNotificationPreferences(_memberId, preferences) {
-      notificationPreferences = { ...preferences }
-      return notificationPreferences
+    async updateNotificationPreferences(memberId, preferences) {
+      const member = getMember(memberId)
+      member.notificationPreferences = { ...preferences }
+      return member.notificationPreferences
     },
 
     async getTierLevels() {
@@ -93,13 +185,15 @@ export function createMockMemberRepository(): MemberRepository {
     },
 
     async getSummary(memberId) {
+      const { profile, pointsBalance } = getMember(memberId)
       return {
         id: memberId,
         displayName: profile.firstName,
+        // Mock avatars are blob URLs, which the navbar's NuxtImg (ipx) can't fetch
         avatarUrl: null,
-        points: 1280,
-        tier: 'Buddy',
-        memberCode: 'YY-204518',
+        points: pointsBalance,
+        tier: profile.tier,
+        memberCode: profile.memberCode,
         unreadNotificationCount: 1
       }
     },

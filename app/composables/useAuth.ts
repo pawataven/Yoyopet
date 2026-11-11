@@ -1,9 +1,11 @@
+import { MOCK_SEEDED_MEMBER_ID } from '~/repositories/member.repository'
+
 export interface SignUpConsents {
   acceptedTerms: boolean
   marketingOptIn: boolean
 }
 
-const MOCK_MEMBER_ID = 'mock-member-id'
+const MOCK_SEEDED_MEMBER_PHONE = '0812344521'
 const MOCK_OTP_RESEND_SECONDS = 60
 const MOCK_OTP_EXPIRES_SECONDS = 5 * 60
 const MOCK_NETWORK_DELAY_MS = 400
@@ -14,11 +16,11 @@ function waitForMockNetwork() {
 
 // TODO: replace with the backend auth session once connected
 export function useAuth() {
-  const userId = useState<string | null>('auth-user-id', () => MOCK_MEMBER_ID)
+  const userId = useState<string | null>('auth-user-id', () => MOCK_SEEDED_MEMBER_ID)
 
   async function signInWithLine(_consents: SignUpConsents) {
     await waitForMockNetwork()
-    userId.value = MOCK_MEMBER_ID
+    userId.value = MOCK_SEEDED_MEMBER_ID
   }
 
   async function requestPhoneOtp(_phone: string) {
@@ -26,11 +28,11 @@ export function useAuth() {
     return { resendAfterSeconds: MOCK_OTP_RESEND_SECONDS, expiresInSeconds: MOCK_OTP_EXPIRES_SECONDS }
   }
 
-  // Mock accepts any 6-digit code
-  async function verifyPhoneOtp(_phone: string, code: string, _consents: SignUpConsents) {
+  // Mock accepts any 6-digit code; any number other than the seeded member's becomes its own new member
+  async function verifyPhoneOtp(phone: string, code: string, _consents: SignUpConsents) {
     await waitForMockNetwork()
     if (!/^\d{6}$/.test(code)) throw new Error('invalid_otp')
-    userId.value = MOCK_MEMBER_ID
+    userId.value = phone === MOCK_SEEDED_MEMBER_PHONE ? MOCK_SEEDED_MEMBER_ID : `mock-member-${phone}`
   }
 
   async function signOut() {

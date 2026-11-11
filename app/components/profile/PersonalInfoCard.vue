@@ -24,23 +24,7 @@ const email = computed({
   }
 })
 
-const birthDate = computed({
-  get: () => draft.value.birthDate ?? '',
-  set: (value: string) => {
-    draft.value.birthDate = value || null
-  }
-})
-
 const todayIsoDate = new Date().toISOString().slice(0, 10)
-
-function openDatePicker(event: MouseEvent) {
-  const input = event.currentTarget as HTMLInputElement
-  try {
-    input.showPicker()
-  } catch {
-    // showPicker throws inside cross-origin iframes and is missing in older browsers; the native input still works
-  }
-}
 
 const textFieldClass = 'h-12 w-full rounded-xl border-2 border-muted/25 bg-white px-4 text-base transition-colors placeholder:text-muted/60 focus:border-primary focus:outline-none xl:h-14.5 xl:px-5 xl:text-lg'
 const labelClass = 'mb-1.5 block text-sm xl:text-[1.0625rem]'
@@ -111,49 +95,20 @@ const labelClass = 'mb-1.5 block text-sm xl:text-[1.0625rem]'
 
       <div>
         <label :for="`${fieldId}-birth-date`" :class="labelClass">วันเกิด</label>
-        <div class="relative">
-          <input
-            :id="`${fieldId}-birth-date`"
-            v-model="birthDate"
-            type="date"
-            :max="todayIsoDate"
-            :aria-describedby="birthDateHintId"
-            class="peer absolute inset-0 size-full cursor-pointer opacity-0"
-            @click="openDatePicker"
-          >
-          <div
-            :class="textFieldClass"
-            class="pointer-events-none flex items-center justify-between peer-focus:border-primary"
-            aria-hidden="true"
-          >
-            <span :class="!birthDate && 'text-muted/60'">
-              {{ birthDate ? formatThaiShortDate(birthDate) : 'เลือกวันเกิด' }}
-            </span>
-            <Icon name="lucide:calendar" class="size-5 text-muted xl:size-6" />
-          </div>
-        </div>
+        <DateField
+          :id="`${fieldId}-birth-date`"
+          v-model="draft.birthDate"
+          placeholder="เลือกวันเกิด"
+          :max="todayIsoDate"
+          :described-by="birthDateHintId"
+        />
       </div>
 
       <fieldset>
         <legend :class="labelClass">
           เพศ
         </legend>
-        <div class="flex flex-wrap gap-2.5">
-          <label
-            v-for="option in genderOptions"
-            :key="option.value"
-            class="flex h-11 cursor-pointer items-center rounded-full border-2 px-5 text-base transition-colors hover:border-primary/40 has-checked:border-primary has-checked:bg-primary has-checked:font-semibold has-checked:text-white has-focus-visible:ring-4 has-focus-visible:ring-primary-soft xl:h-11.5 xl:px-6 xl:text-lg"
-          >
-            <input
-              v-model="draft.gender"
-              type="radio"
-              :name="`${fieldId}-gender`"
-              :value="option.value"
-              class="sr-only"
-            >
-            {{ option.label }}
-          </label>
-        </div>
+        <ChoiceChips v-model="draft.gender" :options="genderOptions" :name="`${fieldId}-gender`" />
       </fieldset>
     </div>
 

@@ -6,7 +6,6 @@ const props = defineProps<{
 }>()
 
 const { referral } = useReferral()
-const { signOut } = useAuth()
 
 const rootElement = useTemplateRef<HTMLElement>('root')
 const avatarButton = useTemplateRef<HTMLButtonElement>('avatarButton')
@@ -29,9 +28,11 @@ const profileMenuItems = computed(() => [
 
 const avatarInitial = computed(() => props.member.displayName.charAt(0))
 
-async function handleSignOut() {
+const isSignOutDialogOpen = ref(false)
+
+function openSignOutDialog() {
   closePopover()
-  await signOut()
+  isSignOutDialogOpen.value = true
 }
 </script>
 
@@ -109,7 +110,7 @@ async function handleSignOut() {
           <button
             type="button"
             class="flex h-12 w-full items-center gap-4 rounded-2xl px-3 font-heading text-base font-medium text-primary-dark transition-colors hover:bg-primary-soft/60 xl:h-13 xl:px-5 xl:text-lg"
-            @click="handleSignOut"
+            @click="openSignOutDialog"
           >
             <Icon name="lucide:arrow-right" class="size-5 shrink-0 xl:size-5.5" />
             ออกจากระบบ
@@ -117,5 +118,7 @@ async function handleSignOut() {
         </div>
       </div>
     </Transition>
+
+    <SignOutConfirmDialog v-model:open="isSignOutDialogOpen" />
   </div>
 </template>

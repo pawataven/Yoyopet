@@ -19,7 +19,6 @@ const isOpen = defineModel<boolean>('open', { required: true })
 
 const OTP_LENGTH = 6
 const otpCode = ref('')
-const dialogElement = useTemplateRef<HTMLDialogElement>('dialog')
 const otpInput = useTemplateRef<{ focus: () => void }>('otpInput')
 const headingId = useId()
 
@@ -36,32 +35,21 @@ const resendCountdownLabel = computed(() => {
 })
 const expiresInMinutes = computed(() => Math.round(props.expiresInSeconds / 60))
 
-function startClock() {
+function handleOpened() {
+  otpCode.value = ''
   now.value = Date.now()
   clearInterval(clockTimer)
   clockTimer = setInterval(() => {
     now.value = Date.now()
   }, 1000)
+  otpInput.value?.focus()
 }
 
-function stopClock() {
+function handleClosed() {
   clearInterval(clockTimer)
 }
 
-watch(isOpen, async (shouldOpen) => {
-  const dialog = dialogElement.value
-  if (!dialog) return
-  if (shouldOpen && !dialog.open) {
-    otpCode.value = ''
-    startClock()
-    dialog.showModal()
-    document.documentElement.style.overflow = 'hidden'
-    await nextTick()
-    otpInput.value?.focus()
-  } else if (!shouldOpen && dialog.open) {
-    dialog.close()
-  }
-})
+onBeforeUnmount(handleClosed)
 
 watch(() => props.otpSentAt, () => {
   otpCode.value = ''
@@ -79,35 +67,20 @@ watch(otpCode, (code) => {
   if (code.length === OTP_LENGTH && !props.isVerifying) emit('verify', code)
 })
 
-function handleDialogClosed() {
-  stopClock()
-  document.documentElement.style.overflow = ''
-  isOpen.value = false
-}
-
-function handleBackdropClick(event: MouseEvent) {
-  if (event.target === dialogElement.value) isOpen.value = false
-}
-
 function handleSubmit() {
   if (otpCode.value.length === OTP_LENGTH) emit('verify', otpCode.value)
 }
-
-onBeforeUnmount(() => {
-  stopClock()
-  document.documentElement.style.overflow = ''
-})
 </script>
 
 <template>
-  <dialog
-    ref="dialog"
+  <ModalDialog
+    v-model:open="isOpen"
     :aria-labelledby="headingId"
-    class="m-auto w-[calc(100%-2rem)] max-w-135.5 rounded-[1.75rem] bg-white text-ink shadow-2xl shadow-ink/20 backdrop:bg-ink/50"
-    @close="handleDialogClosed"
-    @click="handleBackdropClick"
+    class="max-w-135.5"
+    @opened="handleOpened"
+    @closed="handleClosed"
   >
-    <form novalidate class="relative px-5 pt-6 pb-6 sm:px-10 sm:pt-10 sm:pb-10" @submit.prevent="handleSubmit">
+    <form novalidate class="relative p-6 sm:p-10" @submit.prevent="handleSubmit">
       <button
         type="button"
         aria-label="ปิด"
@@ -167,5 +140,5 @@ onBeforeUnmount(() => {
         รหัส OTP ใช้ได้ภายใน {{ expiresInMinutes }} นาที
       </p>
     </form>
-  </dialog>
+  </ModalDialog>
 </template>

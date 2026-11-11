@@ -40,6 +40,23 @@ export interface MemberDashboard {
 
 export type Gender = 'female' | 'male' | 'unspecified'
 
+export type PetOwnership = 'dog' | 'cat' | 'both' | 'other'
+
+export interface OnboardingStatus {
+  isRequired: boolean
+  welcomeBonusPoints: number
+  hasAcceptedPrivacyPolicy: boolean
+}
+
+export interface MemberOnboarding {
+  firstName: string
+  lastName: string
+  birthDate: string | null
+  petOwnership: PetOwnership | null
+  acceptedPrivacyPolicy: boolean
+  lineNotificationsOptIn: boolean
+}
+
 export interface MemberProfile {
   id: string
   firstName: string
@@ -49,6 +66,7 @@ export interface MemberProfile {
   email: string | null
   birthDate: string | null
   gender: Gender | null
+  petOwnership: PetOwnership | null
   avatarUrl: string | null
   memberCode: string
   tier: string

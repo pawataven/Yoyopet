@@ -1,8 +1,10 @@
 <script setup lang="ts">
 const route = useRoute()
 const { signInWithLine, requestPhoneOtp, verifyPhoneOtp } = useAuth()
+const { isOnboardingRequired, refresh: refreshOnboardingStatus } = useMemberOnboarding()
 
 const isOtpDialogOpen = ref(false)
+const isWaitingForOnboarding = ref(false)
 const otpSentAt = ref(0)
 const otpExpiresInSeconds = ref(0)
 
@@ -46,12 +48,28 @@ async function finishSignIn() {
   await navigateTo(safeRedirectPath(route.query.redirect), { replace: true })
 }
 
+// The welcome dialog in the layout opens by itself for members who haven't onboarded; leave this page once they finish
+async function continueAfterSignIn() {
+  await refreshOnboardingStatus()
+  if (isOnboardingRequired.value) {
+    isWaitingForOnboarding.value = true
+    return
+  }
+  await finishSignIn()
+}
+
+watch(isOnboardingRequired, async (isRequired) => {
+  if (isRequired || !isWaitingForOnboarding.value) return
+  isWaitingForOnboarding.value = false
+  await finishSignIn()
+})
+
 async function handleLineSignIn() {
   if (!ensureTermsAccepted()) return
   isSigningInWithLine.value = true
   try {
     await signInWithLine(consents.value)
-    await finishSignIn()
+    await continueAfterSignIn()
   } catch {
     termsError.value = 'เข้าสู่ระบบด้วย LINE ไม่สำเร็จ กรุณาลองอีกครั้ง'
   } finally {
@@ -89,7 +107,7 @@ async function handleVerifyOtp(code: string) {
   try {
     await verifyPhoneOtp(digitsOnly(phone.value), code, consents.value)
     isOtpDialogOpen.value = false
-    await finishSignIn()
+    await continueAfterSignIn()
   } catch {
     otpError.value = 'รหัส OTP ไม่ถูกต้องหรือหมดอายุ'
   } finally {
@@ -211,7 +229,6 @@ async function handleChangePhone() {
       @resend="sendOtp"
       @change-phone="handleChangePhone"
     />
-
     <aside class="mt-6 flex gap-3 rounded-2xl bg-cream p-4 xl:mt-8 xl:gap-3.5 xl:px-6 xl:py-5">
       <Icon name="lucide:info" class="mt-0.5 size-4.5 shrink-0 text-muted xl:size-5" />
       <div>

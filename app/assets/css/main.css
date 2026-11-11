@@ -71,6 +71,35 @@
     @apply bg-white font-sans text-ink;
   }
 
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: --alpha(var(--color-primary) / 55%) var(--color-cream);
+  }
+
+  /*
+   * Safari has no scrollbar-color yet. Chrome ignores ::-webkit-scrollbar once scrollbar-color is supported,
+   * so this block only styles browsers that need it.
+   */
+  @supports not (scrollbar-color: auto) {
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background-color: var(--color-cream);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      border-radius: 9999px;
+      background-color: --alpha(var(--color-primary) / 55%);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: var(--color-primary-dark);
+    }
+  }
+
   *,
   ::before,
   ::after {
