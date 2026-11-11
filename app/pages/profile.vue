@@ -40,13 +40,14 @@ const isFormDataReady = computed(() => preferences.value !== null && !isAddresse
       </p>
     </header>
 
-    <div v-if="profile" class="mt-6 grid items-start gap-6 xl:mt-9 xl:grid-cols-[406fr_1264fr]">
-      <ProfileSummaryCard
-        :profile="profile"
-        :is-uploading-avatar="isUploadingAvatar"
-        @avatar-selected="uploadAvatar"
-      />
-      <ProfileSettingsForm v-if="isFormDataReady" :profile="profile" />
-    </div>
+    <ProfileSettingsForm v-if="profile && isFormDataReady" :profile="profile" class="mt-6 xl:mt-9">
+      <template #summary>
+        <ProfileSummaryCard
+          :profile="profile"
+          :is-uploading-avatar="isUploadingAvatar"
+          @avatar-selected="uploadAvatar"
+        />
+      </template>
+    </ProfileSettingsForm>
   </div>
 </template>

@@ -104,7 +104,7 @@ const accountStatusRows = computed(() => [
       </div>
     </dl>
 
-    <NuxtLink to="/profile/delete-account" class="mt-6 text-sm text-muted hover:text-primary-dark hover:underline xl:text-[0.9375rem]">
+    <NuxtLink to="/profile/delete-account" class="mt-auto pt-6 text-sm text-muted hover:text-primary-dark hover:underline xl:text-[0.9375rem]">
       ลบบัญชีสมาชิก
     </NuxtLink>
   </section>

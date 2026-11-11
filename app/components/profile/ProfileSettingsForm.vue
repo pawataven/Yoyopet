@@ -74,18 +74,24 @@ const saveStatusMessage = computed(() => {
 </script>
 
 <template>
-  <form class="flex min-w-0 flex-col gap-6" @submit.prevent="handleSubmit">
+  <!-- One grid for the summary and the form, so the summary card and the personal-info card share the first row's height -->
+  <form class="grid gap-6 xl:grid-cols-[406fr_1264fr]" @submit.prevent="handleSubmit">
+    <slot name="summary" />
+
     <PersonalInfoCard
       v-model="profileDraft"
       :phone="profile.phone"
       :is-phone-verified="profile.isPhoneVerified"
+      class="min-w-0"
     />
 
-    <ShippingAddressCard v-model="selectedAddressId" :addresses="addresses" />
+    <div class="flex min-w-0 flex-col gap-6 xl:col-start-2">
+      <ShippingAddressCard v-model="selectedAddressId" :addresses="addresses" />
 
-    <NotificationConsentCard v-if="preferencesDraft" v-model="preferencesDraft" />
+      <NotificationConsentCard v-if="preferencesDraft" v-model="preferencesDraft" />
+    </div>
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4 xl:mt-2">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4 xl:col-start-2 xl:mt-2">
       <p
         role="status"
         class="text-sm sm:mr-auto xl:text-base"

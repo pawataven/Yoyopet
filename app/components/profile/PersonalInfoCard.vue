@@ -47,7 +47,7 @@ const labelClass = 'mb-1.5 block text-sm xl:text-[1.0625rem]'
 </script>
 
 <template>
-  <section aria-labelledby="personal-info-heading" class="rounded-[1.25rem] border bg-white p-5 xl:p-10">
+  <section aria-labelledby="personal-info-heading" class="flex flex-col rounded-[1.25rem] border bg-white p-5 xl:p-10">
     <h2 id="personal-info-heading" class="text-xl leading-tight xl:text-[1.625rem]">
       ข้อมูลส่วนตัว
     </h2>
@@ -132,9 +132,6 @@ const labelClass = 'mb-1.5 block text-sm xl:text-[1.0625rem]'
             <Icon name="lucide:calendar" class="size-5 text-muted xl:size-6" />
           </div>
         </div>
-        <p :id="birthDateHintId" class="mt-2 text-xs text-muted xl:text-[0.9375rem]">
-          ใช้วันเกิดเพื่อส่งคูปองวันเกิดให้คุณทุกปี
-        </p>
       </div>
 
       <fieldset>
@@ -159,5 +156,9 @@ const labelClass = 'mb-1.5 block text-sm xl:text-[1.0625rem]'
         </div>
       </fieldset>
     </div>
+
+    <p :id="birthDateHintId" class="mt-auto pt-6 text-xs text-muted xl:pt-10 xl:text-[0.9375rem]">
+      ใช้วันเกิดเพื่อส่งคูปองวันเกิดให้คุณทุกปี
+    </p>
   </section>
 </template>
