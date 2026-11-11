@@ -1,3 +1,5 @@
+import type { ShippingAddress } from '~/types/address'
+
 export function formatNumber(value: number) {
   return value.toLocaleString('th-TH')
 }
@@ -46,4 +48,18 @@ export function formatRelativeTimeThai(isoDate: string, now = new Date()) {
   const elapsedWeeks = Math.floor(elapsedDays / 7)
   if (elapsedWeeks < 5) return `${elapsedWeeks} สัปดาห์`
   return formatThaiShortDate(isoDate)
+}
+
+const BANGKOK_PROVINCE = 'กรุงเทพมหานคร'
+
+// Bangkok addresses use แขวง/เขต; every other province uses ต./อ./จ.
+export function formatThaiAddress(address: ShippingAddress) {
+  const isBangkok = address.province === BANGKOK_PROVINCE
+  return [
+    address.addressLine,
+    isBangkok ? `แขวง${address.subdistrict}` : `ต.${address.subdistrict}`,
+    isBangkok ? `เขต${address.district}` : `อ.${address.district}`,
+    isBangkok ? 'กรุงเทพฯ' : `จ.${address.province}`,
+    address.postalCode
+  ].join(' ')
 }

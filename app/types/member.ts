@@ -37,3 +37,36 @@ export interface MemberDashboard {
   pendingOrders: PendingOrdersSummary
   isLineConnected: boolean
 }
+
+export type Gender = 'female' | 'male' | 'unspecified'
+
+export interface MemberProfile {
+  id: string
+  firstName: string
+  lastName: string
+  phone: string
+  isPhoneVerified: boolean
+  email: string | null
+  birthDate: string | null
+  gender: Gender | null
+  avatarUrl: string | null
+  memberCode: string
+  tier: string
+  joinedAt: string
+  isLineConnected: boolean
+}
+
+export interface MemberProfileUpdate {
+  firstName: string
+  lastName: string
+  email: string | null
+  birthDate: string | null
+  gender: Gender | null
+}
+
+export interface NotificationPreferences {
+  orderAndPointsUpdates: boolean
+  pointsExpiry: boolean
+  promotions: boolean
+  petDataConsent: boolean
+}
