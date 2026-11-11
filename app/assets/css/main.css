@@ -1,11 +1,55 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-50: oklch(0.97 0.02 250);
-  --color-primary-100: oklch(0.93 0.04 250);
-  --color-primary-500: oklch(0.62 0.17 250);
-  --color-primary-600: oklch(0.55 0.18 250);
-  --color-primary-700: oklch(0.48 0.17 250);
+  /* Only the design-system palette is allowed; Tailwind's default colors are disabled on purpose */
+  --color-*: initial;
+
+  --color-white: #ffffff;
+
+  --color-primary: #ed492e;
+  --color-primary-dark: #c93a22;
+  --color-primary-soft: #fde8e3;
+  --color-cream: #fff8f5;
+
+  --color-ink: #2a1d1a;
+  --color-cocoa: #2c1f1d;
+  --color-muted: #6e5a55;
+  --color-border: #efe2de;
+
+  --color-success: #2f7a3a;
+  --color-pending: #8a5a00;
+  --color-gold: #ffd43b;
+  --color-line-green: #06c755;
+
+  --color-medal-gold: #f2b705;
+  --color-medal-silver: #aeb8c2;
+  --color-medal-bronze: #d08a4c;
+
+  --font-sans: "Anuphan", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Mitr", "Anuphan", ui-sans-serif, system-ui, sans-serif;
+  /* Fredoka has no Thai glyphs or ฿, so those characters fall back to Anuphan */
+  --font-number: "Fredoka", "Anuphan", ui-sans-serif, system-ui, sans-serif;
+}
+
+@utility page-container {
+  width: 100%;
+  padding-inline: 1rem;
+
+  @variant sm {
+    padding-inline: 1.5rem;
+  }
+
+  @variant md {
+    padding-inline: 2.5rem;
+  }
+
+  @variant lg {
+    padding-inline: 4rem;
+  }
+
+  @variant xl {
+    padding-inline: 120px;
+  }
 }
 
 @layer base {
@@ -13,7 +57,32 @@
     @apply antialiased;
   }
 
+  /*
+   * Desktop designs are drawn at 1920px with a 16px root, so Tailwind units equal design px / 4.
+   * From xl up, the root scales with the viewport so the whole layout keeps the design's proportions.
+   */
+  @media (width >= 80rem) {
+    html {
+      font-size: clamp(14px, calc(100vw / 120), 16px);
+    }
+  }
+
   body {
-    @apply bg-white text-gray-900;
+    @apply bg-white font-sans text-ink;
+  }
+
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading font-medium;
   }
 }

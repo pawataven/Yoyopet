@@ -1,7 +1,7 @@
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
-  modules: ['@nuxt/a11y', '@nuxt/fonts', '@nuxt/eslint', '@nuxt/image'],
+  modules: ['@nuxt/a11y', '@nuxt/fonts', '@nuxt/eslint', '@nuxt/image', '@nuxt/icon'],
 
   devtools: { enabled: true },
 
@@ -19,11 +19,7 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
-  runtimeConfig: {
-    public: {
-      apiBase: ''
-    }
-  },
+  components: [{ path: '~/components', pathPrefix: false }],
 
   compatibilityDate: '2025-07-15',
 
@@ -33,5 +29,19 @@ export default defineNuxtConfig({
 
   typescript: {
     strict: true
+  },
+
+  fonts: {
+    families: [
+      { name: 'Anuphan', provider: 'google', weights: [400, 500, 600], subsets: ['thai', 'latin'], global: true },
+      { name: 'Mitr', provider: 'google', weights: [500], subsets: ['thai', 'latin'], global: true },
+      { name: 'Fredoka', provider: 'google', weights: [600], subsets: ['latin'], global: true }
+    ]
+  },
+
+  icon: {
+    serverBundle: { collections: ['lucide'] },
+    // Unlayered icon CSS would override Tailwind's `size-*` utilities
+    cssLayer: 'base'
   }
 })
