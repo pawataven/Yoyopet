@@ -19,6 +19,21 @@ export interface TierLevel {
   name: string
   minPoints: number
   benefits: string[]
+  perkHighlights: string[]
+}
+
+export interface MemberTierStatus extends TierProgress {
+  qualifyingSpendBaht: number
+  qualifyingPoints: number
+  nextReviewDate: string
+}
+
+// true renders a check mark, false renders a dash
+export type TierBenefitValue = string | boolean
+
+export interface TierBenefitComparisonRow {
+  label: string
+  valueByTier: Record<string, TierBenefitValue>
 }
 
 export interface ExpiringPoints {

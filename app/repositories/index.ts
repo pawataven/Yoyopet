@@ -5,6 +5,7 @@ import { createMockHelpRepository } from './help.repository'
 import { createMockLeaderboardRepository } from './leaderboard.repository'
 import { createMockMemberRepository } from './member.repository'
 import { createMockNotificationRepository } from './notification.repository'
+import { createMockOrderRepository } from './order.repository'
 import { createMockPetRepository } from './pet.repository'
 import { createMockPointsRepository } from './points.repository'
 import { createMockReferralRepository } from './referral.repository'
@@ -29,6 +30,7 @@ export function useRepositories() {
     notification: mockNotificationRepository,
     referral: createMockReferralRepository(),
     points: createMockPointsRepository(),
+    order: createMockOrderRepository(),
     coupon: createMockCouponRepository()
   }
 }

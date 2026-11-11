@@ -3,7 +3,7 @@ const { marketplaceStores } = useAppConfig()
 </script>
 
 <template>
-  <section aria-labelledby="shop-marketplaces-heading" class="page-container mt-12 xl:mt-17">
+  <section id="shop" aria-labelledby="shop-marketplaces-heading" class="page-container mt-12 xl:mt-17">
     <h2 id="shop-marketplaces-heading" class="text-2xl leading-tight xl:text-[2.25rem]">
       ช้อปสินค้า YoYo
     </h2>

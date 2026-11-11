@@ -4,6 +4,8 @@ import type { PendingOrdersSummary } from '~/types/member'
 defineProps<{
   pendingOrders: PendingOrdersSummary
 }>()
+
+const isStatusDialogOpen = ref(false)
 </script>
 
 <template>
@@ -13,8 +15,15 @@ defineProps<{
       รอยืนยัน {{ formatNumber(pendingOrders.count) }} รายการ ·
       <strong class="font-semibold">+{{ formatNumber(pendingOrders.points) }} แต้ม</strong>
     </p>
-    <NuxtLink to="/orders?status=pending" class="shrink-0 font-semibold text-pending hover:underline">
+    <button
+      type="button"
+      aria-haspopup="dialog"
+      class="shrink-0 font-semibold text-pending hover:underline"
+      @click="isStatusDialogOpen = true"
+    >
       ดูสถานะ ›
-    </NuxtLink>
+    </button>
+
+    <PendingOrdersDialog v-model:open="isStatusDialogOpen" />
   </div>
 </template>

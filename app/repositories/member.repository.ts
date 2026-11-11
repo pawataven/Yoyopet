@@ -4,8 +4,10 @@ import type {
   MemberProfile,
   MemberProfileUpdate,
   MemberSummary,
+  MemberTierStatus,
   NotificationPreferences,
   OnboardingStatus,
+  TierBenefitComparisonRow,
   TierLevel
 } from '~/types/member'
 
@@ -13,6 +15,8 @@ export interface MemberRepository {
   getSummary(memberId: string): Promise<MemberSummary | null>
   getDashboard(memberId: string): Promise<MemberDashboard | null>
   getTierLevels(): Promise<TierLevel[]>
+  getTierBenefitComparison(): Promise<TierBenefitComparisonRow[]>
+  getTierStatus(memberId: string): Promise<MemberTierStatus | null>
   getProfile(memberId: string): Promise<MemberProfile | null>
   updateProfile(memberId: string, update: MemberProfileUpdate): Promise<MemberProfile>
   uploadAvatar(memberId: string, file: File): Promise<MemberProfile>
@@ -27,10 +31,65 @@ export const MOCK_SEEDED_MEMBER_ID = 'mock-member-id'
 const MOCK_NEW_MEMBER_ID_PREFIX = 'mock-member-'
 const MOCK_WELCOME_BONUS_POINTS = 50
 
+const MOCK_TIER_LEVELS: TierLevel[] = [
+  {
+    name: 'Puppy',
+    minPoints: 0,
+    benefits: ['รับแต้ม 1 เท่า ทุกการสั่งซื้อ', 'คูปองต้อนรับสมาชิกใหม่'],
+    perkHighlights: ['รับแต้มทุกการซื้อ', 'คูปองวันเกิด 5%']
+  },
+  {
+    name: 'Buddy',
+    minPoints: 1000,
+    benefits: ['รับแต้ม 1.2 เท่า ทุกการสั่งซื้อ', 'คูปองวันเกิด 10% ทั้งตัวคุณและน้อง', 'ร่วมกิจกรรมพิเศษก่อนใคร'],
+    perkHighlights: ['แต้ม 1.2 เท่า', 'คูปองวันเกิด 10%', 'ส่งฟรีเดือนละ 1 ครั้ง']
+  },
+  {
+    name: 'Best Friend',
+    minPoints: 2000,
+    benefits: ['รับแต้ม 1.5 เท่า ทุกการสั่งซื้อ', 'คูปองวันเกิด 15% ทั้งตัวคุณและน้อง', 'ส่งฟรีทุกออเดอร์'],
+    perkHighlights: ['แต้ม 1.5 เท่า', 'คูปองวันเกิด 15%', 'ส่งฟรีเดือนละ 2 ครั้ง', 'ของขวัญเลื่อนระดับ']
+  },
+  {
+    name: 'Family',
+    minPoints: 5000,
+    benefits: ['รับแต้ม 2 เท่า ทุกการสั่งซื้อ', 'คูปองวันเกิด 20% ทั้งตัวคุณและน้อง', 'ของขวัญพิเศษประจำปี'],
+    perkHighlights: ['แต้ม 2 เท่า', 'คูปองวันเกิด 20%', 'ส่งฟรีไม่จำกัด', 'สิทธิ์ซื้อสินค้าใหม่ก่อนใคร']
+  }
+]
+
+const MOCK_TIER_BENEFIT_COMPARISON: TierBenefitComparisonRow[] = [
+  { label: 'ตัวคูณแต้ม', valueByTier: { 'Puppy': '1 เท่า', 'Buddy': '1.2 เท่า', 'Best Friend': '1.5 เท่า', 'Family': '2 เท่า' } },
+  { label: 'คูปองวันเกิด', valueByTier: { 'Puppy': '5%', 'Buddy': '10%', 'Best Friend': '15%', 'Family': '20%' } },
+  { label: 'ส่งฟรีต่อเดือน', valueByTier: { 'Puppy': false, 'Buddy': '1 ครั้ง', 'Best Friend': '2 ครั้ง', 'Family': 'ไม่จำกัด' } },
+  { label: 'ของขวัญเลื่อนระดับ', valueByTier: { 'Puppy': false, 'Buddy': true, 'Best Friend': true, 'Family': true } },
+  { label: 'ซื้อสินค้าใหม่ก่อนใคร', valueByTier: { 'Puppy': false, 'Buddy': false, 'Best Friend': false, 'Family': true } }
+]
+
+// Mock stand-in for the backend tier rule: progress is measured from 0 toward the next tier's threshold
+function calculateMockTierProgress(qualifyingPoints: number) {
+  const currentTierIndex = Math.max(0, MOCK_TIER_LEVELS.findLastIndex(level => qualifyingPoints >= level.minPoints))
+  const currentTier = MOCK_TIER_LEVELS[currentTierIndex]!
+  const nextTier = MOCK_TIER_LEVELS[currentTierIndex + 1] ?? null
+  return {
+    currentTier: currentTier.name,
+    nextTier: nextTier?.name ?? null,
+    pointsToNextTier: nextTier ? nextTier.minPoints - qualifyingPoints : 0,
+    progressPercent: nextTier ? Math.floor((qualifyingPoints / nextTier.minPoints) * 100) : 100
+  }
+}
+
+function firstDayOfNextMonth(now = new Date()) {
+  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+  return `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-01`
+}
+
 interface MockMemberRecord {
   profile: MemberProfile
   notificationPreferences: NotificationPreferences
   pointsBalance: number
+  qualifyingSpendBaht: number
+  qualifyingPoints: number
   onboardingCompletedAt: string | null
 }
 
@@ -59,6 +118,8 @@ function createSeededMemberRecord(): MockMemberRecord {
       petDataConsent: true
     },
     pointsBalance: 1280,
+    qualifyingSpendBaht: 12800,
+    qualifyingPoints: 1280,
     onboardingCompletedAt: '2026-08-12'
   }
 }
@@ -89,6 +150,8 @@ function createNewMemberRecord(memberId: string, sequence: number): MockMemberRe
       petDataConsent: false
     },
     pointsBalance: 0,
+    qualifyingSpendBaht: 0,
+    qualifyingPoints: 0,
     onboardingCompletedAt: null
   }
 }
@@ -160,28 +223,21 @@ export function createMockMemberRepository(): MemberRepository {
     },
 
     async getTierLevels() {
-      return [
-        {
-          name: 'Puppy',
-          minPoints: 0,
-          benefits: ['รับแต้ม 1 เท่า ทุกการสั่งซื้อ', 'คูปองต้อนรับสมาชิกใหม่']
-        },
-        {
-          name: 'Buddy',
-          minPoints: 1000,
-          benefits: ['รับแต้ม 1.2 เท่า ทุกการสั่งซื้อ', 'คูปองวันเกิด 10% ทั้งตัวคุณและน้อง', 'ร่วมกิจกรรมพิเศษก่อนใคร']
-        },
-        {
-          name: 'Best Friend',
-          minPoints: 2000,
-          benefits: ['รับแต้ม 1.5 เท่า ทุกการสั่งซื้อ', 'คูปองวันเกิด 15% ทั้งตัวคุณและน้อง', 'ส่งฟรีทุกออเดอร์']
-        },
-        {
-          name: 'Family',
-          minPoints: 5000,
-          benefits: ['รับแต้ม 2 เท่า ทุกการสั่งซื้อ', 'คูปองวันเกิด 20% ทั้งตัวคุณและน้อง', 'ของขวัญพิเศษประจำปี']
-        }
-      ]
+      return MOCK_TIER_LEVELS
+    },
+
+    async getTierBenefitComparison() {
+      return MOCK_TIER_BENEFIT_COMPARISON
+    },
+
+    async getTierStatus(memberId) {
+      const { qualifyingSpendBaht, qualifyingPoints } = getMember(memberId)
+      return {
+        ...calculateMockTierProgress(qualifyingPoints),
+        qualifyingSpendBaht,
+        qualifyingPoints,
+        nextReviewDate: firstDayOfNextMonth()
+      }
     },
 
     async getSummary(memberId) {
@@ -212,7 +268,7 @@ export function createMockMemberRepository(): MemberRepository {
         },
         pendingOrders: {
           count: 2,
-          points: 150
+          points: 22
         },
         isLineConnected: true
       }
