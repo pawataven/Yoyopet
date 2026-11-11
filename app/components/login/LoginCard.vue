@@ -2,8 +2,9 @@
 const route = useRoute()
 const { signInWithLine, requestPhoneOtp, verifyPhoneOtp } = useAuth()
 
-type LoginStep = 'phone' | 'otp'
-const step = ref<LoginStep>('phone')
+const isOtpDialogOpen = ref(false)
+const otpSentAt = ref(0)
+const otpExpiresInSeconds = ref(0)
 
 const phone = ref('')
 const acceptedTerms = ref(false)
@@ -19,6 +20,7 @@ const resendAfterSeconds = ref(0)
 
 const fieldId = useId()
 const termsCheckbox = useTemplateRef<HTMLInputElement>('termsCheckbox')
+const phoneInput = useTemplateRef<HTMLInputElement>('phoneInput')
 
 const consents = computed(() => ({ acceptedTerms: acceptedTerms.value, marketingOptIn: marketingOptIn.value }))
 
@@ -60,12 +62,15 @@ async function handleLineSignIn() {
 async function sendOtp() {
   isRequestingOtp.value = true
   try {
-    const { resendAfterSeconds: seconds } = await requestPhoneOtp(digitsOnly(phone.value))
-    resendAfterSeconds.value = seconds
+    const otpRequest = await requestPhoneOtp(digitsOnly(phone.value))
+    resendAfterSeconds.value = otpRequest.resendAfterSeconds
+    otpExpiresInSeconds.value = otpRequest.expiresInSeconds
+    otpSentAt.value = Date.now()
     otpError.value = ''
-    step.value = 'otp'
+    isOtpDialogOpen.value = true
   } catch {
-    phoneError.value = 'ส่งรหัส OTP ไม่สำเร็จ กรุณาลองอีกครั้ง'
+    if (isOtpDialogOpen.value) otpError.value = 'ส่งรหัส OTP ไม่สำเร็จ กรุณาลองอีกครั้ง'
+    else phoneError.value = 'ส่งรหัส OTP ไม่สำเร็จ กรุณาลองอีกครั้ง'
   } finally {
     isRequestingOtp.value = false
   }
@@ -83,6 +88,7 @@ async function handleVerifyOtp(code: string) {
   otpError.value = ''
   try {
     await verifyPhoneOtp(digitsOnly(phone.value), code, consents.value)
+    isOtpDialogOpen.value = false
     await finishSignIn()
   } catch {
     otpError.value = 'รหัส OTP ไม่ถูกต้องหรือหมดอายุ'
@@ -90,18 +96,25 @@ async function handleVerifyOtp(code: string) {
     isVerifyingOtp.value = false
   }
 }
+
+async function handleChangePhone() {
+  isOtpDialogOpen.value = false
+  await nextTick()
+  phoneInput.value?.focus()
+  phoneInput.value?.select()
+}
 </script>
 
 <template>
   <section aria-labelledby="login-heading" class="flex flex-col rounded-[1.25rem] border bg-white p-5 xl:p-10">
     <h2 id="login-heading" class="text-xl leading-tight xl:text-[1.75rem]">
-      {{ step === 'phone' ? 'เข้าสู่ระบบ / สมัครสมาชิก' : 'ยืนยันเบอร์โทรศัพท์' }}
+      เข้าสู่ระบบ / สมัครสมาชิก
     </h2>
     <p class="mt-1 text-sm text-muted xl:text-base">
-      {{ step === 'phone' ? 'สมัครฟรี ใช้เวลาไม่ถึง 1 นาที' : 'กรอกรหัสที่ได้รับทาง SMS' }}
+      สมัครฟรี ใช้เวลาไม่ถึง 1 นาที
     </p>
 
-    <div v-if="step === 'phone'" class="mt-6 xl:mt-7">
+    <div class="mt-6 xl:mt-7">
       <button
         type="button"
         :disabled="isSigningInWithLine"
@@ -125,6 +138,7 @@ async function handleVerifyOtp(code: string) {
         <label :for="`${fieldId}-phone`" class="mb-1.5 block text-sm xl:text-[1.0625rem]">เบอร์โทรศัพท์</label>
         <input
           :id="`${fieldId}-phone`"
+          ref="phoneInput"
           :value="phone"
           type="tel"
           inputmode="tel"
@@ -184,17 +198,18 @@ async function handleVerifyOtp(code: string) {
       </div>
     </div>
 
-    <OtpVerificationStep
-      v-else
-      class="mt-6 xl:mt-7"
+    <OtpVerificationDialog
+      v-model:open="isOtpDialogOpen"
       :phone="phone"
+      :otp-sent-at="otpSentAt"
       :resend-after-seconds="resendAfterSeconds"
+      :expires-in-seconds="otpExpiresInSeconds"
       :is-verifying="isVerifyingOtp"
       :is-resending="isRequestingOtp"
       :error-message="otpError"
       @verify="handleVerifyOtp"
       @resend="sendOtp"
-      @change-phone="step = 'phone'"
+      @change-phone="handleChangePhone"
     />
 
     <aside class="mt-6 flex gap-3 rounded-2xl bg-cream p-4 xl:mt-8 xl:gap-3.5 xl:px-6 xl:py-5">
