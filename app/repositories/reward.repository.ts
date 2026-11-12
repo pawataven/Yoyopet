@@ -19,7 +19,13 @@ const MOCK_REWARDS: Reward[] = [
   { id: 'pet-grooming-brush', name: 'แปรงหวีขนสัตว์เลี้ยง', category: 'product', group: 'grooming', badge: null, pointsCost: 650, imageUrl: null, couponValueBaht: null },
   { id: 'litter-deodorizer-lavender', name: 'ผงดับกลิ่นทรายแมว Lavender', category: 'product', group: 'grooming', badge: null, pointsCost: 700, imageUrl: null, couponValueBaht: null },
   { id: 'yoyo-tofu-litter-7l', name: 'ทรายเต้าหู้ YoYo Tofu 7 ลิตร', category: 'product', group: 'cat_litter', badge: null, pointsCost: 900, imageUrl: '/rewards/yoyo-tofu-litter-7l.jpg', couponValueBaht: null },
-  { id: 'berry-cream-spray-60ml', name: 'สเปรย์น้ำหอม Berry Cream 60ml', category: 'product', group: 'grooming', badge: null, pointsCost: 1500, imageUrl: '/rewards/berry-cream-spray-60ml.jpg', couponValueBaht: null }
+  { id: 'berry-cream-spray-60ml', name: 'สเปรย์น้ำหอม Berry Cream 60ml', category: 'product', group: 'grooming', badge: null, pointsCost: 1500, imageUrl: '/rewards/berry-cream-spray-60ml.jpg', couponValueBaht: null },
+  { id: 'coupon-200-baht', name: 'คูปองส่วนลด 200 บาท', category: 'coupon', group: 'coupon', badge: null, pointsCost: 1000, imageUrl: null, couponValueBaht: 200 },
+  { id: 'cat-scratcher-sofa', name: 'ที่ลับเล็บแมว ทรงโซฟา', category: 'product', group: 'cat_toy', badge: null, pointsCost: 1200, imageUrl: null, couponValueBaht: null },
+  { id: 'yoyo-tofu-litter-7l-twin-pack', name: 'ทรายเต้าหู้ YoYo Tofu 7 ลิตร แพ็กคู่', category: 'product', group: 'cat_litter', badge: null, pointsCost: 1700, imageUrl: '/rewards/yoyo-tofu-litter-7l.jpg', couponValueBaht: null },
+  { id: 'pearl-fur-care-spray', name: 'สเปรย์บำรุงขน Pearl Fur Care', category: 'product', group: 'grooming', badge: 'new', pointsCost: 1800, imageUrl: null, couponValueBaht: null },
+  { id: 'foldable-cat-tunnel', name: 'อุโมงค์แมว พับเก็บได้', category: 'product', group: 'cat_toy', badge: null, pointsCost: 2200, imageUrl: null, couponValueBaht: null },
+  { id: 'coupon-500-baht', name: 'คูปองส่วนลด 500 บาท', category: 'coupon', group: 'coupon', badge: null, pointsCost: 2500, imageUrl: null, couponValueBaht: 500 }
 ]
 
 const RECOMMENDED_REWARD_IDS = ['coupon-50-baht', 'yoyo-pet-wipes-80', 'yoyo-tofu-litter-7l', 'berry-cream-spray-60ml']

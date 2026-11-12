@@ -4,6 +4,15 @@ import type { Reward, RewardGroup } from '~/types/reward'
 type RewardSortOrder = 'points_asc' | 'points_desc'
 
 const POINT_RANGE_ROUNDING = 1000
+const REWARDS_PAGE_SIZE = 12
+
+// TODO: confirm the final redemption terms with the business team
+const redemptionTerms = [
+  'แลกแล้วยกเลิกหรือคืนแต้มไม่ได้',
+  'คูปองมีอายุ 30 วันหลังแลก',
+  'สินค้ามีจำนวนจำกัด',
+  'บริษัทขอสงวนสิทธิ์เปลี่ยนแปลงของรางวัลโดยไม่ต้องแจ้งล่วงหน้า'
+]
 
 definePageMeta({ middleware: 'auth' })
 
@@ -74,6 +83,18 @@ const visibleRewards = computed(() =>
     .filter(matchesFilters)
     .toSorted((a, b) => (sortOrder.value === 'points_asc' ? a.pointsCost - b.pointsCost : b.pointsCost - a.pointsCost))
 )
+
+const shownRewardCount = ref(REWARDS_PAGE_SIZE)
+const shownRewards = computed(() => visibleRewards.value.slice(0, shownRewardCount.value))
+const hasMoreRewards = computed(() => shownRewards.value.length < visibleRewards.value.length)
+
+watch([isRedeemableOnly, minPoints, maxPoints, selectedGroups, sortOrder], () => {
+  shownRewardCount.value = REWARDS_PAGE_SIZE
+}, { deep: true })
+
+function showMoreRewards() {
+  shownRewardCount.value += REWARDS_PAGE_SIZE
+}
 
 const sortSelectId = useId()
 </script>
@@ -154,10 +175,23 @@ const sortSelectId = useId()
         </div>
 
         <ul v-if="visibleRewards.length" class="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3 xl:mt-6 xl:gap-x-8 xl:gap-y-6">
-          <li v-for="reward in visibleRewards" :key="reward.id" class="flex">
+          <li v-for="reward in shownRewards" :key="reward.id" class="flex">
             <RewardCard :reward="reward" :member-points="memberPoints" variant="catalog" class="w-full" />
           </li>
         </ul>
+        <div v-if="visibleRewards.length" class="mt-6 flex flex-col items-center gap-3 xl:mt-8 xl:gap-4">
+          <p class="text-xs text-muted xl:text-sm" aria-live="polite">
+            แสดง {{ formatNumber(shownRewards.length) }} จาก {{ formatNumber(visibleRewards.length) }} รายการ
+          </p>
+          <button
+            v-if="hasMoreRewards"
+            type="button"
+            class="flex h-11 w-48 items-center justify-center rounded-xl border-2 border-primary text-sm font-semibold text-primary-dark transition-colors hover:bg-primary-soft xl:h-14 xl:w-60 xl:text-base"
+            @click="showMoreRewards"
+          >
+            ดูเพิ่มเติม
+          </button>
+        </div>
         <p v-else class="mt-5 rounded-[1.25rem] border bg-cream px-6 py-12 text-center text-muted xl:mt-6 xl:text-lg">
           ไม่พบของรางวัลที่ตรงกับตัวกรอง
         </p>
@@ -165,5 +199,8 @@ const sortSelectId = useId()
     </div>
 
     <RecentRedemptionsCard class="mt-8 xl:hidden" />
+
+    <RewardRedemptionSteps />
+    <TermsNote title="เงื่อนไขการแลก" :terms="redemptionTerms" class="mt-6 xl:mt-10" />
   </div>
 </template>

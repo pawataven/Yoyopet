@@ -3,6 +3,14 @@ import type { MemberCoupon, MemberCouponStatus } from '~/types/coupon'
 
 const RECENT_HISTORY_LIMIT = 2
 
+// TODO: confirm the final coupon terms with the business team
+const couponTerms = [
+  'ใช้ได้ 1 ใบต่อ 1 คำสั่งซื้อ',
+  'ใช้ร่วมกับโปรโมชันอื่นของร้านไม่ได้',
+  'คูปองที่หมดอายุแล้วคืนแต้มไม่ได้',
+  'คูปองเป็นสิทธิ์เฉพาะบุคคล โอนให้ผู้อื่นไม่ได้'
+]
+
 definePageMeta({ middleware: 'auth' })
 
 useSeoMeta({
@@ -173,6 +181,6 @@ const searchInputId = useId()
     </section>
 
     <CouponUsageGuide />
-    <CouponTermsNote />
+    <TermsNote title="เงื่อนไขการใช้คูปอง" :terms="couponTerms" class="mt-6 xl:mt-8" />
   </div>
 </template>
