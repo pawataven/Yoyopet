@@ -1,4 +1,8 @@
 <script setup lang="ts">
+const { disabled = false } = defineProps<{
+  disabled?: boolean
+}>()
+
 const isOn = defineModel<boolean>({ required: true })
 </script>
 
@@ -7,7 +11,8 @@ const isOn = defineModel<boolean>({ required: true })
     type="button"
     role="switch"
     :aria-checked="isOn"
-    class="relative inline-flex h-6.5 w-12 shrink-0 items-center rounded-full p-0.75 transition-colors focus-visible:ring-4 focus-visible:ring-primary-soft focus-visible:outline-none"
+    :disabled="disabled"
+    class="relative inline-flex h-6.5 w-12 shrink-0 items-center rounded-full p-0.75 transition-colors focus-visible:ring-4 focus-visible:ring-primary-soft focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
     :class="isOn ? 'bg-primary' : 'bg-border'"
     @click="isOn = !isOn"
   >

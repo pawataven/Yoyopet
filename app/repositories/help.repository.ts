@@ -8,6 +8,12 @@ export interface HelpRepository {
 // TODO: confirm the FAQ answers and earning rate with the YoYo team before launch
 const mockFaqs: FaqItem[] = [
   {
+    id: 'faq-order-number-location',
+    question: 'เลขคำสั่งซื้อหาได้ที่ไหน?',
+    summary: 'ดูได้ในหน้าการซื้อของฉันของแต่ละแพลตฟอร์ม',
+    answer: 'เปิดแอปร้านค้า › ฉัน › การซื้อของฉัน กดคำสั่งซื้อจาก YoYo แล้วคัดลอกหมายเลขคำสั่งซื้อ'
+  },
+  {
     id: 'faq-membership-fee',
     question: 'สมัครสมาชิกต้องเสียค่าใช้จ่ายไหม?',
     summary: 'ไม่มีค่าใช้จ่าย สมัครผ่าน LINE หรือเบอร์โทรได้ทันที',
@@ -27,19 +33,19 @@ const mockFaqs: FaqItem[] = [
   },
   {
     id: 'faq-points-expiry',
-    question: 'แต้มมีวันหมดอายุไหม?',
+    question: 'แต้มหมดอายุเมื่อไหร่?',
     summary: 'แต้มมีอายุ 12 เดือนนับจากวันที่ได้รับ',
     answer: 'แต้มแต่ละก้อนมีอายุ 12 เดือนนับจากวันที่แต้มเข้าบัญชี ระบบจะแจ้งเตือนผ่าน LINE ก่อนแต้มหมดอายุ และดูวันหมดอายุได้ที่หน้าแรกหรือประวัติแต้ม'
   },
   {
     id: 'faq-refund',
-    question: 'ยกเลิกหรือคืนสินค้า แต้มจะเป็นยังไง?',
+    question: 'คืนสินค้าแล้วแต้มเป็นยังไง?',
     summary: 'ระบบจะหักแต้มของคำสั่งซื้อนั้นออกอัตโนมัติ',
     answer: 'เมื่อคำสั่งซื้อถูกยกเลิกหรือคืนสินค้าบนแพลตฟอร์ม ระบบจะหักแต้มที่ได้จากคำสั่งซื้อนั้นออกโดยอัตโนมัติ หากแต้มยังอยู่ระหว่างตรวจสอบ คำสั่งซื้อจะไม่ได้รับแต้ม'
   },
   {
     id: 'faq-order-entry-deadline',
-    question: 'ต้องกรอกภายในกี่วัน?',
+    question: 'กรอกได้ภายในกี่วัน?',
     summary: 'กรอกได้ภายใน 30 วันหลังได้รับสินค้า',
     answer: 'กรอกเลขคำสั่งซื้อได้ภายใน 30 วันนับจากวันที่ได้รับสินค้า หากเกินกำหนด ระบบจะไม่สามารถสะสมแต้มให้คำสั่งซื้อนั้นได้'
   },
@@ -58,7 +64,7 @@ const mockFaqs: FaqItem[] = [
 ]
 
 const faqIdsByTopic: Record<FaqTopic, string[]> = {
-  'general': ['faq-membership-fee', 'faq-duplicate-order', 'faq-points-expiry', 'faq-refund', 'faq-tier', 'faq-cancel-redemption'],
+  'general': ['faq-order-number-location', 'faq-order-entry-deadline', 'faq-points-not-usable', 'faq-refund', 'faq-points-expiry', 'faq-membership-fee', 'faq-duplicate-order', 'faq-tier', 'faq-cancel-redemption'],
   'order-entry': ['faq-duplicate-order', 'faq-points-not-usable', 'faq-refund', 'faq-order-entry-deadline']
 }
 
@@ -72,6 +78,7 @@ export function createMockHelpRepository(): HelpRepository {
       return {
         bahtPerPoint: 100,
         tierMultipliers: [
+          { tier: 'Puppy', multiplier: 1 },
           { tier: 'Buddy', multiplier: 1.2 },
           { tier: 'Best Friend', multiplier: 1.5 },
           { tier: 'Family', multiplier: 2 }

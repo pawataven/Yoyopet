@@ -99,9 +99,50 @@ export interface MemberProfileUpdate {
   gender: Gender | null
 }
 
+export type NotificationChannel = 'line' | 'web'
+
+export type NotificationTopic =
+  | 'pointsAndOrders'
+  | 'redemptionAndShipping'
+  | 'expiry'
+  | 'tierAndTopSpender'
+  | 'promotions'
+
+export type NotificationChannelSettings = Record<NotificationChannel, boolean>
+
+// Account and security messages are always sent, so they have no topic here
 export interface NotificationPreferences {
-  orderAndPointsUpdates: boolean
-  pointsExpiry: boolean
-  promotions: boolean
-  petDataConsent: boolean
+  topics: Record<NotificationTopic, NotificationChannelSettings>
+}
+
+export type ConsentPurpose = 'marketing' | 'petData'
+
+export interface ConsentStatus {
+  granted: boolean
+  // When the member last gave or withdrew it; null if they never answered
+  updatedAt: string | null
+}
+
+export interface TermsAcceptance {
+  version: string
+  acceptedAt: string
+}
+
+export interface MemberConsents {
+  terms: TermsAcceptance | null
+  // Promotions are only sent when this is given and the promotions topic is switched on
+  marketing: ConsentStatus
+  petData: ConsentStatus
+}
+
+export interface ConsentHistoryEntry {
+  id: string
+  purpose: ConsentPurpose
+  granted: boolean
+  recordedAt: string
+}
+
+export interface PrivacyRequests {
+  dataExportRequestedAt: string | null
+  accountDeletionRequestedAt: string | null
 }

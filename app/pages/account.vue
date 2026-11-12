@@ -12,12 +12,13 @@ interface AccountMenuItem {
   value?: string
 }
 
-const { appVersion, supportChat } = useAppConfig()
+const { appVersion } = useAppConfig()
 const { member } = useMember()
 const { profile } = useMemberProfile()
 const { addresses } = useShippingAddresses()
 const { pets } = usePets()
 const { referral } = useReferral()
+const { preferences: notificationPreferences } = useNotificationPreferences()
 
 const languageSelectId = useId()
 const selectedLanguage = ref('th')
@@ -27,10 +28,15 @@ const memberContactLine = computed(() =>
   [member.value?.memberCode, profile.value?.phone && maskThaiMobile(profile.value.phone)].filter(Boolean).join(' · ')
 )
 
-// In-app notifications always reach the member; LINE only once the account is linked
-const notificationChannelsLabel = computed(() =>
-  [profile.value?.isLineConnected && 'LINE', 'เว็บ'].filter(Boolean).join(' · ')
-)
+const notificationChannelsLabel = computed(() => {
+  if (!notificationPreferences.value) return undefined
+  const topicSettings = Object.values(notificationPreferences.value.topics)
+  const enabledChannels = [
+    topicSettings.some(settings => settings.line) && 'LINE',
+    topicSettings.some(settings => settings.web) && 'เว็บ'
+  ].filter(Boolean)
+  return enabledChannels.length ? enabledChannels.join(' · ') : 'ปิดอยู่'
+})
 
 const accountItems = computed<AccountMenuItem[]>(() => [
   { label: 'ข้อมูลส่วนตัว', icon: 'lucide:user', to: '/profile#personal-info' },
@@ -45,13 +51,13 @@ const accountItems = computed<AccountMenuItem[]>(() => [
 ])
 
 const settingItems = computed<AccountMenuItem[]>(() => [
-  { label: 'การแจ้งเตือน', icon: 'lucide:bell', to: '/profile#notification-settings', value: notificationChannelsLabel.value },
-  { label: 'ความยินยอมและความเป็นส่วนตัว', icon: 'lucide:shield-check', to: '/profile#notification-settings' }
+  { label: 'การแจ้งเตือน', icon: 'lucide:bell', to: '/settings/notifications', value: notificationChannelsLabel.value },
+  { label: 'ความยินยอมและความเป็นส่วนตัว', icon: 'lucide:shield-check', to: '/settings/privacy' }
 ])
 
 const helpItems: AccountMenuItem[] = [
   { label: 'วิธีสะสมแต้มและคำถามที่พบบ่อย', icon: 'lucide:circle-help', to: '/help/how-to-earn' },
-  { label: 'เงื่อนไขการใช้งาน', icon: 'lucide:file-text', to: '/terms/points' }
+  { label: 'เงื่อนไขการใช้งาน', icon: 'lucide:file-text', to: '/terms/membership' }
 ]
 
 const sectionHeadingClass = 'px-1 pb-2 font-sans text-sm font-semibold xl:text-base'
@@ -172,7 +178,7 @@ const menuRowClass = 'flex min-h-14 w-full items-center gap-3.5 px-4 text-[0.937
 
       <p class="text-center text-xs text-muted">
         YoYo Member v{{ appVersion }} ·
-        <a :href="supportChat.url" target="_blank" rel="noopener" class="underline-offset-2 hover:text-primary-dark hover:underline">ขอลบบัญชี</a>
+        <NuxtLink to="/settings/privacy#delete-account" class="underline-offset-2 hover:text-primary-dark hover:underline">ขอลบบัญชี</NuxtLink>
       </p>
     </div>
 

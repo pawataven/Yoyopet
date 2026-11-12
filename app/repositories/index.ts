@@ -12,6 +12,7 @@ import { createMockPointsRepository } from './points.repository'
 import { createMockProductRepository } from './product.repository'
 import { createMockReferralRepository } from './referral.repository'
 import { createMockRewardRepository } from './reward.repository'
+import { createMockTermsRepository } from './terms.repository'
 
 const mockMemberRepository = createMockMemberRepository()
 const mockAddressRepository = createMockAddressRepository()
@@ -28,6 +29,7 @@ export function useRepositories() {
     reward: createMockRewardRepository(),
     leaderboard: mockLeaderboardRepository,
     help: createMockHelpRepository(),
+    terms: createMockTermsRepository(),
     // Shared instances so the mocks remember writes (profile edits, claimed coupon, read notifications, confirmed prizes, submitted orders) between calls
     member: mockMemberRepository,
     address: mockAddressRepository,

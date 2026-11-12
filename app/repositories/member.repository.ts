@@ -5,6 +5,10 @@ import type {
   MemberProfileUpdate,
   MemberSummary,
   MemberTierStatus,
+  ConsentHistoryEntry,
+  ConsentPurpose,
+  MemberConsents,
+  PrivacyRequests,
   NotificationPreferences,
   OnboardingStatus,
   TierBenefitComparisonRow,
@@ -22,6 +26,12 @@ export interface MemberRepository {
   uploadAvatar(memberId: string, file: File): Promise<MemberProfile>
   getNotificationPreferences(memberId: string): Promise<NotificationPreferences>
   updateNotificationPreferences(memberId: string, preferences: NotificationPreferences): Promise<NotificationPreferences>
+  getConsents(memberId: string): Promise<MemberConsents>
+  setConsent(memberId: string, purpose: ConsentPurpose, granted: boolean): Promise<MemberConsents>
+  getConsentHistory(memberId: string): Promise<ConsentHistoryEntry[]>
+  getPrivacyRequests(memberId: string): Promise<PrivacyRequests>
+  requestDataExport(memberId: string): Promise<PrivacyRequests>
+  requestAccountDeletion(memberId: string): Promise<PrivacyRequests>
   getOnboardingStatus(memberId: string): Promise<OnboardingStatus>
   // The welcome bonus is awarded by the backend; the result reports how many points were actually given
   completeOnboarding(memberId: string, onboarding: MemberOnboarding): Promise<{ awardedPoints: number }>
@@ -30,6 +40,7 @@ export interface MemberRepository {
 export const MOCK_SEEDED_MEMBER_ID = 'mock-member-id'
 const MOCK_NEW_MEMBER_ID_PREFIX = 'mock-member-'
 const MOCK_WELCOME_BONUS_POINTS = 50
+const MOCK_CURRENT_TERMS_VERSION = '1.2'
 
 const MOCK_TIER_LEVELS: TierLevel[] = [
   {
@@ -87,11 +98,18 @@ function firstDayOfNextMonth(now = new Date()) {
 interface MockMemberRecord {
   profile: MemberProfile
   notificationPreferences: NotificationPreferences
+  consents: MemberConsents
+  consentHistory: ConsentHistoryEntry[]
+  privacyRequests: PrivacyRequests
   pointsBalance: number
   qualifyingSpendBaht: number
   qualifyingPoints: number
   onboardingCompletedAt: string | null
   isLineOfficialAccountFriend: boolean
+}
+
+function recordConsent(member: MockMemberRecord, purpose: ConsentPurpose, granted: boolean, recordedAt: string) {
+  member.consentHistory.push({ id: `consent-${member.consentHistory.length + 1}`, purpose, granted, recordedAt })
 }
 
 function createSeededMemberRecord(): MockMemberRecord {
@@ -102,7 +120,7 @@ function createSeededMemberRecord(): MockMemberRecord {
       lastName: 'ใจดี',
       phone: '081-234-4521',
       isPhoneVerified: true,
-      email: null,
+      email: 'mind.jaidee@example.com',
       birthDate: '1996-02-14',
       gender: 'female',
       petOwnership: 'both',
@@ -113,11 +131,24 @@ function createSeededMemberRecord(): MockMemberRecord {
       isLineConnected: true
     },
     notificationPreferences: {
-      orderAndPointsUpdates: true,
-      pointsExpiry: true,
-      promotions: false,
-      petDataConsent: true
+      topics: {
+        pointsAndOrders: { line: true, web: true },
+        redemptionAndShipping: { line: true, web: true },
+        expiry: { line: true, web: true },
+        tierAndTopSpender: { line: false, web: true },
+        promotions: { line: false, web: false }
+      }
     },
+    consents: {
+      terms: { version: MOCK_CURRENT_TERMS_VERSION, acceptedAt: '2026-02-14T10:22:00+07:00' },
+      marketing: { granted: true, updatedAt: '2026-02-14T10:22:00+07:00' },
+      petData: { granted: true, updatedAt: '2026-02-14T10:22:00+07:00' }
+    },
+    consentHistory: [
+      { id: 'consent-1', purpose: 'marketing', granted: true, recordedAt: '2026-02-14T10:22:00+07:00' },
+      { id: 'consent-2', purpose: 'petData', granted: true, recordedAt: '2026-02-14T10:22:00+07:00' }
+    ],
+    privacyRequests: { dataExportRequestedAt: null, accountDeletionRequestedAt: null },
     pointsBalance: 1280,
     qualifyingSpendBaht: 12800,
     qualifyingPoints: 1280,
@@ -146,11 +177,21 @@ function createNewMemberRecord(memberId: string, sequence: number): MockMemberRe
       isLineConnected: false
     },
     notificationPreferences: {
-      orderAndPointsUpdates: false,
-      pointsExpiry: false,
-      promotions: false,
-      petDataConsent: false
+      topics: {
+        pointsAndOrders: { line: true, web: true },
+        redemptionAndShipping: { line: true, web: true },
+        expiry: { line: true, web: true },
+        tierAndTopSpender: { line: true, web: true },
+        promotions: { line: false, web: false }
+      }
     },
+    consents: {
+      terms: null,
+      marketing: { granted: false, updatedAt: null },
+      petData: { granted: false, updatedAt: null }
+    },
+    consentHistory: [],
+    privacyRequests: { dataExportRequestedAt: null, accountDeletionRequestedAt: null },
     pointsBalance: 0,
     qualifyingSpendBaht: 0,
     qualifyingPoints: 0,
@@ -189,7 +230,18 @@ export function createMockMemberRepository(): MemberRepository {
       // TODO: the backend should credit the referrer when referralCode is valid; the mock ignores it
       const { firstName, lastName, birthDate, email, marketingOptIn } = onboarding
       member.profile = { ...member.profile, firstName, lastName, birthDate, email }
-      member.notificationPreferences = { ...member.notificationPreferences, promotions: marketingOptIn }
+      const answeredAt = new Date().toISOString()
+      member.consents = {
+        ...member.consents,
+        terms: { version: MOCK_CURRENT_TERMS_VERSION, acceptedAt: answeredAt },
+        marketing: { granted: marketingOptIn, updatedAt: answeredAt }
+      }
+      recordConsent(member, 'marketing', marketingOptIn, answeredAt)
+      if (marketingOptIn) {
+        member.notificationPreferences = {
+          topics: { ...member.notificationPreferences.topics, promotions: { line: true, web: true } }
+        }
+      }
       member.pointsBalance += MOCK_WELCOME_BONUS_POINTS
       member.onboardingCompletedAt = new Date().toISOString()
       return { awardedPoints: MOCK_WELCOME_BONUS_POINTS }
@@ -213,13 +265,45 @@ export function createMockMemberRepository(): MemberRepository {
     },
 
     async getNotificationPreferences(memberId) {
-      return getMember(memberId).notificationPreferences
+      return structuredClone(getMember(memberId).notificationPreferences)
     },
 
     async updateNotificationPreferences(memberId, preferences) {
       const member = getMember(memberId)
-      member.notificationPreferences = { ...preferences }
-      return member.notificationPreferences
+      member.notificationPreferences = structuredClone(preferences)
+      return structuredClone(member.notificationPreferences)
+    },
+
+    async getConsents(memberId) {
+      return structuredClone(getMember(memberId).consents)
+    },
+
+    async setConsent(memberId, purpose, granted) {
+      const member = getMember(memberId)
+      const recordedAt = new Date().toISOString()
+      member.consents = { ...member.consents, [purpose]: { granted, updatedAt: recordedAt } }
+      recordConsent(member, purpose, granted, recordedAt)
+      return structuredClone(member.consents)
+    },
+
+    async getConsentHistory(memberId) {
+      return [...getMember(memberId).consentHistory].sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))
+    },
+
+    async getPrivacyRequests(memberId) {
+      return { ...getMember(memberId).privacyRequests }
+    },
+
+    async requestDataExport(memberId) {
+      const member = getMember(memberId)
+      member.privacyRequests = { ...member.privacyRequests, dataExportRequestedAt: new Date().toISOString() }
+      return { ...member.privacyRequests }
+    },
+
+    async requestAccountDeletion(memberId) {
+      const member = getMember(memberId)
+      member.privacyRequests = { ...member.privacyRequests, accountDeletionRequestedAt: new Date().toISOString() }
+      return { ...member.privacyRequests }
     },
 
     async getTierLevels() {

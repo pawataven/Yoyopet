@@ -1,30 +1,28 @@
 <script setup lang="ts">
-import type { NotificationPreferences } from '~/types/member'
-
-const preferences = defineModel<NotificationPreferences>({ required: true })
-
-const labelIdPrefix = useId()
-
-const preferenceRows: { key: keyof NotificationPreferences, label: string }[] = [
-  { key: 'orderAndPointsUpdates', label: 'แจ้งเตือนเมื่อแต้มเข้าและสถานะคำสั่งซื้อ' },
-  { key: 'pointsExpiry', label: 'แจ้งเตือนแต้มใกล้หมดอายุ' },
-  { key: 'promotions', label: 'รับข่าวสารและโปรโมชันจาก YoYo' },
-  { key: 'petDataConsent', label: 'ยินยอมให้ใช้ข้อมูลสัตว์เลี้ยงเพื่อแนะนำสินค้า (PDPA)' }
+const settingLinks = [
+  { label: 'ความยินยอมและความเป็นส่วนตัว', icon: 'lucide:shield-check', to: '/settings/privacy' },
+  { label: 'ตั้งค่าการแจ้งเตือน LINE และเว็บ', icon: 'lucide:bell', to: '/settings/notifications' }
 ]
 </script>
 
 <template>
-  <section id="notification-settings" aria-labelledby="notification-consent-heading" class="scroll-mt-24 xl:scroll-mt-32 rounded-[1.25rem] border bg-white p-5 xl:p-10">
-    <h2 id="notification-consent-heading" class="text-xl leading-tight xl:text-[1.625rem]">
-      การแจ้งเตือนผ่าน LINE และความยินยอม
+  <section id="privacy-consents" aria-labelledby="privacy-consents-heading" class="scroll-mt-24 rounded-[1.25rem] border bg-white p-5 xl:scroll-mt-32 xl:p-10">
+    <h2 id="privacy-consents-heading" class="text-xl leading-tight xl:text-[1.625rem]">
+      ความยินยอมและการแจ้งเตือน
     </h2>
 
-    <ul class="mt-3 divide-y xl:mt-4">
-      <li v-for="row in preferenceRows" :key="row.key" class="flex items-center justify-between gap-4 py-3.5 xl:py-3">
-        <span :id="`${labelIdPrefix}-${row.key}`" class="text-sm xl:text-lg">
-          {{ row.label }}
-        </span>
-        <ToggleSwitch v-model="preferences[row.key]" :aria-labelledby="`${labelIdPrefix}-${row.key}`" />
+    <ul class="mt-3 space-y-2 xl:mt-4">
+      <li v-for="link in settingLinks" :key="link.to">
+        <NuxtLink
+          :to="link.to"
+          class="flex items-center justify-between gap-3 rounded-2xl bg-cream px-4 py-3.5 text-sm font-semibold transition-colors hover:bg-primary-soft/60 xl:text-base"
+        >
+          <span class="flex items-center gap-3">
+            <Icon :name="link.icon" class="size-5 shrink-0" aria-hidden="true" />
+            {{ link.label }}
+          </span>
+          <Icon name="lucide:chevron-right" class="size-5 shrink-0 text-muted" aria-hidden="true" />
+        </NuxtLink>
       </li>
     </ul>
   </section>

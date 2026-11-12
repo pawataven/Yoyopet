@@ -22,7 +22,7 @@ const profileMenuItems = computed(() => [
   { label: 'ระดับสมาชิกและสิทธิพิเศษ', icon: 'lucide:award', to: '/tiers' },
   { label: 'ประวัติแต้มและการแลก', icon: 'lucide:history', to: '/points/history' },
   { label: referralLabel.value, icon: 'lucide:gift', to: '/referral' },
-  { label: 'ตั้งค่าการแจ้งเตือน', icon: 'lucide:bell', to: '/profile#notification-settings' },
+  { label: 'ตั้งค่าการแจ้งเตือน', icon: 'lucide:bell', to: '/settings/notifications' },
   { label: 'ภาษา: ไทย', icon: 'lucide:globe', to: '/settings/language' }
 ])
 

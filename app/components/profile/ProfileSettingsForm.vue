@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import type { MemberProfile, MemberProfileUpdate, NotificationPreferences } from '~/types/member'
+import type { MemberProfile, MemberProfileUpdate } from '~/types/member'
 
 const props = defineProps<{
   profile: MemberProfile
 }>()
 
 const { saveProfile } = useMemberProfile()
-const { preferences, savePreferences } = useNotificationPreferences()
 const { addresses, defaultAddressId, setDefaultAddress } = useShippingAddresses()
 
 const profileDraft = ref<MemberProfileUpdate>(toProfileUpdate(props.profile))
-const preferencesDraft = ref<NotificationPreferences | null>(null)
 const selectedAddressId = ref<string | null>(null)
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -26,18 +24,16 @@ function isSameValue(left: unknown, right: unknown) {
 }
 
 const isProfileChanged = computed(() => !isSameValue(profileDraft.value, toProfileUpdate(props.profile)))
-const isPreferencesChanged = computed(() => !isSameValue(preferencesDraft.value, preferences.value))
 const isDefaultAddressChanged = computed(() => selectedAddressId.value !== defaultAddressId.value)
-const hasChanges = computed(() => isProfileChanged.value || isPreferencesChanged.value || isDefaultAddressChanged.value)
+const hasChanges = computed(() => isProfileChanged.value || isDefaultAddressChanged.value)
 
 function resetDrafts() {
   profileDraft.value = toProfileUpdate(props.profile)
-  preferencesDraft.value = preferences.value ? { ...preferences.value } : null
   selectedAddressId.value = defaultAddressId.value
 }
 
-watch([() => props.profile, preferences, defaultAddressId], resetDrafts, { immediate: true })
-watch([profileDraft, preferencesDraft, selectedAddressId], () => {
+watch([() => props.profile, defaultAddressId], resetDrafts, { immediate: true })
+watch([profileDraft, selectedAddressId], () => {
   if (saveStatus.value !== 'saving') saveStatus.value = 'idle'
 }, { deep: true })
 
@@ -51,7 +47,6 @@ async function handleSubmit() {
   try {
     await Promise.all([
       isProfileChanged.value && saveProfile({ ...profileDraft.value }),
-      isPreferencesChanged.value && preferencesDraft.value && savePreferences({ ...preferencesDraft.value }),
       isDefaultAddressChanged.value && selectedAddressId.value && setDefaultAddress(selectedAddressId.value)
     ])
     await nextTick()
@@ -88,7 +83,7 @@ const saveStatusMessage = computed(() => {
     <div class="flex min-w-0 flex-col gap-6 xl:col-start-2">
       <ShippingAddressCard v-model="selectedAddressId" :addresses="addresses" />
 
-      <NotificationConsentCard v-if="preferencesDraft" v-model="preferencesDraft" />
+      <NotificationConsentCard />
     </div>
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4 xl:col-start-2 xl:mt-2">

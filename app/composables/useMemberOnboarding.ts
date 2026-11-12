@@ -20,7 +20,8 @@ export function useMemberOnboarding() {
       'member-onboarding-status',
       'member-profile',
       'member-summary',
-      'notification-preferences'
+      'notification-preferences',
+      'member-consents'
     ])
     return result
   }

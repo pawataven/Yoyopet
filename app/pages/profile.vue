@@ -6,11 +6,10 @@ useSeoMeta({
 })
 
 const { profile, isUploadingAvatar, uploadAvatar } = useMemberProfile()
-const { preferences } = useNotificationPreferences()
 const { isLoading: isAddressesLoading } = useShippingAddresses()
 
 // The form copies these into drafts during setup, so it must mount after all of them have loaded
-const isFormDataReady = computed(() => preferences.value !== null && !isAddressesLoading.value)
+const isFormDataReady = computed(() => !isAddressesLoading.value)
 </script>
 
 <template>

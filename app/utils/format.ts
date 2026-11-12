@@ -62,6 +62,13 @@ export function formatThaiShortDateTime(localDateTime: string) {
   return `${formatThaiShortDate(localDateTime)} · ${localDateTime.slice(11, 16)}`
 }
 
+const clockTimeFormatter = new Intl.DateTimeFormat('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false })
+
+// Unlike formatThaiShortDateTime this parses the timestamp, so UTC ISO strings show in the viewer's time zone
+export function formatThaiDateAndTime(isoDateTime: string) {
+  return `${formatThaiShortDate(isoDateTime)} ${clockTimeFormatter.format(new Date(isoDateTime))}`
+}
+
 export function formatThaiLongMonthYear(isoDate: string) {
   return thaiLongMonthYearFormatter.format(new Date(isoDate))
 }

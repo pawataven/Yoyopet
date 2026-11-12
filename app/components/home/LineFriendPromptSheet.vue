@@ -87,7 +87,7 @@ const lineBenefits = [
 
       <p class="mt-4 text-xs text-muted">
         เปลี่ยนใจได้ทุกเมื่อในหน้า
-        <NuxtLink to="/profile#notification-settings" class="underline underline-offset-2 hover:text-primary-dark" @click="snooze">ตั้งค่าการแจ้งเตือน</NuxtLink>
+        <NuxtLink to="/settings/notifications" class="underline underline-offset-2 hover:text-primary-dark" @click="snooze">ตั้งค่าการแจ้งเตือน</NuxtLink>
       </p>
     </div>
   </ModalDialog>
