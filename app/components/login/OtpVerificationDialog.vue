@@ -79,8 +79,8 @@ function handleSubmit() {
   <ModalDialog
     v-model:open="isOpen"
     :aria-labelledby="headingId"
-    :fullscreen="isScreen"
-    :class="isScreen ? undefined : 'max-w-135.5'"
+    :fullscreen="isScreen ? 'mobile' : false"
+    :class="isScreen ? 'md:max-w-135.5' : 'max-w-135.5'"
     @opened="handleOpened"
     @closed="handleClosed"
   >

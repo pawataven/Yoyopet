@@ -58,10 +58,21 @@ export type Gender = 'female' | 'male' | 'unspecified'
 
 export type PetOwnership = 'dog' | 'cat' | 'both' | 'other'
 
+export type SignUpMethod = 'line' | 'phone'
+
 export interface OnboardingStatus {
   isRequired: boolean
   welcomeBonusPoints: number
   hasAcceptedPrivacyPolicy: boolean
+  // LINE sign-ups still need a verified phone; phone sign-ups verified it at sign-in
+  signUpMethod: SignUpMethod
+  lineProfile: { displayName: string, pictureUrl: string | null } | null
+  isLineOfficialAccountFriend: boolean
+}
+
+export interface PhoneVerificationRequest {
+  resendAfterSeconds: number
+  expiresInSeconds: number
 }
 
 export interface MemberOnboarding {

@@ -1,4 +1,4 @@
-import { MOCK_SEEDED_MEMBER_ID } from '~/repositories/member.repository'
+import { MOCK_LINE_MEMBER_ID, MOCK_SEEDED_MEMBER_ID } from '~/repositories/member.repository'
 
 export interface SignUpConsents {
   acceptedTerms: boolean
@@ -18,9 +18,10 @@ function waitForMockNetwork() {
 export function useAuth() {
   const userId = useState<string | null>('auth-user-id', () => MOCK_SEEDED_MEMBER_ID)
 
+  // Mock: LINE sign-in always lands on a brand-new LINE member so the LINE sign-up flow can be tried
   async function signInWithLine(_consents: SignUpConsents) {
     await waitForMockNetwork()
-    userId.value = MOCK_SEEDED_MEMBER_ID
+    userId.value = MOCK_LINE_MEMBER_ID
   }
 
   async function requestPhoneOtp(_phone: string) {

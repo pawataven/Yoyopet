@@ -11,6 +11,7 @@ import type {
   PrivacyRequests,
   NotificationPreferences,
   OnboardingStatus,
+  PhoneVerificationRequest,
   TierBenefitComparisonRow,
   TierLevel
 } from '~/types/member'
@@ -34,12 +35,18 @@ export interface MemberRepository {
   requestDataExport(memberId: string): Promise<PrivacyRequests>
   requestAccountDeletion(memberId: string): Promise<PrivacyRequests>
   getOnboardingStatus(memberId: string): Promise<OnboardingStatus>
+  // For LINE sign-ups: one phone number can belong to one account only, so a taken number fails with phone_in_use
+  requestPhoneVerification(memberId: string, phone: string): Promise<PhoneVerificationRequest>
+  verifyPhone(memberId: string, phone: string, code: string): Promise<MemberProfile>
   // The welcome bonus is awarded by the backend; the result reports how many points were actually given
   completeOnboarding(memberId: string, onboarding: MemberOnboarding): Promise<{ awardedPoints: number }>
 }
 
 export const MOCK_SEEDED_MEMBER_ID = 'mock-member-id'
 const MOCK_NEW_MEMBER_ID_PREFIX = 'mock-member-'
+export const MOCK_LINE_MEMBER_ID = 'mock-line-member'
+const MOCK_OTP_RESEND_SECONDS = 60
+const MOCK_OTP_EXPIRES_SECONDS = 5 * 60
 const MOCK_WELCOME_BONUS_POINTS = 50
 const MOCK_CURRENT_TERMS_VERSION = '1.2'
 
@@ -171,13 +178,15 @@ function createSeededMemberRecord(): MockMemberRecord {
 
 // A member who just signed up by phone: the backend has only the verified phone number so far
 function createNewMemberRecord(memberId: string, sequence: number): MockMemberRecord {
+  // A LINE sign-up arrives with a LINE profile but no phone; a phone sign-up is the reverse
+  const isLineSignUp = memberId === MOCK_LINE_MEMBER_ID
   return {
     profile: {
       id: memberId,
       firstName: '',
       lastName: '',
-      phone: formatThaiMobile(memberId.slice(MOCK_NEW_MEMBER_ID_PREFIX.length)),
-      isPhoneVerified: true,
+      phone: isLineSignUp ? '' : formatThaiMobile(memberId.slice(MOCK_NEW_MEMBER_ID_PREFIX.length)),
+      isPhoneVerified: !isLineSignUp,
       email: null,
       birthDate: null,
       gender: null,
@@ -186,7 +195,7 @@ function createNewMemberRecord(memberId: string, sequence: number): MockMemberRe
       memberCode: `YY-${String(300000 + sequence)}`,
       tier: 'Puppy',
       joinedAt: new Date().toISOString().slice(0, 10),
-      lineAccount: null,
+      lineAccount: isLineSignUp ? { displayName: 'Mind', pictureUrl: null, linkedAt: new Date().toISOString() } : null,
       birthDateChangeAvailableAt: null
     },
     notificationPreferences: {
@@ -209,7 +218,8 @@ function createNewMemberRecord(memberId: string, sequence: number): MockMemberRe
     qualifyingSpendBaht: 0,
     qualifyingPoints: 0,
     onboardingCompletedAt: null,
-    isLineOfficialAccountFriend: false
+    // LINE Login can add the official account as a friend in the same consent screen
+    isLineOfficialAccountFriend: isLineSignUp
   }
 }
 
@@ -227,18 +237,41 @@ export function createMockMemberRepository(): MemberRepository {
 
   return {
     async getOnboardingStatus(memberId) {
-      const isRequired = getMember(memberId).onboardingCompletedAt === null
+      const member = getMember(memberId)
+      const isRequired = member.onboardingCompletedAt === null
       return {
         isRequired,
         welcomeBonusPoints: isRequired ? MOCK_WELCOME_BONUS_POINTS : 0,
         // Terms and privacy are accepted on the sign-in screen before an account can be created
-        hasAcceptedPrivacyPolicy: true
+        hasAcceptedPrivacyPolicy: true,
+        signUpMethod: member.profile.lineAccount && !member.profile.isPhoneVerified ? 'line' : 'phone',
+        lineProfile: member.profile.lineAccount
+          ? { displayName: member.profile.lineAccount.displayName, pictureUrl: member.profile.lineAccount.pictureUrl }
+          : null,
+        isLineOfficialAccountFriend: member.isLineOfficialAccountFriend
       }
+    },
+
+    async requestPhoneVerification(memberId, phone) {
+      const isTakenByAnotherMember = [...members.entries()].some(([otherId, other]) =>
+        otherId !== memberId && other.profile.isPhoneVerified && digitsOnly(other.profile.phone) === digitsOnly(phone)
+      )
+      if (isTakenByAnotherMember) throw new Error('phone_in_use')
+      return { resendAfterSeconds: MOCK_OTP_RESEND_SECONDS, expiresInSeconds: MOCK_OTP_EXPIRES_SECONDS }
+    },
+
+    // Mock accepts any 6-digit code
+    async verifyPhone(memberId, phone, code) {
+      if (!/^\d{6}$/.test(code)) throw new Error('invalid_otp')
+      const member = getMember(memberId)
+      member.profile = { ...member.profile, phone: formatThaiMobile(phone), isPhoneVerified: true }
+      return member.profile
     },
 
     async completeOnboarding(memberId, onboarding) {
       const member = getMember(memberId)
       if (member.onboardingCompletedAt) return { awardedPoints: 0 }
+      if (!member.profile.isPhoneVerified) throw new Error('phone_not_verified')
 
       // TODO: the backend should credit the referrer when referralCode is valid; the mock ignores it
       const { firstName, lastName, birthDate, email, marketingOptIn } = onboarding
