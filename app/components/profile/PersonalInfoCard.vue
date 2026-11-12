@@ -31,7 +31,7 @@ const labelClass = 'mb-1.5 block text-sm xl:text-[1.0625rem]'
 </script>
 
 <template>
-  <section aria-labelledby="personal-info-heading" class="flex flex-col rounded-[1.25rem] border bg-white p-5 xl:p-10">
+  <section id="personal-info" aria-labelledby="personal-info-heading" class="flex scroll-mt-24 flex-col xl:scroll-mt-32 rounded-[1.25rem] border bg-white p-5 xl:p-10">
     <h2 id="personal-info-heading" class="text-xl leading-tight xl:text-[1.625rem]">
       ข้อมูลส่วนตัว
     </h2>

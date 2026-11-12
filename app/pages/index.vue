@@ -13,5 +13,6 @@ useSeoMeta({
     <PetsAndReferral />
     <PointsAndCoupons />
     <ShopOnMarketplaces />
+    <LineFriendPromptSheet />
   </div>
 </template>

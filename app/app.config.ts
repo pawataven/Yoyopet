@@ -1,10 +1,16 @@
 export default defineAppConfig({
+  appVersion: '1.0',
   // TODO: replace with the real YoYo Pet store URLs on each marketplace
   marketplaceStores: [
     { id: 'shopee', name: 'Shopee', logoUrl: '/marketplaces/shopee.png', storeUrl: 'https://shopee.co.th/', storeName: 'yoyopet Official Store' },
     { id: 'tiktok-shop', name: 'TikTok Shop', logoUrl: '/marketplaces/tiktok-shop.png', storeUrl: 'https://www.tiktok.com/', storeName: 'yoyopet Official Store' },
     { id: 'lazada', name: 'Lazada', logoUrl: '/marketplaces/lazada.png', storeUrl: 'https://www.lazada.co.th/', storeName: 'yoyopet Official Store' }
   ],
+  lineOfficialAccount: {
+    name: 'YoYo Pet Shop',
+    lineId: '@yoyopet',
+    addFriendUrl: 'https://line.me/R/ti/p/@yoyopet'
+  },
   // TODO: confirm the LINE OA chat link and support hours
   supportChat: {
     lineId: '@yoyopet',

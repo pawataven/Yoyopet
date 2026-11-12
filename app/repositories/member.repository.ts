@@ -91,6 +91,7 @@ interface MockMemberRecord {
   qualifyingSpendBaht: number
   qualifyingPoints: number
   onboardingCompletedAt: string | null
+  isLineOfficialAccountFriend: boolean
 }
 
 function createSeededMemberRecord(): MockMemberRecord {
@@ -120,7 +121,8 @@ function createSeededMemberRecord(): MockMemberRecord {
     pointsBalance: 1280,
     qualifyingSpendBaht: 12800,
     qualifyingPoints: 1280,
-    onboardingCompletedAt: '2026-08-12'
+    onboardingCompletedAt: '2026-08-12',
+    isLineOfficialAccountFriend: false
   }
 }
 
@@ -152,7 +154,8 @@ function createNewMemberRecord(memberId: string, sequence: number): MockMemberRe
     pointsBalance: 0,
     qualifyingSpendBaht: 0,
     qualifyingPoints: 0,
-    onboardingCompletedAt: null
+    onboardingCompletedAt: null,
+    isLineOfficialAccountFriend: false
   }
 }
 
@@ -251,7 +254,7 @@ export function createMockMemberRepository(): MemberRepository {
       }
     },
 
-    async getDashboard() {
+    async getDashboard(memberId) {
       return {
         tierProgress: {
           currentTier: 'Buddy',
@@ -267,7 +270,8 @@ export function createMockMemberRepository(): MemberRepository {
           count: 2,
           points: 22
         },
-        isLineConnected: true
+        isLineConnected: true,
+        isLineOfficialAccountFriend: getMember(memberId).isLineOfficialAccountFriend
       }
     }
   }

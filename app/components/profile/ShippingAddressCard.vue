@@ -11,7 +11,7 @@ const radioGroupName = useId()
 </script>
 
 <template>
-  <section aria-labelledby="shipping-address-heading" class="rounded-[1.25rem] border bg-white p-5 xl:p-10">
+  <section id="shipping-addresses" aria-labelledby="shipping-address-heading" class="scroll-mt-24 rounded-[1.25rem] xl:scroll-mt-32 border bg-white p-5 xl:p-10">
     <div class="flex items-center justify-between gap-4">
       <h2 id="shipping-address-heading" class="text-xl leading-tight xl:text-[1.625rem]">
         ที่อยู่จัดส่งของรางวัล

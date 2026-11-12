@@ -8,7 +8,6 @@ useSeoMeta({
 })
 
 const NuxtLink = resolveComponent('NuxtLink')
-const router = useRouter()
 const { notifications, unreadCount, isLoading, error, refresh, markAsRead, markAllAsRead } = useNotifications()
 
 const activeFilter = ref<NotificationFilter>('all')
@@ -31,39 +30,22 @@ const notificationGroups = computed(() => {
 function openNotification(notification: MemberNotification) {
   if (!notification.isRead) markAsRead(notification.id)
 }
-
-// Opened straight from a push or shared link there is no in-app page to return to
-function goBack() {
-  if (window.history.state?.back) router.back()
-  else navigateTo('/')
-}
 </script>
 
 <template>
   <div class="pb-10 md:page-container md:pt-5 md:pb-16 xl:pt-9">
-    <header class="sticky top-0 z-20 border-b bg-white px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 md:hidden">
-      <div class="relative flex h-11 items-center justify-center">
-        <button
-          type="button"
-          aria-label="ย้อนกลับ"
-          class="absolute left-0 flex size-10 items-center justify-center rounded-full bg-cream transition-colors hover:bg-primary-soft"
-          @click="goBack"
-        >
-          <Icon name="lucide:chevron-left" class="size-5.5" />
-        </button>
-        <h1 class="text-lg">
-          แจ้งเตือน
-        </h1>
+    <MobilePageHeader title="แจ้งเตือน">
+      <template #action>
         <button
           type="button"
           :disabled="unreadCount === 0"
-          class="absolute right-0 text-sm font-semibold text-primary disabled:text-muted/60"
+          class="text-sm font-semibold text-primary disabled:text-muted/60"
           @click="markAllAsRead"
         >
           อ่านทั้งหมด
         </button>
-      </div>
-    </header>
+      </template>
+    </MobilePageHeader>
 
     <div class="max-md:hidden">
       <PageBreadcrumb current-label="การแจ้งเตือน" />

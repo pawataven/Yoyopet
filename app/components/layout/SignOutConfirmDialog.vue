@@ -26,27 +26,27 @@ async function handleConfirm() {
     :aria-labelledby="headingId"
     :aria-describedby="descriptionId"
     role="alertdialog"
-    class="max-w-110"
+    class="max-w-80 sm:max-w-110"
     @opened="cancelButton?.focus()"
   >
-    <div class="p-6 text-center sm:p-10">
-      <span class="mx-auto flex size-14 items-center justify-center rounded-full bg-primary-soft text-primary-dark sm:size-16" aria-hidden="true">
-        <Icon name="lucide:log-out" class="size-6 sm:size-7" />
+    <div class="px-5 pt-6 pb-6 text-center sm:p-10">
+      <span class="mx-auto flex size-14 items-center justify-center rounded-full bg-primary-soft text-primary sm:size-16" aria-hidden="true">
+        <Icon name="lucide:log-out" class="size-6 -scale-x-100 sm:size-7" />
       </span>
 
       <h2 :id="headingId" class="mt-4 text-xl leading-tight sm:mt-5 sm:text-[1.625rem]">
         ออกจากระบบ?
       </h2>
-      <p :id="descriptionId" class="mt-2 text-sm text-muted sm:text-[1.0625rem]">
-        แต้มและคูปองของคุณยังอยู่ครบ เข้าสู่ระบบอีกครั้งได้ทุกเมื่อ
+      <p :id="descriptionId" class="mt-1.5 text-xs sm:mt-2 text-muted sm:text-[1.0625rem]">
+        แต้มและคูปองยังอยู่ครบ เข้าสู่ระบบใหม่ได้ทุกเมื่อ
       </p>
 
-      <div class="mt-6 grid grid-cols-2 gap-3 sm:mt-8">
+      <div class="mt-5 grid grid-cols-2 gap-3 sm:mt-8">
         <button
           ref="cancelButton"
           type="button"
           :disabled="isSigningOut"
-          class="h-12 rounded-xl border-2 border-primary bg-white text-base font-semibold text-primary-dark transition-colors hover:bg-primary-soft disabled:opacity-60 sm:h-14 sm:text-lg"
+          class="h-12 rounded-full border-2 border-border bg-white text-[0.9375rem] font-semibold text-ink transition-colors hover:border-primary hover:text-primary-dark disabled:opacity-60 sm:h-14 sm:text-lg"
           @click="isOpen = false"
         >
           ยกเลิก
@@ -54,7 +54,7 @@ async function handleConfirm() {
         <button
           type="button"
           :disabled="isSigningOut"
-          class="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 sm:h-14 sm:text-lg"
+          class="flex h-12 items-center justify-center gap-2 rounded-full bg-primary text-[0.9375rem] font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 sm:h-14 sm:text-lg"
           @click="handleConfirm"
         >
           <Icon v-if="isSigningOut" name="lucide:loader-circle" class="size-5 animate-spin" />

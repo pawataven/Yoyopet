@@ -38,13 +38,29 @@ function openSignOutDialog() {
 
 <template>
   <div ref="root" class="relative">
+    <!-- Phones get the full account page; the popover is too cramped below sm -->
+    <NuxtLink
+      to="/account"
+      aria-label="บัญชีของฉัน"
+      class="flex size-(--nav-avatar-size) shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-white/40 transition-shadow hover:ring-4 sm:hidden"
+    >
+      <NuxtImg
+        v-if="member.avatarUrl"
+        :src="member.avatarUrl"
+        :alt="member.displayName"
+        width="62"
+        height="62"
+        class="size-full object-cover"
+      />
+      <CatAvatarIcon v-else class="aspect-35/40 h-[62%] translate-y-[8%]" />
+    </NuxtLink>
     <button
       ref="avatarButton"
       type="button"
       aria-label="เมนูบัญชีของฉัน"
       :aria-expanded="isOpen"
       :aria-controls="popoverId"
-      class="flex size-(--nav-avatar-size) shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-white/40 transition-shadow hover:ring-4"
+      class="hidden size-(--nav-avatar-size) sm:flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-white/40 transition-shadow hover:ring-4"
       :class="isOpen && 'ring-4'"
       @click="togglePopover"
     >
@@ -56,7 +72,7 @@ function openSignOutDialog() {
         height="62"
         class="size-full object-cover"
       />
-      <CatAvatarIcon v-else class="aspect-[35/40] h-[62%] translate-y-[8%]" />
+      <CatAvatarIcon v-else class="aspect-35/40 h-[62%] translate-y-[8%]" />
     </button>
 
     <Transition

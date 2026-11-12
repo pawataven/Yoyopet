@@ -51,6 +51,7 @@ export interface MemberDashboard {
   expiringPoints: ExpiringPoints | null
   pendingOrders: PendingOrdersSummary
   isLineConnected: boolean
+  isLineOfficialAccountFriend: boolean
 }
 
 export type Gender = 'female' | 'male' | 'unspecified'

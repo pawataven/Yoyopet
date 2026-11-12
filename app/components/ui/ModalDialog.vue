@@ -2,9 +2,11 @@
 const props = withDefaults(defineProps<{
   dismissible?: boolean
   fullscreen?: boolean | 'mobile'
+  bottomSheetOnMobile?: boolean
 }>(), {
   dismissible: true,
-  fullscreen: false
+  fullscreen: false,
+  bottomSheetOnMobile: false
 })
 
 const emit = defineEmits<{
@@ -18,6 +20,7 @@ const fullscreenLayoutClass = 'm-0 h-dvh max-h-none w-full max-w-none'
 const centeredLayoutClass = 'm-auto w-[calc(100%-2rem)] rounded-[1.75rem] shadow-2xl shadow-ink/20 backdrop:bg-ink/50'
 
 const dialogLayoutClass = computed(() => {
+  if (props.bottomSheetOnMobile) return 'max-md:mx-0 max-md:mt-auto max-md:mb-0 max-md:w-full max-md:max-w-none max-md:rounded-t-[1.75rem] max-md:backdrop:bg-ink/50 md:m-auto md:w-[calc(100%-2rem)] md:rounded-[1.75rem] md:shadow-2xl md:shadow-ink/20 md:backdrop:bg-ink/50'
   if (props.fullscreen === 'mobile') return 'max-md:m-0 max-md:h-dvh max-md:max-h-none max-md:w-full max-md:max-w-none md:m-auto md:w-[calc(100%-2rem)] md:rounded-[1.75rem] md:shadow-2xl md:shadow-ink/20 md:backdrop:bg-ink/50'
   return props.fullscreen ? fullscreenLayoutClass : centeredLayoutClass
 })
