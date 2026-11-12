@@ -15,7 +15,7 @@ const progressPercent = computed(() => {
 
 <template>
   <section aria-labelledby="my-top-spender-standing-heading" class="rounded-[1.25rem] border bg-white p-5 xl:px-8 xl:py-7">
-    <h2 id="my-top-spender-standing-heading" class="text-lg leading-tight xl:text-2xl">
+    <h2 id="my-top-spender-standing-heading" class="font-sans text-lg leading-tight font-semibold xl:text-2xl">
       อันดับของคุณ
     </h2>
 

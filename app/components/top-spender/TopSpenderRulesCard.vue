@@ -10,7 +10,7 @@ const topSpenderRules = [
 
 <template>
   <section aria-labelledby="top-spender-rules-heading" class="rounded-[1.25rem] border bg-white p-5 xl:px-8 xl:py-7">
-    <h2 id="top-spender-rules-heading" class="text-lg leading-tight xl:text-2xl">
+    <h2 id="top-spender-rules-heading" class="font-sans text-lg leading-tight font-semibold xl:text-2xl">
       กติกา
     </h2>
     <ul class="mt-3 space-y-2.5 xl:mt-5 xl:space-y-4">

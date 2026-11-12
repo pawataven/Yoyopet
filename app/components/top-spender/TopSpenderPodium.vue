@@ -24,7 +24,7 @@ const daysUntilReset = computed(() => daysUntilEndOf(props.leaderboard.periodEnd
 </script>
 
 <template>
-  <section aria-labelledby="top-spender-podium-heading" class="flex flex-col overflow-hidden rounded-[1.25rem] border bg-cream xl:min-h-140">
+  <section aria-labelledby="top-spender-podium-heading" class="flex flex-col overflow-hidden rounded-[1.25rem] bg-cream xl:min-h-140">
     <header class="flex items-start justify-between gap-3 px-5 pt-5 xl:px-8 xl:pt-7">
       <h2 id="top-spender-podium-heading" class="font-sans text-lg leading-tight font-semibold xl:text-2xl">
         อันดับเดือน{{ monthLabel }}
@@ -43,7 +43,7 @@ const daysUntilReset = computed(() => daysUntilEndOf(props.leaderboard.periodEnd
         :key="entry.rank"
         class="flex flex-col items-center text-center"
       >
-        <Icon v-if="entry.rank === 1" name="lucide:crown" class="mb-1 size-6 text-medal-gold xl:mb-2 xl:size-9" aria-hidden="true" />
+        <Icon v-if="entry.rank === 1" name="lucide:crown" class="mb-2 size-6 text-medal-gold xl:mb-6 xl:size-9" aria-hidden="true" />
         <span class="relative">
           <span
             class="flex items-center justify-center rounded-full border-3 bg-white font-sans text-xl font-semibold text-primary-dark xl:border-4 xl:text-[2rem]"
@@ -68,7 +68,7 @@ const daysUntilReset = computed(() => daysUntilEndOf(props.leaderboard.periodEnd
           {{ formatNumber(entry.totalSpentBaht) }} บาท
         </p>
         <div
-          class="mt-3 flex w-full items-center justify-center rounded-t-xl font-number text-2xl font-semibold xl:mt-5 xl:text-[2.5rem]"
+          class="mt-3 flex w-full items-center justify-center font-number text-2xl font-semibold xl:mt-5 xl:text-[2.5rem]"
           :class="podiumAppearanceByRank[entry.rank]?.blockClass"
           aria-hidden="true"
         >
