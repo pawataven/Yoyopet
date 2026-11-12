@@ -2,6 +2,8 @@
 import type { MemberCoupon, MemberCouponStatus } from '~/types/coupon'
 
 const RECENT_HISTORY_LIMIT = 2
+// The backend only returns used and expired coupons from this window
+const COUPON_HISTORY_MONTHS = 6
 
 // TODO: confirm the final coupon terms with the business team
 const couponTerms = [
@@ -77,7 +79,18 @@ function showAllCouponHistory() {
   couponListSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-function scrollToUsageGuide() {
+const couponInUse = ref<MemberCoupon | null>(null)
+const isCouponUseDialogOpen = ref(false)
+
+function openCouponUseDialog(coupon: MemberCoupon) {
+  couponInUse.value = coupon
+  isCouponUseDialogOpen.value = true
+}
+
+async function showUsageGuide() {
+  isCouponUseDialogOpen.value = false
+  // The dialog locks page scroll until it has closed
+  await nextTick()
   document.getElementById('coupon-usage-guide')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
@@ -153,7 +166,7 @@ const searchInputId = useId()
 
       <ul v-if="visibleCoupons.length || isRedeemMoreCardVisible" class="mt-5 grid gap-4 lg:grid-cols-2 xl:mt-6 xl:gap-6">
         <li v-for="coupon in visibleCoupons" :key="coupon.id" class="flex">
-          <CouponListCard :coupon="coupon" class="w-full" @apply="scrollToUsageGuide" />
+          <CouponListCard :coupon="coupon" class="w-full" @apply="openCouponUseDialog" />
         </li>
         <li v-if="isRedeemMoreCardVisible">
           <RedeemMoreCouponsCard :points="memberPoints" :redeemable-reward-count="redeemableRewardCount" />
@@ -162,9 +175,32 @@ const searchInputId = useId()
       <p v-else-if="!isLoading" class="mt-5 rounded-[1.25rem] border bg-cream px-6 py-12 text-center text-muted xl:mt-6 xl:text-lg">
         {{ emptyMessage }}
       </p>
+
+      <div
+        v-if="selectedStatus !== 'active'"
+        class="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-[1.25rem] bg-cream px-5 py-5 xl:mt-8 xl:px-7 xl:py-6"
+      >
+        <div class="flex min-w-0 items-start gap-3">
+          <Icon name="lucide:info" class="mt-0.5 size-4.5 shrink-0 text-muted xl:size-5" />
+          <div>
+            <p class="text-sm xl:text-base">
+              {{ selectedStatus === 'used' ? 'คูปองที่ใช้แล้ว' : 'คูปองที่หมดอายุ' }}จะแสดง {{ COUPON_HISTORY_MONTHS }} เดือนย้อนหลัง
+            </p>
+            <p class="mt-1 text-xs text-muted xl:text-sm">
+              ต้องการคูปองเพิ่ม? ใช้แต้มแลกที่หน้าของรางวัล
+            </p>
+          </div>
+        </div>
+        <NuxtLink
+          to="/rewards"
+          class="flex h-11 shrink-0 items-center justify-center rounded-xl border-2 border-primary bg-white px-6 text-sm font-semibold text-primary-dark transition-colors hover:bg-primary-soft xl:h-12 xl:px-10 xl:text-base"
+        >
+          ไปหน้าของรางวัล
+        </NuxtLink>
+      </div>
     </section>
 
-    <section v-if="recentHistoryCoupons.length" aria-labelledby="recent-coupon-history-heading" class="mt-12 xl:mt-20">
+    <section v-if="selectedStatus === 'active' && recentHistoryCoupons.length" aria-labelledby="recent-coupon-history-heading" class="mt-12 xl:mt-20">
       <div class="flex items-center justify-between gap-4">
         <h2 id="recent-coupon-history-heading" class="text-2xl leading-tight xl:text-[2.25rem]">
           ใช้แล้ว / หมดอายุล่าสุด
@@ -180,7 +216,16 @@ const searchInputId = useId()
       </ul>
     </section>
 
-    <CouponUsageGuide />
-    <TermsNote title="เงื่อนไขการใช้คูปอง" :terms="couponTerms" class="mt-6 xl:mt-8" />
+    <template v-if="selectedStatus === 'active'">
+      <CouponUsageGuide />
+      <TermsNote title="เงื่อนไขการใช้คูปอง" :terms="couponTerms" class="mt-6 xl:mt-8" />
+    </template>
+
+    <CouponUseDialog
+      v-if="couponInUse"
+      v-model:open="isCouponUseDialogOpen"
+      :coupon="couponInUse"
+      @show-usage-guide="showUsageGuide"
+    />
   </div>
 </template>

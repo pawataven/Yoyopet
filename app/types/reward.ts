@@ -11,6 +11,9 @@ export interface Reward {
   pointsCost: number
   imageUrl: string | null
   couponValueBaht: number | null
+  // Drives the "ยอดนิยม" sort
+  redemptionCount: number
+  addedAt: string
 }
 
 export type RewardFulfillment = 'coupon' | 'delivery'
@@ -45,10 +48,32 @@ export interface RewardRedemptionResult {
   coupons: RedeemedCoupon[]
 }
 
-export type RewardRedemptionStatus = 'preparing' | 'shipping' | 'delivered' | 'ready_to_use' | 'used'
+export type ShipmentStage = 'redeemed' | 'preparing' | 'handed_to_carrier' | 'in_transit' | 'delivered'
+
+export interface ShipmentStageEvent {
+  stage: ShipmentStage
+  // Local date-time (YYYY-MM-DDTHH:mm); null until the stage is reached
+  occurredAt: string | null
+}
+
+export interface ShipmentTracking {
+  redemptionId: string
+  carrierName: string
+  trackingNumber: string | null
+  currentStage: ShipmentStage
+  estimatedDeliveryDate: string | null
+  // Every stage in delivery order, including ones not reached yet
+  stages: ShipmentStageEvent[]
+}
+
+export type RewardRedemptionStatus = 'preparing' | 'shipping' | 'delivered' | 'ready_to_use' | 'used' | 'expired'
 
 export interface RewardRedemption {
   id: string
+  rewardId: string
+  // Redemption number for products (RW-2611-0042), coupon code for coupons
+  referenceCode: string
+  pointsSpent: number
   rewardName: string
   imageUrl: string | null
   couponValueBaht: number | null

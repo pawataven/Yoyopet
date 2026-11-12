@@ -6,6 +6,10 @@ const props = defineProps<{
   isFinal: boolean
 }>()
 
+const emit = defineEmits<{
+  shop: []
+}>()
+
 const isInTargetRank = computed(() => props.standing.rank <= props.standing.targetRank)
 const progressPercent = computed(() => {
   const target = props.standing.totalSpentBaht + props.standing.amountToTargetBaht
@@ -47,12 +51,13 @@ const progressPercent = computed(() => {
       >
         <div class="h-full rounded-full bg-primary" :style="{ width: `${progressPercent}%` }" />
       </div>
-      <NuxtLink
-        to="/#shop"
-        class="mt-4 flex h-11 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark xl:mt-5 xl:h-13 xl:text-base"
+      <button
+        type="button"
+        class="mt-4 flex h-11 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark xl:mt-5 xl:h-13 xl:text-base w-full"
+        @click="emit('shop')"
       >
         ช้อปเพิ่มที่ร้าน YoYo
-      </NuxtLink>
+      </button>
     </template>
   </section>
 </template>

@@ -17,6 +17,8 @@ const mockMemberRepository = createMockMemberRepository()
 const mockAddressRepository = createMockAddressRepository()
 const mockPetRepository = createMockPetRepository()
 const mockNotificationRepository = createMockNotificationRepository()
+const mockLeaderboardRepository = createMockLeaderboardRepository()
+const mockOrderRepository = createMockOrderRepository()
 
 // Single switch point for the data source: replace the mock factories with backend implementations when connecting
 export function useRepositories() {
@@ -24,17 +26,17 @@ export function useRepositories() {
     banner: createMockBannerRepository(),
     campaign: createMockCampaignRepository(),
     reward: createMockRewardRepository(),
-    leaderboard: createMockLeaderboardRepository(),
+    leaderboard: mockLeaderboardRepository,
     help: createMockHelpRepository(),
-    // Shared instances so the mocks remember writes (profile edits, claimed coupon, read notifications) between calls
+    // Shared instances so the mocks remember writes (profile edits, claimed coupon, read notifications, confirmed prizes, submitted orders) between calls
     member: mockMemberRepository,
     address: mockAddressRepository,
     pet: mockPetRepository,
     notification: mockNotificationRepository,
+    order: mockOrderRepository,
     referral: createMockReferralRepository(),
     points: createMockPointsRepository(),
     product: createMockProductRepository(),
-    order: createMockOrderRepository(),
     coupon: createMockCouponRepository()
   }
 }

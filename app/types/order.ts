@@ -10,3 +10,29 @@ export interface PendingOrder {
   points: number
   expectedCreditDate: string | null
 }
+
+export interface OrderSubmission {
+  marketplaceId: MarketplaceId
+  orderNumber: string
+}
+
+export interface OrderSubmissionResult {
+  orderId: string
+  marketplaceId: MarketplaceId
+  orderNumber: string
+}
+
+export interface OrderNumberGuideField {
+  label: string
+  value: string
+}
+
+export interface OrderNumberGuide {
+  marketplaceId: MarketplaceId
+  orderNumberPath: string
+  orderNumberPlaceholder: string
+  sampleOrderNumber: string
+  sampleDetails: OrderNumberGuideField[]
+  sampleTimeline: OrderNumberGuideField[]
+  steps: string[]
+}

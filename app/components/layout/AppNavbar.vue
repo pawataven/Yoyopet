@@ -11,6 +11,8 @@ function isActive(to: string) {
   return to === '/' ? route.path === '/' : route.path.startsWith(to)
 }
 
+const isOrderEntryActive = computed(() => isActive('/orders/submit'))
+
 watch(() => route.path, () => {
   isMobileMenuOpen.value = false
 })
@@ -38,9 +40,11 @@ watch(() => route.path, () => {
         <NuxtLink
           v-if="isLoggedIn"
           to="/orders/submit"
-          class="hidden h-(--nav-control-height) items-center gap-2.5 rounded-full bg-white px-(--nav-button-px) text-(length:--nav-control-font-size) font-medium whitespace-nowrap text-ink transition-colors hover:bg-primary-soft md:flex"
+          :aria-current="isOrderEntryActive ? 'page' : undefined"
+          class="hidden h-(--nav-control-height) items-center gap-2.5 rounded-full px-(--nav-button-px) text-(length:--nav-control-font-size) font-medium whitespace-nowrap transition-colors md:flex"
+          :class="isOrderEntryActive ? 'bg-cocoa text-white' : 'bg-white text-ink hover:bg-primary-soft'"
         >
-          <OrderEntryIcon class="size-(--nav-icon-size) shrink-0 text-primary-dark" />
+          <OrderEntryIcon class="size-(--nav-icon-size) shrink-0" :class="isOrderEntryActive ? 'text-white' : 'text-primary-dark'" />
           กรอกเลขออเดอร์
         </NuxtLink>
 
@@ -120,9 +124,11 @@ watch(() => route.path, () => {
         <NuxtLink
           v-if="isLoggedIn"
           to="/orders/submit"
-          class="flex h-11 items-center justify-center gap-2 rounded-full bg-white text-sm font-medium text-ink md:hidden"
+          :aria-current="isOrderEntryActive ? 'page' : undefined"
+          class="flex h-11 items-center justify-center gap-2 rounded-full text-sm font-medium md:hidden"
+          :class="isOrderEntryActive ? 'bg-cocoa text-white' : 'bg-white text-ink'"
         >
-          <OrderEntryIcon class="size-4 shrink-0 text-primary-dark" />
+          <OrderEntryIcon class="size-4 shrink-0" :class="isOrderEntryActive ? 'text-white' : 'text-primary-dark'" />
           กรอกเลขออเดอร์
         </NuxtLink>
       </nav>

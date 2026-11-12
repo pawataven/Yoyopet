@@ -18,18 +18,27 @@ export interface TopSpenderPrize {
   name: string
   imageUrl: string
   bonusCouponBaht: number
+  includedItems: string[]
 }
 
 export interface TopSpenderLeaderboard {
   // First day of the month, e.g. 2026-11-01
   month: string
   periodEnd: string
+  resultAnnouncedOn: string
   // Past months are closed and their ranking no longer changes
   isFinal: boolean
   rewardedRankCount: number
   entries: TopSpenderEntry[]
   prizes: TopSpenderPrize[]
   myStanding: MyTopSpenderStanding | null
+}
+
+export interface TopSpenderPrizeClaim {
+  month: string
+  rank: number
+  prize: TopSpenderPrize
+  confirmBy: string
 }
 
 export interface TopSpenderMonthWinners {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Reward, RewardGroup } from '~/types/reward'
 
-type RewardSortOrder = 'points_asc' | 'points_desc'
+type RewardSortOrder = 'points_asc' | 'points_desc' | 'popular' | 'newest' | 'redeemable_first'
 
 const POINT_RANGE_ROUNDING = 1000
 const REWARDS_PAGE_SIZE = 12
@@ -27,7 +27,10 @@ const { rewards } = useRewards()
 
 const sortOptions: { value: RewardSortOrder, label: string }[] = [
   { value: 'points_asc', label: 'แต้มน้อยไปมาก' },
-  { value: 'points_desc', label: 'แต้มมากไปน้อย' }
+  { value: 'points_desc', label: 'แต้มมากไปน้อย' },
+  { value: 'popular', label: 'ยอดนิยม' },
+  { value: 'newest', label: 'มาใหม่' },
+  { value: 'redeemable_first', label: 'แลกได้ตอนนี้' }
 ]
 
 const memberPoints = computed(() => member.value?.points ?? 0)
@@ -83,11 +86,23 @@ function matchesFilters(reward: Reward) {
   return true
 }
 
-const visibleRewards = computed(() =>
-  rewards.value
-    .filter(matchesFilters)
-    .toSorted((a, b) => (sortOrder.value === 'points_asc' ? a.pointsCost - b.pointsCost : b.pointsCost - a.pointsCost))
-)
+function compareRewards(a: Reward, b: Reward) {
+  const byPointsAscending = a.pointsCost - b.pointsCost
+  switch (sortOrder.value) {
+    case 'points_desc':
+      return -byPointsAscending
+    case 'popular':
+      return b.redemptionCount - a.redemptionCount || byPointsAscending
+    case 'newest':
+      return b.addedAt.localeCompare(a.addedAt) || byPointsAscending
+    case 'redeemable_first':
+      return Number(a.pointsCost > memberPoints.value) - Number(b.pointsCost > memberPoints.value) || byPointsAscending
+    default:
+      return byPointsAscending
+  }
+}
+
+const visibleRewards = computed(() => rewards.value.filter(matchesFilters).toSorted(compareRewards))
 
 const shownRewardCount = ref(REWARDS_PAGE_SIZE)
 const shownRewards = computed(() => visibleRewards.value.slice(0, shownRewardCount.value))
@@ -100,8 +115,6 @@ watch([isRedeemableOnly, minPoints, maxPoints, selectedGroups, sortOrder], () =>
 function showMoreRewards() {
   shownRewardCount.value += REWARDS_PAGE_SIZE
 }
-
-const sortSelectId = useId()
 </script>
 
 <template>
@@ -148,19 +161,13 @@ const sortSelectId = useId()
             </p>
           </div>
 
-          <div class="relative">
-            <label :for="sortSelectId" class="sr-only">เรียงตาม</label>
-            <select
-              :id="sortSelectId"
-              v-model="sortOrder"
-              class="h-11 cursor-pointer appearance-none rounded-full border bg-white pr-12 pl-5 text-sm transition-colors hover:border-primary/40 focus:border-primary focus:outline-none xl:h-12 xl:w-76 xl:pl-6 xl:text-[0.9375rem]"
-            >
-              <option v-for="option in sortOptions" :key="option.value" :value="option.value">
-                เรียงตาม: {{ option.label }}
-              </option>
-            </select>
-            <Icon name="lucide:chevron-down" class="pointer-events-none absolute top-1/2 right-5 size-4.5 -translate-y-1/2" />
-          </div>
+          <SelectMenu
+            v-model="sortOrder"
+            :options="sortOptions"
+            prefix="เรียงตาม: "
+            label="เรียงตาม"
+            class="w-60 xl:w-76"
+          />
         </div>
 
         <div role="group" aria-label="กรองตามประเภท" class="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 scrollbar-none sm:mx-0 sm:flex-wrap sm:px-0 xl:mt-5 xl:gap-3.5">

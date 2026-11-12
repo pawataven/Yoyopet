@@ -57,6 +57,11 @@ export function formatThaiDateSpan(from: string, to: string, monthStyle: 'short'
   return `${days} ${monthYearFormatter.format(new Date(to))}`
 }
 
+// Expects a local date-time (YYYY-MM-DDTHH:mm), shown as "3 พ.ย. 2026 · 14:20"
+export function formatThaiShortDateTime(localDateTime: string) {
+  return `${formatThaiShortDate(localDateTime)} · ${localDateTime.slice(11, 16)}`
+}
+
 export function formatThaiLongMonthYear(isoDate: string) {
   return thaiLongMonthYearFormatter.format(new Date(isoDate))
 }

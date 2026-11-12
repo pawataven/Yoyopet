@@ -26,7 +26,7 @@ const statusBadge = computed(() => {
 
 const description = computed(() => {
   const { status, redemption } = props.coupon
-  if (status === 'used' && redemption) return `ใช้กับคำสั่งซื้อ ${redemption.marketplaceName} #${redemption.orderNumber}`
+  if (status === 'used' && redemption) return `ใช้กับ ${redemption.marketplaceName} #${redemption.orderNumber}`
   if (status === 'expired') return 'ไม่ได้ใช้ภายในเวลาที่กำหนด'
   return formatCouponConditions(props.coupon)
 })
@@ -37,11 +37,6 @@ const footnote = computed(() => {
   if (status === 'expired') return `หมดอายุ ${formatThaiShortDate(expiresAt)}`
   return `ใช้ได้ถึง ${formatThaiShortDate(expiresAt)} · อีก ${formatNumber(daysLeft.value)} วัน`
 })
-
-async function applyCoupon() {
-  await copy(props.coupon.code)
-  emit('apply', props.coupon)
-}
 </script>
 
 <template>
@@ -62,7 +57,7 @@ async function applyCoupon() {
     <div class="ml-1.5 flex min-w-0 flex-1 flex-col rounded-2xl border bg-white px-4 py-3.5 xl:ml-2.5 xl:px-6 xl:py-5 2xl:px-7 2xl:py-6">
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
-          <h3 class="font-sans text-base leading-snug font-semibold xl:text-xl 2xl:text-2xl">
+          <h3 class="font-sans text-base leading-snug font-semibold xl:text-xl 2xl:text-2xl" :class="!isActive && 'text-ink/75'">
             {{ coupon.title }}
           </h3>
           <p class="mt-0.5 text-xs text-muted xl:mt-1 xl:text-sm 2xl:text-base">
@@ -91,7 +86,7 @@ async function applyCoupon() {
         </button>
         <p
           v-else
-          class="flex h-10 min-w-0 flex-1 items-center rounded-lg bg-border/60 px-3 font-number text-sm font-semibold tracking-wide text-muted xl:h-12 xl:max-w-76 xl:px-4 xl:text-base 2xl:px-5 2xl:text-lg"
+          class="flex h-10 min-w-0 flex-1 items-center rounded-lg border border-dashed border-primary/20 bg-border/40 px-3 font-number text-sm font-semibold tracking-wide text-ink/75 xl:h-12 xl:max-w-76 xl:px-4 xl:text-base 2xl:px-5 2xl:text-lg"
         >
           <span class="truncate">{{ coupon.code }}</span>
         </p>
@@ -100,7 +95,7 @@ async function applyCoupon() {
           v-if="isActive"
           type="button"
           class="ml-auto h-10 shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-dark xl:h-12 xl:px-8 xl:text-base 2xl:w-40"
-          @click="applyCoupon"
+          @click="emit('apply', coupon)"
         >
           ใช้คูปอง
         </button>

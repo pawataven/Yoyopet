@@ -57,20 +57,4 @@
     stroke-dashoffset: 0;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .success-checkmark,
-  .success-checkmark-ring {
-    animation: none;
-  }
-
-  .success-checkmark-ring {
-    opacity: 0;
-  }
-
-  .success-checkmark-tick {
-    animation: none;
-    stroke-dashoffset: 0;
-  }
-}
 </style>

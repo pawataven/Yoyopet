@@ -18,7 +18,18 @@ const { leaderboard } = useTopSpenderLeaderboard(selectedPastMonth)
 const { pastWinners } = useTopSpenderPastWinners()
 const { member } = useMember()
 
-const monthSelectId = useId()
+const { pendingClaim, shouldPromptClaim, postponeClaim, refresh: refreshPendingClaim } = useTopSpenderPrizeClaim()
+const isPrizeClaimDialogOpen = ref(false)
+const isShopDialogOpen = ref(false)
+watch(shouldPromptClaim, (shouldPrompt) => {
+  if (shouldPrompt) isPrizeClaimDialogOpen.value = true
+}, { immediate: true })
+
+const monthOptions = computed(() => months.value.map((month, index) => ({
+  value: month,
+  label: formatThaiLongMonthYear(month),
+  description: index === 0 ? 'กำลังแข่งขัน' : 'ประกาศผลแล้ว'
+})))
 </script>
 
 <template>
@@ -35,26 +46,26 @@ const monthSelectId = useId()
         </p>
       </div>
 
-      <div v-if="months.length" class="relative xl:mb-2">
-        <label :for="monthSelectId" class="sr-only">เลือกเดือน</label>
-        <Icon name="lucide:calendar" class="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 xl:left-5 xl:size-5" />
-        <select
-          :id="monthSelectId"
-          v-model="selectedMonth"
-          class="h-11 cursor-pointer appearance-none rounded-full border bg-white pr-12 pl-11 text-sm transition-colors hover:border-primary/40 focus:border-primary focus:outline-none xl:h-12 xl:w-75 xl:pl-13 xl:text-[0.9375rem]"
-        >
-          <option v-for="month in months" :key="month" :value="month">
-            {{ formatThaiLongMonthYear(month) }}
-          </option>
-        </select>
-        <Icon name="lucide:chevron-down" class="pointer-events-none absolute top-1/2 right-5 size-4.5 -translate-y-1/2" />
-      </div>
+      <SelectMenu
+        v-if="months.length"
+        v-model="selectedMonth"
+        :options="monthOptions"
+        icon="lucide:calendar"
+        label="เลือกเดือน"
+        class="w-60 xl:mb-2 xl:w-75"
+      />
     </header>
 
     <template v-if="leaderboard">
       <div class="mt-6 grid gap-6 xl:mt-10 xl:grid-cols-[972fr_684fr]">
         <TopSpenderPodium :leaderboard="leaderboard" />
-        <TopSpenderPrizesCard :prizes="leaderboard.prizes" :is-final="leaderboard.isFinal" />
+        <TopSpenderPrizesCard
+          :prizes="leaderboard.prizes"
+          :month="leaderboard.month"
+          :result-announced-on="leaderboard.resultAnnouncedOn"
+          :is-final="leaderboard.isFinal"
+          @shop="isShopDialogOpen = true"
+        />
       </div>
 
       <div class="mt-6 grid items-start gap-6 xl:grid-cols-[1112fr_544fr]">
@@ -70,6 +81,7 @@ const monthSelectId = useId()
             v-if="leaderboard.myStanding"
             :standing="leaderboard.myStanding"
             :is-final="leaderboard.isFinal"
+            @shop="isShopDialogOpen = true"
           />
           <TopSpenderRulesCard />
         </div>
@@ -77,5 +89,16 @@ const monthSelectId = useId()
     </template>
 
     <TopSpenderPastWinners v-if="pastWinners.length" :past-winners="pastWinners" />
+
+    <TopSpenderPrizeClaimDialog
+      v-if="pendingClaim && member"
+      v-model:open="isPrizeClaimDialogOpen"
+      :claim="pendingClaim"
+      :member-display-name="member.displayName"
+      @postponed="postponeClaim"
+      @confirmed="refreshPendingClaim"
+    />
+
+    <ShopMarketplacesDialog v-model:open="isShopDialogOpen" />
   </div>
 </template>
