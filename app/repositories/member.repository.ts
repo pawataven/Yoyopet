@@ -24,6 +24,7 @@ export interface MemberRepository {
   getProfile(memberId: string): Promise<MemberProfile | null>
   updateProfile(memberId: string, update: MemberProfileUpdate): Promise<MemberProfile>
   uploadAvatar(memberId: string, file: File): Promise<MemberProfile>
+  applyLinePictureAsAvatar(memberId: string): Promise<MemberProfile>
   getNotificationPreferences(memberId: string): Promise<NotificationPreferences>
   updateNotificationPreferences(memberId: string, preferences: NotificationPreferences): Promise<NotificationPreferences>
   getConsents(memberId: string): Promise<MemberConsents>
@@ -108,6 +109,12 @@ interface MockMemberRecord {
   isLineOfficialAccountFriend: boolean
 }
 
+function addOneYear(date: Date) {
+  const nextYear = new Date(date)
+  nextYear.setFullYear(date.getFullYear() + 1)
+  return nextYear
+}
+
 function recordConsent(member: MockMemberRecord, purpose: ConsentPurpose, granted: boolean, recordedAt: string) {
   member.consentHistory.push({ id: `consent-${member.consentHistory.length + 1}`, purpose, granted, recordedAt })
 }
@@ -128,7 +135,12 @@ function createSeededMemberRecord(): MockMemberRecord {
       memberCode: 'YY-204518',
       tier: 'Buddy',
       joinedAt: '2026-08-12',
-      isLineConnected: true
+      lineAccount: {
+        displayName: 'Mind',
+        pictureUrl: '/pets/khanompang-siamese-cat.jpg',
+        linkedAt: '2026-02-14T10:22:00+07:00'
+      },
+      birthDateChangeAvailableAt: null
     },
     notificationPreferences: {
       topics: {
@@ -174,7 +186,8 @@ function createNewMemberRecord(memberId: string, sequence: number): MockMemberRe
       memberCode: `YY-${String(300000 + sequence)}`,
       tier: 'Puppy',
       joinedAt: new Date().toISOString().slice(0, 10),
-      isLineConnected: false
+      lineAccount: null,
+      birthDateChangeAvailableAt: null
     },
     notificationPreferences: {
       topics: {
@@ -253,7 +266,25 @@ export function createMockMemberRepository(): MemberRepository {
 
     async updateProfile(memberId, update) {
       const member = getMember(memberId)
-      member.profile = { ...member.profile, ...update }
+      const previousBirthDate = member.profile.birthDate
+      const isChangingBirthDate = previousBirthDate !== null && update.birthDate !== previousBirthDate
+      const changeAvailableAt = member.profile.birthDateChangeAvailableAt
+      if (isChangingBirthDate && changeAvailableAt && new Date(changeAvailableAt) > new Date()) {
+        throw new Error('birth_date_change_locked')
+      }
+
+      member.profile = {
+        ...member.profile,
+        ...update,
+        birthDateChangeAvailableAt: isChangingBirthDate ? addOneYear(new Date()).toISOString() : changeAvailableAt
+      }
+      return member.profile
+    },
+
+    async applyLinePictureAsAvatar(memberId) {
+      const member = getMember(memberId)
+      const linePictureUrl = member.profile.lineAccount?.pictureUrl
+      if (linePictureUrl) member.profile = { ...member.profile, avatarUrl: linePictureUrl }
       return member.profile
     },
 

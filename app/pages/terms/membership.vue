@@ -19,66 +19,31 @@ const topicLabels: Record<MembershipTermsTopic, string> = {
   tiers: 'ระดับ'
 }
 
-const topicTabs = computed(() =>
-  (terms.value?.sections ?? []).flatMap(section =>
-    section.topic ? [{ topic: section.topic, sectionId: section.id, label: topicLabels[section.topic] }] : []
-  )
+const topicTabs = computed(() => {
+  const topicsInDocument = new Set(terms.value?.sections.map(section => section.topic))
+  return (Object.keys(topicLabels) as MembershipTermsTopic[])
+    .filter(topic => topicsInDocument.has(topic))
+    .map(topic => ({ topic, label: topicLabels[topic] }))
+})
+
+function isTopic(value: unknown): value is MembershipTermsTopic {
+  return typeof value === 'string' && value in topicLabels
+}
+
+// Kept in the URL so a link can open a specific tab, e.g. ?topic=coupons
+const activeTopic = computed<MembershipTermsTopic | null>(() => {
+  const requestedTopic = route.query.topic
+  if (isTopic(requestedTopic) && topicTabs.value.some(tab => tab.topic === requestedTopic)) return requestedTopic
+  return topicTabs.value[0]?.topic ?? null
+})
+
+const visibleSections = computed(() =>
+  (terms.value?.sections ?? []).filter(section => section.topic === activeTopic.value)
 )
 
-const activeTopic = ref<MembershipTermsTopic | null>(null)
-watch(topicTabs, (tabs) => {
-  activeTopic.value = tabs[0]?.topic ?? null
-}, { immediate: true })
-
-function sectionElementId(sectionId: string) {
-  return `terms-${sectionId}`
+function selectTopic(topic: MembershipTermsTopic) {
+  navigateTo({ query: { ...route.query, topic } }, { replace: true })
 }
-
-// Sections near the end can't scroll up to the top, so scroll-spy would pull the tapped tab back to an earlier one;
-// it stays paused until the jump's scrolling settles
-const JUMP_SETTLE_MS = 200
-let isFollowingTabJump = false
-let jumpSettleTimer: ReturnType<typeof setTimeout> | undefined
-
-function waitForJumpToSettle() {
-  clearTimeout(jumpSettleTimer)
-  jumpSettleTimer = setTimeout(() => {
-    isFollowingTabJump = false
-  }, JUMP_SETTLE_MS)
-}
-
-function jumpToTopic(tab: { topic: MembershipTermsTopic, sectionId: string }) {
-  activeTopic.value = tab.topic
-  isFollowingTabJump = true
-  waitForJumpToSettle()
-  document.getElementById(sectionElementId(tab.sectionId))?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-}
-
-// Highlights the tab of the last topic section scrolled past, so the tabs follow the reader
-const SCROLL_SPY_OFFSET_PX = 120
-let pendingFrame = 0
-
-function syncActiveTopicWithScroll() {
-  if (isFollowingTabJump) {
-    waitForJumpToSettle()
-    return
-  }
-  cancelAnimationFrame(pendingFrame)
-  pendingFrame = requestAnimationFrame(() => {
-    const passedTabs = topicTabs.value.filter((tab) => {
-      const sectionTop = document.getElementById(sectionElementId(tab.sectionId))?.getBoundingClientRect().top
-      return sectionTop !== undefined && sectionTop <= SCROLL_SPY_OFFSET_PX
-    })
-    activeTopic.value = passedTabs.at(-1)?.topic ?? topicTabs.value[0]?.topic ?? null
-  })
-}
-
-onMounted(() => window.addEventListener('scroll', syncActiveTopicWithScroll, { passive: true }))
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', syncActiveTopicWithScroll)
-  cancelAnimationFrame(pendingFrame)
-  clearTimeout(jumpSettleTimer)
-})
 </script>
 
 <template>
@@ -113,7 +78,7 @@ onBeforeUnmount(() => {
             </p>
             <NuxtLink
               v-if="previousVersion"
-              :to="{ query: { version: previousVersion.version } }"
+              :to="{ query: { ...route.query, version: previousVersion.version } }"
               class="text-sm font-semibold text-primary hover:underline"
             >
               เวอร์ชันก่อนหน้า
@@ -122,36 +87,34 @@ onBeforeUnmount(() => {
 
           <div v-if="!isCurrent" class="mt-3 flex items-center justify-between gap-3 rounded-2xl border bg-cream px-4 py-3 text-sm">
             <span>คุณกำลังดูเวอร์ชันเก่า</span>
-            <NuxtLink to="/terms/membership" class="shrink-0 font-semibold text-primary hover:underline">
+            <NuxtLink :to="{ query: { topic: activeTopic ?? undefined } }" class="shrink-0 font-semibold text-primary hover:underline">
               ดูเวอร์ชัน {{ currentVersion }}
             </NuxtLink>
           </div>
 
-          <nav v-if="topicTabs.length" aria-label="หัวข้อเงื่อนไข" class="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 scrollbar-none md:mx-0 md:px-0">
-            <a
+          <div v-if="topicTabs.length" role="group" aria-label="เลือกหัวข้อเงื่อนไข" class="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 scrollbar-none md:mx-0 md:px-0">
+            <button
               v-for="tab in topicTabs"
               :key="tab.topic"
-              :href="`#${sectionElementId(tab.sectionId)}`"
-              :aria-current="activeTopic === tab.topic ? 'true' : undefined"
+              type="button"
+              :aria-pressed="activeTopic === tab.topic"
               class="flex h-9 shrink-0 items-center rounded-full border px-4 text-sm transition-colors xl:h-11 xl:px-5 xl:text-base"
               :class="activeTopic === tab.topic
                 ? 'border-primary bg-primary font-semibold text-white'
                 : 'bg-white hover:border-primary hover:text-primary'"
-              @click.prevent="jumpToTopic(tab)"
+              @click="selectTopic(tab.topic)"
             >
               {{ tab.label }}
-            </a>
-          </nav>
+            </button>
+          </div>
 
-          <div class="mt-5 space-y-6 xl:mt-8 xl:space-y-8">
+          <div class="mt-5 space-y-6 xl:mt-8 xl:space-y-8" aria-live="polite">
             <section
-              v-for="(section, index) in terms.sections"
-              :id="sectionElementId(section.id)"
+              v-for="(section, index) in visibleSections"
               :key="section.id"
-              :aria-labelledby="`${sectionElementId(section.id)}-heading`"
-              class="scroll-mt-24 xl:scroll-mt-32"
+              :aria-labelledby="`terms-${section.id}-heading`"
             >
-              <h2 :id="`${sectionElementId(section.id)}-heading`" class="text-lg leading-tight xl:text-2xl">
+              <h2 :id="`terms-${section.id}-heading`" class="text-lg leading-tight xl:text-2xl">
                 {{ index + 1 }}. {{ section.title }}
               </h2>
               <ul class="mt-2 space-y-1.5 text-sm text-muted xl:mt-3 xl:space-y-2 xl:text-base">

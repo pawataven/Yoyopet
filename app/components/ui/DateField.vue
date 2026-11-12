@@ -5,11 +5,13 @@ withDefaults(defineProps<{
   max?: string
   describedBy?: string
   invalid?: boolean
+  disabled?: boolean
 }>(), {
   placeholder: 'เลือกวันที่',
   max: undefined,
   describedBy: undefined,
-  invalid: false
+  invalid: false,
+  disabled: false
 })
 
 const isoDate = defineModel<string | null>({ required: true })
@@ -39,14 +41,15 @@ function openDatePicker(event: MouseEvent) {
       v-model="inputValue"
       type="date"
       :max="max"
+      :disabled="disabled"
       :aria-describedby="describedBy"
       :aria-invalid="invalid ? 'true' : undefined"
-      class="peer absolute inset-0 size-full cursor-pointer opacity-0"
+      class="peer absolute inset-0 size-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
       @click="openDatePicker"
     >
     <div
       class="pointer-events-none flex h-12 w-full items-center justify-between rounded-xl border-2 bg-white px-4 text-base transition-colors peer-focus:border-primary xl:h-14.5 xl:px-5 xl:text-lg"
-      :class="invalid ? 'border-primary' : 'border-muted/25'"
+      :class="[invalid ? 'border-primary' : 'border-muted/25', disabled && 'bg-border/40 text-muted']"
       aria-hidden="true"
     >
       <span :class="!isoDate && 'text-muted/60'">

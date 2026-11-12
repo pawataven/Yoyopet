@@ -2,8 +2,8 @@ export type MembershipTermsTopic = 'points' | 'redemption' | 'coupons' | 'tiers'
 
 export interface MembershipTermsSection {
   id: string
-  // Sections without a topic still render; they just have no tab of their own
-  topic: MembershipTermsTopic | null
+  // Each tab shows only the sections of its topic
+  topic: MembershipTermsTopic
   title: string
   terms: string[]
 }

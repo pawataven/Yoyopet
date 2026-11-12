@@ -23,8 +23,8 @@ function handleAvatarChange(event: Event) {
 const accountStatusRows = computed(() => [
   {
     label: 'บัญชี LINE',
-    value: props.profile.isLineConnected ? 'เชื่อมต่อแล้ว' : 'ยังไม่เชื่อมต่อ',
-    isPositive: props.profile.isLineConnected
+    value: props.profile.lineAccount ? 'เชื่อมต่อแล้ว' : 'ยังไม่เชื่อมต่อ',
+    isPositive: props.profile.lineAccount !== null
   },
   {
     label: 'เบอร์โทร',
@@ -104,7 +104,7 @@ const accountStatusRows = computed(() => [
       </div>
     </dl>
 
-    <NuxtLink to="/profile/delete-account" class="mt-auto pt-6 text-sm text-muted hover:text-primary-dark hover:underline xl:text-[0.9375rem]">
+    <NuxtLink to="/settings/privacy#delete-account" class="mt-auto pt-6 text-sm text-muted hover:text-primary-dark hover:underline xl:text-[0.9375rem]">
       ลบบัญชีสมาชิก
     </NuxtLink>
   </section>

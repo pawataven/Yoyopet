@@ -88,7 +88,15 @@ export interface MemberProfile {
   memberCode: string
   tier: string
   joinedAt: string
-  isLineConnected: boolean
+  lineAccount: LinkedLineAccount | null
+  // Birthdays drive the yearly coupon, so once set they can change only once a year; null means it can change now
+  birthDateChangeAvailableAt: string | null
+}
+
+export interface LinkedLineAccount {
+  displayName: string
+  pictureUrl: string | null
+  linkedAt: string
 }
 
 export interface MemberProfileUpdate {

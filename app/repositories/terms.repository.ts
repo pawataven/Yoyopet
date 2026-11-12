@@ -21,7 +21,7 @@ const currentSections: MembershipTermsSection[] = [
   },
   {
     id: 'points-expiry',
-    topic: null,
+    topic: 'points',
     title: 'อายุแต้ม',
     terms: [
       'แต้มแต่ละก้อนมีอายุ 12 เดือนนับจากวันที่ได้รับ',
@@ -39,7 +39,7 @@ const currentSections: MembershipTermsSection[] = [
   },
   {
     id: 'cancellation',
-    topic: null,
+    topic: 'points',
     title: 'การยกเลิกและคืนสินค้า',
     terms: [
       'คำสั่งซื้อที่คืนสินค้า ระบบหักแต้มคืน',

@@ -29,6 +29,17 @@ export function useMemberProfile() {
     }
   }
 
+  async function applyLinePictureAsAvatar() {
+    if (!userId.value) return
+    isUploadingAvatar.value = true
+    try {
+      profile.value = await memberRepository.applyLinePictureAsAvatar(userId.value)
+      await refreshNuxtData('member-summary')
+    } finally {
+      isUploadingAvatar.value = false
+    }
+  }
+
   return {
     profile,
     isLoading: computed(() => status.value === 'pending'),
@@ -36,6 +47,7 @@ export function useMemberProfile() {
     refresh,
     saveProfile,
     isUploadingAvatar: readonly(isUploadingAvatar),
-    uploadAvatar
+    uploadAvatar,
+    applyLinePictureAsAvatar
   }
 }

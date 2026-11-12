@@ -223,7 +223,7 @@ const menuRowClass = 'flex min-h-16 w-full items-center gap-3.5 px-4 py-3 text-l
         </h2>
         <ul class="divide-y overflow-hidden rounded-2xl border bg-white">
           <li>
-            <NuxtLink to="/profile#personal-info" :class="menuRowClass" class="hover:bg-cream">
+            <NuxtLink to="/account/personal-info" :class="menuRowClass" class="hover:bg-cream">
               <Icon name="lucide:user" class="size-5.5 shrink-0" aria-hidden="true" />
               <span class="min-w-0 flex-1 text-[0.9375rem]">แก้ไขข้อมูลส่วนตัว</span>
               <Icon name="lucide:chevron-right" class="size-5 shrink-0 text-muted" aria-hidden="true" />
@@ -231,7 +231,7 @@ const menuRowClass = 'flex min-h-16 w-full items-center gap-3.5 px-4 py-3 text-l
           </li>
           <li>
             <!-- The copy is emailed, so members without an email are sent to add one first -->
-            <NuxtLink v-if="profile && !profile.email" to="/profile#personal-info" :class="menuRowClass" class="hover:bg-cream">
+            <NuxtLink v-if="profile && !profile.email" to="/account/personal-info" :class="menuRowClass" class="hover:bg-cream">
               <Icon name="lucide:file-text" class="size-5.5 shrink-0" aria-hidden="true" />
               <span class="min-w-0 flex-1">
                 <span class="block text-[0.9375rem]">ขอสำเนาข้อมูลของฉัน</span>

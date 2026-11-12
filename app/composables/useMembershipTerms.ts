@@ -5,23 +5,24 @@ import { useRepositories } from '~/repositories'
 export function useMembershipTerms(requestedVersion: MaybeRefOrGetter<string | null>) {
   const { terms: termsRepository } = useRepositories()
 
-  const { data: versions } = useAsyncData(
-    'membership-terms-versions',
-    () => termsRepository.getMembershipTermsVersions(),
-    { default: () => [] }
-  )
-
-  const currentVersion = computed(() => versions.value[0]?.version ?? null)
-  const shownVersion = computed(() => toValue(requestedVersion) ?? currentVersion.value)
-
-  const { data: terms, status, error } = useAsyncData(
-    () => `membership-terms-${shownVersion.value ?? 'pending'}`,
-    () => (shownVersion.value ? termsRepository.getMembershipTerms(shownVersion.value) : Promise.resolve(null)),
+  // One request resolves the version list and the document together, so the server never renders a half-known state
+  const { data, status, error } = useAsyncData(
+    () => `membership-terms-${toValue(requestedVersion) ?? 'current'}`,
+    async () => {
+      const versions = await termsRepository.getMembershipTermsVersions()
+      const version = toValue(requestedVersion) ?? versions[0]?.version ?? null
+      const terms = version ? await termsRepository.getMembershipTerms(version) : null
+      return { versions, terms }
+    },
     { default: () => null }
   )
 
+  const versions = computed(() => data.value?.versions ?? [])
+  const terms = computed(() => data.value?.terms ?? null)
+  const currentVersion = computed(() => versions.value[0]?.version ?? null)
+
   const previousVersion = computed(() => {
-    const shownIndex = versions.value.findIndex(entry => entry.version === shownVersion.value)
+    const shownIndex = versions.value.findIndex(entry => entry.version === terms.value?.version)
     return shownIndex === -1 ? null : versions.value[shownIndex + 1] ?? null
   })
 
@@ -30,7 +31,7 @@ export function useMembershipTerms(requestedVersion: MaybeRefOrGetter<string | n
     versions,
     currentVersion,
     previousVersion,
-    isCurrent: computed(() => shownVersion.value !== null && shownVersion.value === currentVersion.value),
+    isCurrent: computed(() => terms.value !== null && terms.value.version === currentVersion.value),
     isLoading: computed(() => status.value === 'pending'),
     error
   }
