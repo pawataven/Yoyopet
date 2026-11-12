@@ -67,9 +67,10 @@ export interface MemberOnboarding {
   firstName: string
   lastName: string
   birthDate: string | null
-  petOwnership: PetOwnership | null
-  acceptedPrivacyPolicy: boolean
-  lineNotificationsOptIn: boolean
+  email: string | null
+  referralCode: string | null
+  acceptedTerms: boolean
+  marketingOptIn: boolean
 }
 
 export interface MemberProfile {

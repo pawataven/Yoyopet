@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = withDefaults(defineProps<{
   dismissible?: boolean
-  fullscreen?: boolean
+  fullscreen?: boolean | 'mobile'
 }>(), {
   dismissible: true,
   fullscreen: false
@@ -13,6 +13,18 @@ const emit = defineEmits<{
 }>()
 
 const isOpen = defineModel<boolean>('open', { required: true })
+
+const fullscreenLayoutClass = 'm-0 h-dvh max-h-none w-full max-w-none'
+const centeredLayoutClass = 'm-auto w-[calc(100%-2rem)] rounded-[1.75rem] shadow-2xl shadow-ink/20 backdrop:bg-ink/50'
+
+const dialogLayoutClass = computed(() => {
+  if (props.fullscreen === 'mobile') return 'max-md:m-0 max-md:h-dvh max-md:max-h-none max-md:w-full max-md:max-w-none md:m-auto md:w-[calc(100%-2rem)] md:rounded-[1.75rem] md:shadow-2xl md:shadow-ink/20 md:backdrop:bg-ink/50'
+  return props.fullscreen ? fullscreenLayoutClass : centeredLayoutClass
+})
+const scrollAreaClass = computed(() => {
+  if (props.fullscreen === 'mobile') return 'max-md:h-full md:max-h-[calc(100dvh-2rem)]'
+  return props.fullscreen ? 'h-full' : 'max-h-[calc(100dvh-2rem)]'
+})
 
 const dialogElement = useTemplateRef<HTMLDialogElement>('dialog')
 
@@ -66,9 +78,7 @@ function handleBackdropClick(event: MouseEvent) {
   <dialog
     ref="dialog"
     class="overflow-hidden bg-white text-ink"
-    :class="fullscreen
-      ? 'm-0 h-dvh max-h-none w-full max-w-none'
-      : 'm-auto w-[calc(100%-2rem)] rounded-[1.75rem] shadow-2xl shadow-ink/20 backdrop:bg-ink/50'"
+    :class="dialogLayoutClass"
     @cancel="handleCancel"
     @close="handleClose"
     @click="handleBackdropClick"
@@ -77,7 +87,7 @@ function handleBackdropClick(event: MouseEvent) {
     <div v-if="$slots.close" class="absolute inset-x-0 top-0 z-10 h-0">
       <slot name="close" />
     </div>
-    <div class="modal-dialog-scroll overflow-y-auto overscroll-contain" :class="fullscreen ? 'h-full' : 'max-h-[calc(100dvh-2rem)]'">
+    <div class="modal-dialog-scroll overflow-y-auto overscroll-contain" :class="scrollAreaClass">
       <slot />
     </div>
   </dialog>

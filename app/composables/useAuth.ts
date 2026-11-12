@@ -35,9 +35,9 @@ export function useAuth() {
     userId.value = phone === MOCK_SEEDED_MEMBER_PHONE ? MOCK_SEEDED_MEMBER_ID : `mock-member-${phone}`
   }
 
-  async function signOut() {
+  async function signOut(redirectTo = '/') {
     userId.value = null
-    await navigateTo('/')
+    await navigateTo(redirectTo)
   }
 
   return {

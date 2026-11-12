@@ -1,23 +1,5 @@
 <script setup lang="ts">
-import type { MemberNotification, NotificationCategory, NotificationKind } from '~/types/notification'
-
-type NotificationFilter = 'all' | NotificationCategory
-
-const notificationFilters: { value: NotificationFilter, label: string }[] = [
-  { value: 'all', label: 'ทั้งหมด' },
-  { value: 'points', label: 'แต้ม' },
-  { value: 'coupon', label: 'คูปอง' },
-  { value: 'shipping', label: 'จัดส่ง' }
-]
-
-const appearanceByKind: Record<NotificationKind, { icon: string, iconClass: string }> = {
-  points_earned: { icon: 'lucide:star', iconClass: 'bg-success/10 text-success' },
-  order_rejected: { icon: 'lucide:circle-alert', iconClass: 'bg-primary-soft text-primary-dark' },
-  points_expiring: { icon: 'lucide:clock', iconClass: 'bg-gold/25 text-pending' },
-  coupon_ready: { icon: 'lucide:cake', iconClass: 'bg-primary-soft text-primary-dark' },
-  reward_shipping: { icon: 'lucide:truck', iconClass: 'bg-gold/25 text-pending' },
-  tier_progress: { icon: 'lucide:award', iconClass: 'bg-primary-soft text-primary-dark' }
-}
+import type { MemberNotification } from '~/types/notification'
 
 const NuxtLink = resolveComponent('NuxtLink')
 const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
@@ -26,6 +8,10 @@ const rootElement = useTemplateRef<HTMLElement>('root')
 const bellButton = useTemplateRef<HTMLButtonElement>('bellButton')
 const popoverId = useId()
 const { isOpen, toggle: togglePopover, close: closePopover } = usePopover(rootElement, bellButton)
+
+const bellLabel = computed(() =>
+  unreadCount.value > 0 ? `การแจ้งเตือน (ใหม่ ${unreadCount.value} รายการ)` : 'การแจ้งเตือน'
+)
 
 const visibleNotifications = computed(() =>
   activeFilter.value === 'all'
@@ -41,13 +27,22 @@ function openNotification(notification: MemberNotification) {
 
 <template>
   <div ref="root" class="relative">
+    <!-- Phones get the full notifications page; the popover is too cramped below sm -->
+    <NuxtLink
+      to="/notifications"
+      :aria-label="bellLabel"
+      class="relative flex size-(--nav-bell-size) shrink-0 items-center justify-center rounded-full bg-white/15 transition-colors hover:bg-white/25 sm:hidden"
+    >
+      <Icon name="lucide:bell" class="size-(--nav-icon-size)" />
+      <span v-if="unreadCount > 0" class="absolute top-[12%] right-[12%] size-[22%] rounded-full bg-gold" />
+    </NuxtLink>
     <button
       ref="bellButton"
       type="button"
-      :aria-label="unreadCount > 0 ? `การแจ้งเตือน (ใหม่ ${unreadCount} รายการ)` : 'การแจ้งเตือน'"
+      :aria-label="bellLabel"
       :aria-expanded="isOpen"
       :aria-controls="popoverId"
-      class="relative flex size-(--nav-bell-size) shrink-0 items-center justify-center rounded-full bg-white/15 transition-colors hover:bg-white/25"
+      class="relative hidden size-(--nav-bell-size) shrink-0 items-center justify-center rounded-full bg-white/15 transition-colors hover:bg-white/25 sm:flex"
       :class="isOpen && 'bg-white/25'"
       @click="togglePopover"
     >
@@ -112,9 +107,9 @@ function openNotification(notification: MemberNotification) {
             >
               <span
                 class="flex size-10 shrink-0 items-center justify-center rounded-full xl:size-12"
-                :class="appearanceByKind[notification.kind].iconClass"
+                :class="notificationAppearanceByKind[notification.kind].iconClass"
               >
-                <Icon :name="appearanceByKind[notification.kind].icon" class="size-5 xl:size-6" />
+                <Icon :name="notificationAppearanceByKind[notification.kind].icon" class="size-5 xl:size-6" />
               </span>
               <span class="min-w-0 flex-1">
                 <span class="block text-sm font-semibold xl:text-base">{{ notification.title }}</span>

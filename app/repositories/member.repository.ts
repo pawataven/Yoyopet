@@ -183,13 +183,10 @@ export function createMockMemberRepository(): MemberRepository {
       const member = getMember(memberId)
       if (member.onboardingCompletedAt) return { awardedPoints: 0 }
 
-      const { firstName, lastName, birthDate, petOwnership, lineNotificationsOptIn } = onboarding
-      member.profile = { ...member.profile, firstName, lastName, birthDate, petOwnership }
-      member.notificationPreferences = {
-        ...member.notificationPreferences,
-        orderAndPointsUpdates: lineNotificationsOptIn,
-        pointsExpiry: lineNotificationsOptIn
-      }
+      // TODO: the backend should credit the referrer when referralCode is valid; the mock ignores it
+      const { firstName, lastName, birthDate, email, marketingOptIn } = onboarding
+      member.profile = { ...member.profile, firstName, lastName, birthDate, email }
+      member.notificationPreferences = { ...member.notificationPreferences, promotions: marketingOptIn }
       member.pointsBalance += MOCK_WELCOME_BONUS_POINTS
       member.onboardingCompletedAt = new Date().toISOString()
       return { awardedPoints: MOCK_WELCOME_BONUS_POINTS }

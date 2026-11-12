@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import type { MemberOnboarding, PetOwnership } from '~/types/member'
+import type { MemberOnboarding } from '~/types/member'
 
 const { onboardingStatus, isOnboardingRequired, completeOnboarding } = useMemberOnboarding()
+const { signOut } = useAuth()
 
 // Shown on every page until the member finishes it once; the backend's onboarding status decides, not the sign-in flow
 const isOpen = computed({
@@ -9,54 +10,70 @@ const isOpen = computed({
   set: () => {}
 })
 const welcomeBonusPoints = computed(() => onboardingStatus.value?.welcomeBonusPoints ?? 0)
+const formattedBonusPoints = computed(() => formatNumber(welcomeBonusPoints.value))
+
+const SIGN_UP_STEP = 2
+const SIGN_UP_STEP_COUNT = 3
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const fieldId = useId()
 const headingId = `${fieldId}-heading`
 const firstNameInput = useTemplateRef<HTMLInputElement>('firstNameInput')
 
-const petOwnershipOptions: { value: PetOwnership, label: string }[] = [
-  { value: 'dog', label: 'สุนัข' },
-  { value: 'cat', label: 'แมว' },
-  { value: 'both', label: 'ทั้งสองอย่าง' },
-  { value: 'other', label: 'อื่น ๆ' }
-]
-
-const onboarding = reactive<MemberOnboarding>({
+const form = reactive({
   firstName: '',
   lastName: '',
-  birthDate: null,
-  petOwnership: null,
-  acceptedPrivacyPolicy: onboardingStatus.value?.hasAcceptedPrivacyPolicy ?? false,
-  lineNotificationsOptIn: true
+  birthDate: null as string | null,
+  email: '',
+  referralCode: '',
+  acceptedTerms: onboardingStatus.value?.hasAcceptedPrivacyPolicy ?? false,
+  marketingOptIn: false
 })
 
-const nameError = ref('')
-const privacyError = ref('')
+const errors = reactive({
+  firstName: '',
+  lastName: '',
+  birthDate: '',
+  email: '',
+  acceptedTerms: ''
+})
 const submitError = ref('')
 const isSubmitting = ref(false)
+const isSigningOut = ref(false)
 
 const todayIsoDate = new Date().toISOString().slice(0, 10)
-const formattedBonusPoints = computed(() => formatNumber(welcomeBonusPoints.value))
 
-watch(() => [onboarding.firstName, onboarding.lastName], () => {
-  nameError.value = ''
-})
-watch(() => onboarding.acceptedPrivacyPolicy, (isAccepted) => {
-  if (isAccepted) privacyError.value = ''
-})
+watch(() => form.firstName, () => { errors.firstName = '' })
+watch(() => form.lastName, () => { errors.lastName = '' })
+watch(() => form.birthDate, () => { errors.birthDate = '' })
+watch(() => form.email, () => { errors.email = '' })
+watch(() => form.acceptedTerms, () => { errors.acceptedTerms = '' })
 
 function validate() {
-  nameError.value = onboarding.firstName && onboarding.lastName ? '' : 'กรุณากรอกชื่อและนามสกุล'
-  privacyError.value = onboarding.acceptedPrivacyPolicy ? '' : 'กรุณายินยอมนโยบายความเป็นส่วนตัวเพื่อเริ่มใช้งาน'
-  return !nameError.value && !privacyError.value
+  errors.firstName = form.firstName ? '' : 'กรุณากรอกชื่อ'
+  errors.lastName = form.lastName ? '' : 'กรุณากรอกนามสกุล'
+  errors.birthDate = form.birthDate ? '' : 'กรุณาเลือกวันเกิด'
+  errors.email = !form.email || EMAIL_PATTERN.test(form.email) ? '' : 'รูปแบบอีเมลไม่ถูกต้อง'
+  errors.acceptedTerms = form.acceptedTerms ? '' : 'กรุณายอมรับเงื่อนไขสมาชิกและนโยบายความเป็นส่วนตัว'
+  return Object.values(errors).every(error => !error)
 }
 
 async function handleSubmit() {
   if (!validate()) return
   isSubmitting.value = true
   submitError.value = ''
+  const onboarding: MemberOnboarding = {
+    firstName: form.firstName,
+    lastName: form.lastName,
+    birthDate: form.birthDate,
+    email: form.email || null,
+    referralCode: form.referralCode.toUpperCase() || null,
+    acceptedTerms: form.acceptedTerms,
+    marketingOptIn: form.marketingOptIn
+  }
   try {
-    await completeOnboarding({ ...onboarding })
+    await completeOnboarding(onboarding)
   } catch {
     submitError.value = 'บันทึกข้อมูลไม่สำเร็จ กรุณาลองอีกครั้ง'
   } finally {
@@ -64,106 +81,195 @@ async function handleSubmit() {
   }
 }
 
-const textFieldClass = 'h-12 w-full rounded-xl border-2 bg-white px-4 text-base transition-colors placeholder:text-muted/60 focus:border-primary focus:outline-none xl:h-14.5 xl:px-5 xl:text-lg'
-const labelClass = 'mb-1.5 block text-sm xl:text-base'
+// The account already exists after OTP, so leaving sign-up signs out; the form returns on the next sign-in
+async function cancelSignUp() {
+  isSigningOut.value = true
+  try {
+    await signOut('/login')
+  } finally {
+    isSigningOut.value = false
+  }
+}
+
+function errorId(field: keyof typeof errors) {
+  return errors[field] ? `${fieldId}-${field}-error` : undefined
+}
+
+function textFieldClass(hasError: boolean) {
+  return [
+    'h-12 w-full rounded-xl border-2 bg-white px-4 text-base transition-colors placeholder:text-muted/60 focus:border-primary focus:outline-none xl:h-14 xl:text-lg',
+    hasError ? 'border-primary' : 'border-muted/25'
+  ]
+}
+
+const labelClass = 'mb-1.5 block text-sm font-semibold xl:text-base'
+const checkboxClass = 'peer size-full cursor-pointer appearance-none rounded-md border-2 border-muted/25 bg-white transition-colors checked:border-primary checked:bg-primary focus-visible:ring-4 focus-visible:ring-primary-soft focus-visible:outline-none'
 </script>
 
 <template>
-  <!-- Not dismissible: the account exists already, but it isn't usable until the member accepts the privacy policy -->
+  <!-- Not dismissible: the account exists already, but it isn't usable until the member accepts the terms -->
   <ModalDialog
     v-model:open="isOpen"
     :dismissible="false"
+    fullscreen="mobile"
     :aria-labelledby="headingId"
-    class="max-w-207"
+    class="md:max-w-160"
     @opened="firstNameInput?.focus()"
   >
-    <form novalidate class="p-6 sm:p-10" @submit.prevent="handleSubmit">
-      <h2 :id="headingId" class="text-xl leading-tight sm:text-[1.625rem]">
-        ยินดีต้อนรับสู่ YoYo Member
-      </h2>
-      <p v-if="welcomeBonusPoints > 0" class="mt-2 text-sm text-muted sm:text-[1.0625rem]">
-        กรอกข้อมูลอีกนิด รับ {{ formattedBonusPoints }} แต้มต้อนรับทันที
-      </p>
-      <p v-else class="mt-2 text-sm text-muted sm:text-[1.0625rem]">
-        กรอกข้อมูลอีกนิดเพื่อเริ่มใช้งาน
+    <header class="sticky top-0 z-10 border-b bg-white px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 md:static md:px-10 md:pt-6 md:pb-4">
+      <div class="relative flex h-11 items-center justify-center">
+        <button
+          type="button"
+          aria-label="ยกเลิกการสมัครและออกจากระบบ"
+          :disabled="isSigningOut"
+          class="absolute left-0 flex size-10 items-center justify-center rounded-full bg-cream transition-colors hover:bg-primary-soft disabled:opacity-60"
+          @click="cancelSignUp"
+        >
+          <Icon name="lucide:chevron-left" class="size-5.5" />
+        </button>
+        <h2 :id="headingId" class="text-lg xl:text-xl">
+          สมัครสมาชิก
+        </h2>
+      </div>
+    </header>
+
+    <form novalidate class="px-4 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:px-10 md:pt-5 md:pb-10" @submit.prevent="handleSubmit">
+      <div
+        role="progressbar"
+        :aria-valuenow="SIGN_UP_STEP"
+        aria-valuemin="1"
+        :aria-valuemax="SIGN_UP_STEP_COUNT"
+        :aria-label="`ขั้นที่ ${SIGN_UP_STEP} จาก ${SIGN_UP_STEP_COUNT}`"
+        class="h-1.5 overflow-hidden rounded-full bg-primary-soft"
+      >
+        <div class="h-full rounded-full bg-primary" :style="{ width: `${(SIGN_UP_STEP / SIGN_UP_STEP_COUNT) * 100}%` }" />
+      </div>
+      <p class="mt-2 text-xs text-muted xl:text-sm">
+        ขั้นที่ {{ SIGN_UP_STEP }} จาก {{ SIGN_UP_STEP_COUNT }} · ข้อมูลของคุณ
       </p>
 
-      <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-5 sm:mt-7 sm:grid-cols-2 sm:gap-y-6">
+      <div class="mt-4 grid grid-cols-1 gap-x-4 gap-y-4 md:grid-cols-2 md:gap-y-5">
         <div>
-          <label :for="`${fieldId}-first-name`" :class="labelClass">ชื่อ</label>
+          <label :for="`${fieldId}-first-name`" :class="labelClass">ชื่อ <span class="text-primary" aria-hidden="true">*</span></label>
           <input
             :id="`${fieldId}-first-name`"
             ref="firstNameInput"
-            v-model.trim="onboarding.firstName"
+            v-model.trim="form.firstName"
             type="text"
             required
             autocomplete="given-name"
-            :aria-invalid="nameError && !onboarding.firstName ? 'true' : undefined"
-            :aria-describedby="nameError ? `${fieldId}-name-error` : undefined"
-            :class="[textFieldClass, nameError && !onboarding.firstName ? 'border-primary' : 'border-muted/25']"
+            :aria-invalid="errors.firstName ? 'true' : undefined"
+            :aria-describedby="errorId('firstName')"
+            :class="textFieldClass(Boolean(errors.firstName))"
           >
+          <p v-if="errors.firstName" :id="errorId('firstName')" class="mt-1.5 text-sm text-primary-dark">
+            {{ errors.firstName }}
+          </p>
         </div>
 
         <div>
-          <label :for="`${fieldId}-last-name`" :class="labelClass">นามสกุล</label>
+          <label :for="`${fieldId}-last-name`" :class="labelClass">นามสกุล <span class="text-primary" aria-hidden="true">*</span></label>
           <input
             :id="`${fieldId}-last-name`"
-            v-model.trim="onboarding.lastName"
+            v-model.trim="form.lastName"
             type="text"
             required
             autocomplete="family-name"
-            :aria-invalid="nameError && !onboarding.lastName ? 'true' : undefined"
-            :aria-describedby="nameError ? `${fieldId}-name-error` : undefined"
-            :class="[textFieldClass, nameError && !onboarding.lastName ? 'border-primary' : 'border-muted/25']"
+            :aria-invalid="errors.lastName ? 'true' : undefined"
+            :aria-describedby="errorId('lastName')"
+            :class="textFieldClass(Boolean(errors.lastName))"
           >
+          <p v-if="errors.lastName" :id="errorId('lastName')" class="mt-1.5 text-sm text-primary-dark">
+            {{ errors.lastName }}
+          </p>
         </div>
 
-        <p v-if="nameError" :id="`${fieldId}-name-error`" class="-mt-2 text-sm text-primary-dark sm:col-span-2">
-          {{ nameError }}
-        </p>
-
-        <div class="sm:col-span-2">
-          <label :for="`${fieldId}-birth-date`" :class="labelClass">วันเกิด</label>
+        <div class="md:col-span-2">
+          <label :for="`${fieldId}-birth-date`" :class="labelClass">วันเกิด <span class="text-primary" aria-hidden="true">*</span></label>
           <DateField
             :id="`${fieldId}-birth-date`"
-            v-model="onboarding.birthDate"
+            v-model="form.birthDate"
             placeholder="เลือกวันเกิด"
             :max="todayIsoDate"
+            :invalid="Boolean(errors.birthDate)"
+            :described-by="errors.birthDate ? errorId('birthDate') : `${fieldId}-birth-date-hint`"
           />
+          <p v-if="errors.birthDate" :id="errorId('birthDate')" class="mt-1.5 text-sm text-primary-dark">
+            {{ errors.birthDate }}
+          </p>
+          <p v-else :id="`${fieldId}-birth-date-hint`" class="mt-1.5 text-xs text-muted xl:text-sm">
+            ใช้แจกคูปองวันเกิดทุกปี
+          </p>
         </div>
 
-        <fieldset class="sm:col-span-2">
-          <legend :class="labelClass">
-            เลี้ยงสัตว์อะไรบ้าง
-          </legend>
-          <ChoiceChips v-model="onboarding.petOwnership" :options="petOwnershipOptions" :name="`${fieldId}-pet-ownership`" />
-        </fieldset>
+        <div>
+          <label :for="`${fieldId}-email`" :class="labelClass">
+            อีเมล <span class="ml-1 text-xs font-normal text-muted">(ไม่บังคับ)</span>
+          </label>
+          <input
+            :id="`${fieldId}-email`"
+            v-model.trim="form.email"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            placeholder="name@email.com"
+            :aria-invalid="errors.email ? 'true' : undefined"
+            :aria-describedby="errorId('email')"
+            :class="textFieldClass(Boolean(errors.email))"
+          >
+          <p v-if="errors.email" :id="errorId('email')" class="mt-1.5 text-sm text-primary-dark">
+            {{ errors.email }}
+          </p>
+        </div>
+
+        <div>
+          <label :for="`${fieldId}-referral-code`" :class="labelClass">
+            รหัสชวนเพื่อน <span class="ml-1 text-xs font-normal text-muted">(ไม่บังคับ)</span>
+          </label>
+          <input
+            :id="`${fieldId}-referral-code`"
+            v-model.trim="form.referralCode"
+            type="text"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            placeholder="ถ้ามี"
+            :class="textFieldClass(false)"
+          >
+        </div>
       </div>
 
-      <div class="mt-6 space-y-4 rounded-[1.25rem] bg-cream px-5 py-5 text-sm sm:mt-7 sm:px-6 sm:py-6 sm:text-[1.0625rem]">
-        <label class="flex cursor-pointer items-start gap-3 sm:gap-3.5">
-          <input
-            v-model="onboarding.acceptedPrivacyPolicy"
-            type="checkbox"
-            :aria-invalid="privacyError ? 'true' : undefined"
-            :aria-describedby="privacyError ? `${fieldId}-privacy-error` : undefined"
-            class="mt-0.5 size-4.5 shrink-0 cursor-pointer accent-primary sm:size-5.5"
-          >
-          <span>
-            ยินยอมให้เก็บและใช้ข้อมูลตาม<NuxtLink to="/privacy" target="_blank" class="hover:text-primary-dark hover:underline">นโยบายความเป็นส่วนตัว</NuxtLink>
-          </span>
-        </label>
-        <p v-if="privacyError" :id="`${fieldId}-privacy-error`" class="-mt-2 pl-7.5 text-sm text-primary-dark sm:pl-9">
-          {{ privacyError }}
-        </p>
+      <div class="mt-6 space-y-4 text-sm xl:text-base">
+        <div>
+          <label class="flex cursor-pointer items-start gap-3">
+            <span class="relative mt-px flex size-5.5 shrink-0">
+              <input
+                v-model="form.acceptedTerms"
+                type="checkbox"
+                :aria-invalid="errors.acceptedTerms ? 'true' : undefined"
+                :aria-describedby="errorId('acceptedTerms')"
+                :class="[checkboxClass, errors.acceptedTerms && 'border-primary']"
+              >
+              <Icon name="lucide:check" class="pointer-events-none absolute inset-0 m-auto size-3.5 text-white opacity-0 peer-checked:opacity-100" aria-hidden="true" />
+            </span>
+            <span>
+              ยอมรับ<NuxtLink to="/terms/membership" target="_blank" class="hover:text-primary-dark hover:underline">เงื่อนไขสมาชิก</NuxtLink>และ<NuxtLink to="/privacy" target="_blank" class="hover:text-primary-dark hover:underline">นโยบายความเป็นส่วนตัว</NuxtLink>
+            </span>
+          </label>
+          <p v-if="errors.acceptedTerms" :id="errorId('acceptedTerms')" class="mt-1.5 pl-8.5 text-sm text-primary-dark">
+            {{ errors.acceptedTerms }}
+          </p>
+        </div>
 
-        <label class="flex cursor-pointer items-start gap-3 sm:gap-3.5">
-          <input
-            v-model="onboarding.lineNotificationsOptIn"
-            type="checkbox"
-            class="mt-0.5 size-4.5 shrink-0 cursor-pointer accent-primary sm:size-5.5"
-          >
-          <span>รับแจ้งเตือนแต้มและสิทธิพิเศษผ่าน LINE</span>
+        <label class="flex cursor-pointer items-start gap-3">
+          <span class="relative mt-px flex size-5.5 shrink-0">
+            <input v-model="form.marketingOptIn" type="checkbox" :class="checkboxClass">
+            <Icon name="lucide:check" class="pointer-events-none absolute inset-0 m-auto size-3.5 text-white opacity-0 peer-checked:opacity-100" aria-hidden="true" />
+          </span>
+          <span>
+            ยินยอมรับข่าวสารและโปรโมชันจาก YoYo
+            <span class="mt-0.5 block text-xs text-muted xl:text-sm">เปลี่ยนได้ทุกเมื่อในหน้าบัญชีของฉัน</span>
+          </span>
         </label>
       </div>
 
@@ -174,10 +280,10 @@ const labelClass = 'mb-1.5 block text-sm xl:text-base'
       <button
         type="submit"
         :disabled="isSubmitting"
-        class="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 sm:mt-8 sm:h-14 sm:text-lg"
+        class="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-base font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 xl:h-14 xl:text-lg"
       >
         <Icon v-if="isSubmitting" name="lucide:loader-circle" class="size-5 animate-spin" />
-        {{ welcomeBonusPoints > 0 ? `เริ่มใช้งาน รับ ${formattedBonusPoints} แต้ม` : 'เริ่มใช้งาน' }}
+        {{ welcomeBonusPoints > 0 ? `สมัครสมาชิก รับ ${formattedBonusPoints} แต้ม` : 'สมัครสมาชิก' }}
       </button>
     </form>
   </ModalDialog>

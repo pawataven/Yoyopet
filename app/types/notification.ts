@@ -1,12 +1,17 @@
-export type NotificationCategory = 'points' | 'coupon' | 'shipping'
+export type NotificationCategory = 'points' | 'redemption' | 'promotion'
 
 export type NotificationKind =
   | 'points_earned'
+  | 'order_approved'
   | 'order_rejected'
   | 'points_expiring'
-  | 'coupon_ready'
-  | 'reward_shipping'
   | 'tier_progress'
+  | 'reward_shipping'
+  | 'coupon_ready'
+  | 'coupon_expiring'
+  | 'new_reward'
+  | 'pet_birthday'
+  | 'top_spender_result'
 
 export interface MemberNotification {
   id: string
