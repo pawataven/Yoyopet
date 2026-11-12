@@ -1,8 +1,10 @@
 <script setup lang="ts">
 const props = withDefaults(defineProps<{
   dismissible?: boolean
+  fullscreen?: boolean
 }>(), {
-  dismissible: true
+  dismissible: true,
+  fullscreen: false
 })
 
 const emit = defineEmits<{
@@ -63,7 +65,10 @@ function handleBackdropClick(event: MouseEvent) {
 <template>
   <dialog
     ref="dialog"
-    class="m-auto w-[calc(100%-2rem)] overflow-hidden rounded-[1.75rem] bg-white text-ink shadow-2xl shadow-ink/20 backdrop:bg-ink/50"
+    class="overflow-hidden bg-white text-ink"
+    :class="fullscreen
+      ? 'm-0 h-dvh max-h-none w-full max-w-none'
+      : 'm-auto w-[calc(100%-2rem)] rounded-[1.75rem] shadow-2xl shadow-ink/20 backdrop:bg-ink/50'"
     @cancel="handleCancel"
     @close="handleClose"
     @click="handleBackdropClick"
@@ -72,7 +77,7 @@ function handleBackdropClick(event: MouseEvent) {
     <div v-if="$slots.close" class="absolute inset-x-0 top-0 z-10 h-0">
       <slot name="close" />
     </div>
-    <div class="modal-dialog-scroll max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain">
+    <div class="modal-dialog-scroll overflow-y-auto overscroll-contain" :class="fullscreen ? 'h-full' : 'max-h-[calc(100dvh-2rem)]'">
       <slot />
     </div>
   </dialog>

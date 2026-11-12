@@ -284,6 +284,7 @@ async function handleChangePhone() {
 
     <OtpVerificationDialog
       v-model:open="isOtpDialogOpen"
+      :variant="isSheet ? 'screen' : 'dialog'"
       :phone="phone"
       :otp-sent-at="otpSentAt"
       :resend-after-seconds="resendAfterSeconds"

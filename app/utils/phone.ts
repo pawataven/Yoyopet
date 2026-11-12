@@ -14,3 +14,8 @@ export function formatThaiMobile(value: string) {
   if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`
   return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`
 }
+
+export function maskThaiMobile(value: string) {
+  const digits = digitsOnly(value)
+  return `${digits.slice(0, 2)}x-xxx-${digits.slice(6)}`
+}

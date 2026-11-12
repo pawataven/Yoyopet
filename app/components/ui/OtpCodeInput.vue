@@ -3,15 +3,23 @@ const props = withDefaults(defineProps<{
   length?: number
   isInvalid?: boolean
   label?: string
+  appearance?: 'outline' | 'soft'
 }>(), {
   length: 6,
   isInvalid: false,
-  label: 'รหัส OTP'
+  label: 'รหัส OTP',
+  appearance: 'outline'
 })
 
 const code = defineModel<string>({ required: true })
 
 const digitInputs = useTemplateRef<HTMLInputElement[]>('digitInputs')
+
+function digitBoxClass(digit: string) {
+  if (props.appearance === 'outline') return props.isInvalid ? 'border-primary/60 bg-white' : 'border-muted/25 bg-white'
+  if (props.isInvalid) return 'border-primary/60 bg-primary-soft/40'
+  return digit ? 'border-primary/15 bg-cream' : 'border-border bg-white'
+}
 
 const digits = computed(() => Array.from({ length: props.length }, (_, index) => code.value[index] ?? ''))
 
@@ -25,8 +33,10 @@ function handleFocus(index: number) {
   if (index > code.value.length) focusDigit(code.value.length)
 }
 
-function insertDigits(index: number, enteredDigits: string) {
+// The v-model value only updates after the parent re-renders; focusing earlier makes handleFocus see the old code and snap back
+async function insertDigits(index: number, enteredDigits: string) {
   code.value = (code.value.slice(0, index) + enteredDigits + code.value.slice(index + enteredDigits.length)).slice(0, props.length)
+  await nextTick()
   focusDigit(index + enteredDigits.length)
 }
 
@@ -79,8 +89,8 @@ defineExpose({
       :autocomplete="index === 0 ? 'one-time-code' : 'off'"
       :aria-label="`${label} หลักที่ ${index + 1}`"
       :aria-invalid="isInvalid ? 'true' : undefined"
-      class="aspect-67/77 w-0 min-w-0 flex-1 rounded-xl border-2 bg-white text-center font-number text-2xl font-semibold caret-primary transition-colors focus:border-primary focus:outline-none xl:rounded-[0.875rem] xl:text-[1.75rem]"
-      :class="isInvalid ? 'border-primary/60' : 'border-muted/25'"
+      class="aspect-67/77 w-0 min-w-0 flex-1 rounded-xl border-2 text-center font-number text-2xl font-semibold caret-primary transition-colors focus:border-primary focus:outline-none xl:rounded-[0.875rem] xl:text-[1.75rem]"
+      :class="digitBoxClass(digit)"
       @focus="handleFocus(index)"
       @input="handleInput(index, $event)"
       @paste="handlePaste(index, $event)"
