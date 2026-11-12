@@ -5,7 +5,7 @@ const selectedMarketplaceId = defineModel<MarketplaceId>('marketplaceId', { requ
 </script>
 
 <template>
-  <section aria-labelledby="order-number-guide-heading" class="rounded-[1.5rem] border bg-white p-5 xl:p-8">
+  <section aria-labelledby="order-number-guide-heading" class="rounded-3xl border bg-white p-5 xl:p-8">
     <h2 id="order-number-guide-heading" class="text-base xl:text-[1.375rem]">
       หาเลขคำสั่งซื้อได้ที่ไหน
     </h2>

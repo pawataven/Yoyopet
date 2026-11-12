@@ -40,6 +40,13 @@ export interface OrderSubmissionResult {
   expectedCreditDate: string | null
 }
 
+export type OrderSubmissionFailureReason = 'already_submitted' | 'invalid_order_number' | 'unknown'
+
+export interface OrderSubmissionFailure {
+  reason: OrderSubmissionFailureReason
+  orderNumber: string
+}
+
 export interface OrderNumberGuideField {
   label: string
   value: string

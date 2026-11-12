@@ -18,7 +18,7 @@ const examplePoints = computed(() =>
 </script>
 
 <template>
-  <section aria-labelledby="order-earning-rate-heading" class="rounded-[1.5rem] bg-primary-soft p-5 xl:p-8">
+  <section aria-labelledby="order-earning-rate-heading" class="rounded-3xl bg-primary-soft p-5 xl:p-8">
     <h2 id="order-earning-rate-heading" class="text-base xl:text-[1.375rem]">
       ได้แต้มเท่าไหร่?
     </h2>

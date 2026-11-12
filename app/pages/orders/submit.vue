@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MarketplaceId, OrderSubmissionResult } from '~/types/order'
+import type { MarketplaceId, OrderSubmissionFailure, OrderSubmissionResult } from '~/types/order'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -19,6 +19,9 @@ const isGuideDialogOpen = ref(false)
 
 const lastSubmission = ref<OrderSubmissionResult | null>(null)
 const isSubmittedDialogOpen = ref(false)
+const lastFailure = ref<OrderSubmissionFailure | null>(null)
+const isFailedDialogOpen = ref(false)
+const orderSubmitForm = useTemplateRef('orderSubmitForm')
 
 watch(selectedMarketplaceId, (marketplaceId) => {
   guideMarketplaceId.value = marketplaceId
@@ -33,6 +36,17 @@ async function showSubmissionStatus() {
   isSubmittedDialogOpen.value = false
   await nextTick()
   document.getElementById('recent-order-submissions')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+function handleFailed(failure: OrderSubmissionFailure) {
+  lastFailure.value = failure
+  isFailedDialogOpen.value = true
+}
+
+async function retryOrderSubmission() {
+  isFailedDialogOpen.value = false
+  await nextTick()
+  orderSubmitForm.value?.focusOrderNumber()
 }
 
 function handleSubmitted(result: OrderSubmissionResult) {
@@ -56,8 +70,10 @@ function handleSubmitted(result: OrderSubmissionResult) {
 
     <div class="mt-6 grid items-start gap-4 lg:grid-cols-[minmax(0,970fr)_minmax(0,686fr)] xl:mt-8 xl:gap-6">
       <OrderSubmitForm
+        ref="orderSubmitForm"
         v-model:marketplace-id="selectedMarketplaceId"
         @submitted="handleSubmitted"
+        @failed="handleFailed"
         @show-example="showOrderNumberExample"
       />
 
@@ -79,6 +95,11 @@ function handleSubmitted(result: OrderSubmissionResult) {
       v-model:open="isSubmittedDialogOpen"
       :submission="lastSubmission"
       @view-status="showSubmissionStatus"
+    />
+    <OrderSubmissionFailedDialog
+      v-model:open="isFailedDialogOpen"
+      :failure="lastFailure"
+      @retry="retryOrderSubmission"
     />
   </div>
 </template>

@@ -1,4 +1,4 @@
-import type { OrderSubmission, OrderSubmissionResult, PendingOrder, PendingOrderStatus, SubmittedOrder } from '~/types/order'
+import type { OrderSubmission, OrderSubmissionFailureReason, OrderSubmissionResult, PendingOrder, PendingOrderStatus, SubmittedOrder } from '~/types/order'
 
 export interface OrderRepository {
   getPendingOrders(memberId: string): Promise<PendingOrder[]>
@@ -7,7 +7,7 @@ export interface OrderRepository {
 }
 
 export class OrderSubmissionError extends Error {
-  constructor(readonly reason: 'already_submitted' | 'invalid_order_number') {
+  constructor(readonly reason: Exclude<OrderSubmissionFailureReason, 'unknown'>) {
     super(reason)
   }
 }

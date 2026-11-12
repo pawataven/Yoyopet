@@ -1,18 +1,19 @@
 <script setup lang="ts">
-import type { MarketplaceId, OrderSubmissionResult } from '~/types/order'
+import type { MarketplaceId, OrderSubmissionFailure, OrderSubmissionResult } from '~/types/order'
 
 const MAX_PROOF_IMAGE_BYTES = 5 * 1024 * 1024
 const ACCEPTED_PROOF_IMAGE_TYPES = ['image/jpeg', 'image/png']
 
 const emit = defineEmits<{
   submitted: [result: OrderSubmissionResult]
+  failed: [failure: OrderSubmissionFailure]
   showExample: []
 }>()
 
 const selectedMarketplaceId = defineModel<MarketplaceId>('marketplaceId', { required: true })
 
 const { marketplaceStores } = useAppConfig()
-const { submitOrder, isSubmitting, errorMessage: submitError, clearError } = useOrderSubmission()
+const { submitOrder, isSubmitting } = useOrderSubmission()
 
 const fieldId = useId()
 const orderNumberInput = useTemplateRef<HTMLInputElement>('orderNumberInput')
@@ -32,9 +33,7 @@ const selectedGuide = computed(() => orderNumberGuides[selectedMarketplaceId.val
 
 watch(orderNumber, () => {
   orderNumberError.value = ''
-  clearError()
 })
-watch(selectedMarketplaceId, clearError)
 watch(hasConfirmedOwnership, () => {
   ownershipError.value = ''
 })
@@ -80,16 +79,27 @@ async function handleSubmit() {
     if (orderNumberError.value) orderNumberInput.value?.focus()
     return
   }
-  const result = await submitOrder(
+  const outcome = await submitOrder(
     { marketplaceId: selectedMarketplaceId.value, orderNumber: orderNumber.value },
     proofImage.value
   )
-  if (!result) return
+  if (!outcome) return
+  if ('failure' in outcome) {
+    emit('failed', outcome.failure)
+    return
+  }
   orderNumber.value = ''
   hasConfirmedOwnership.value = false
   clearProofImage()
-  emit('submitted', result)
+  emit('submitted', outcome.result)
 }
+
+function focusOrderNumber() {
+  orderNumberInput.value?.focus()
+  orderNumberInput.value?.select()
+}
+
+defineExpose({ focusOrderNumber })
 
 const stepNumberClass = 'flex size-6 shrink-0 items-center justify-center rounded-full bg-primary font-number text-sm font-semibold text-white xl:size-8 xl:text-base'
 const stepTitleClass = 'flex items-center gap-2.5 font-heading text-lg font-medium xl:gap-3 xl:text-2xl'
@@ -99,7 +109,7 @@ const stepTitleClass = 'flex items-center gap-2.5 font-heading text-lg font-medi
   <form
     novalidate
     aria-label="กรอกเลขคำสั่งซื้อ"
-    class="rounded-[1.5rem] border bg-white p-5 xl:p-8"
+    class="rounded-3xl border bg-white p-5 xl:p-8"
     @submit.prevent="handleSubmit"
   >
     <fieldset>
@@ -148,10 +158,10 @@ const stepTitleClass = 'flex items-center gap-2.5 font-heading text-lg font-medi
         autocapitalize="characters"
         spellcheck="false"
         :placeholder="selectedGuide.orderNumberPlaceholder"
-        :aria-invalid="orderNumberError || submitError ? 'true' : undefined"
+        :aria-invalid="orderNumberError ? 'true' : undefined"
         :aria-describedby="`${fieldId}-order-number-hint${orderNumberError ? ` ${fieldId}-order-number-error` : ''}`"
         class="mt-3 h-12 w-full rounded-xl border-2 bg-white px-4 text-base transition-colors placeholder:text-muted/60 focus:border-primary focus:outline-none xl:mt-4 xl:h-16 xl:px-6 xl:text-lg"
-        :class="orderNumberError || submitError ? 'border-primary' : 'border-muted/25'"
+        :class="orderNumberError ? 'border-primary' : 'border-muted/25'"
       >
       <p v-if="orderNumberError" :id="`${fieldId}-order-number-error`" class="mt-1.5 text-sm text-primary-dark xl:text-base">
         {{ orderNumberError }}
@@ -243,10 +253,6 @@ const stepTitleClass = 'flex items-center gap-2.5 font-heading text-lg font-medi
         {{ ownershipError }}
       </p>
     </div>
-
-    <p v-if="submitError" role="alert" class="mt-4 rounded-xl bg-primary-soft px-4 py-3 text-center text-sm text-primary-dark xl:text-base">
-      {{ submitError }}
-    </p>
 
     <button
       type="submit"
