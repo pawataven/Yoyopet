@@ -57,6 +57,10 @@ export function formatThaiDateSpan(from: string, to: string, monthStyle: 'short'
   return `${days} ${monthYearFormatter.format(new Date(to))}`
 }
 
+export function formatThaiLongMonthYear(isoDate: string) {
+  return thaiLongMonthYearFormatter.format(new Date(isoDate))
+}
+
 export function toLocalIsoDate(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')

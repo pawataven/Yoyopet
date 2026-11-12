@@ -6,12 +6,9 @@ const props = defineProps<{
   memberDisplayName: string | null
 }>()
 
-const medalClassByRank: Record<number, string> = {
-  1: 'bg-medal-gold text-white',
-  2: 'bg-medal-silver text-white',
-  3: 'bg-medal-bronze text-white'
-}
+const PREVIEW_ENTRY_COUNT = 5
 
+const previewEntries = computed(() => props.leaderboard.entries.slice(0, PREVIEW_ENTRY_COUNT))
 const monthLabel = computed(() => formatThaiShortMonth(props.leaderboard.periodEnd))
 const daysUntilReset = computed(() => daysUntilEndOf(props.leaderboard.periodEnd))
 </script>
@@ -37,13 +34,13 @@ const daysUntilReset = computed(() => daysUntilEndOf(props.leaderboard.periodEnd
 
     <ol class="mt-4 flex-1 xl:mt-7.5">
       <li
-        v-for="entry in leaderboard.entries"
+        v-for="entry in previewEntries"
         :key="entry.rank"
         class="flex h-12 items-center gap-3 border-b px-2 last:border-b-0 xl:h-14 xl:gap-4 xl:px-4"
       >
         <span
           class="flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold xl:size-9 xl:text-sm"
-          :class="medalClassByRank[entry.rank] ?? 'bg-border/70 text-muted'"
+          :class="topSpenderMedalClassByRank[entry.rank] ??'bg-border/70 text-muted'"
         >
           {{ entry.rank }}
         </span>
