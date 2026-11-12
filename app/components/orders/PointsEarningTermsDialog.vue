@@ -20,7 +20,7 @@ const termSections = computed(() => buildPointsEarningTermSections(props.earning
     class="max-w-240"
     @opened="acknowledgeButton?.focus()"
   >
-    <div class="relative px-5 pt-6 pb-6 sm:px-11 sm:pt-11 sm:pb-10">
+    <template #close>
       <button
         type="button"
         aria-label="ปิด"
@@ -29,7 +29,8 @@ const termSections = computed(() => buildPointsEarningTermSections(props.earning
       >
         <Icon name="lucide:x" class="size-4.5 sm:size-5" />
       </button>
-
+    </template>
+    <div class="relative px-5 pt-6 pb-6 sm:px-11 sm:pt-11 sm:pb-10">
       <h2 :id="headingId" class="pr-12 text-xl leading-tight sm:text-[1.75rem]">
         เงื่อนไขการสะสมแต้ม
       </h2>

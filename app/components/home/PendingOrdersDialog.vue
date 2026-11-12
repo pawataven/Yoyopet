@@ -26,7 +26,7 @@ function orderStatusLabel(order: PendingOrder) {
     class="max-w-203"
     @opened="closeButton?.focus()"
   >
-    <div class="relative px-5 pt-6 pb-6 sm:px-10 sm:pt-10 sm:pb-10">
+    <template #close>
       <button
         ref="closeButton"
         type="button"
@@ -36,7 +36,8 @@ function orderStatusLabel(order: PendingOrder) {
       >
         <Icon name="lucide:x" class="size-4.5 sm:size-5" />
       </button>
-
+    </template>
+    <div class="relative px-5 pt-6 pb-6 sm:px-10 sm:pt-10 sm:pb-10">
       <h2 :id="headingId" class="pr-12 font-sans text-xl leading-tight font-semibold sm:text-[1.75rem]">
         รายการรอยืนยัน {{ formatNumber(pendingOrders.length) }} รายการ
       </h2>

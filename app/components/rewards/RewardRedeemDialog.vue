@@ -66,7 +66,7 @@ const primaryButtonClass = 'flex h-12 w-full items-center justify-center gap-2 r
     :class="isCouponReward || redemptionResult ? 'max-w-148' : 'max-w-208'"
     @opened="confirmButton?.focus()"
   >
-    <div class="relative px-5 pt-6 pb-6 sm:px-10 sm:pt-9 sm:pb-10">
+    <template #close>
       <button
         type="button"
         aria-label="ปิด"
@@ -76,7 +76,8 @@ const primaryButtonClass = 'flex h-12 w-full items-center justify-center gap-2 r
       >
         <Icon name="lucide:x" class="size-5" />
       </button>
-
+    </template>
+    <div class="relative px-5 pt-6 pb-6 sm:px-10 sm:pt-9 sm:pb-10">
       <template v-if="redemptionResult">
         <div class="pt-2 text-center sm:pt-3">
           <SuccessCheckmark />

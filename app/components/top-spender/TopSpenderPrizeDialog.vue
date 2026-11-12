@@ -27,14 +27,7 @@ const closeButton = useTemplateRef('closeButton')
     class="max-w-200 overflow-x-hidden"
     @opened="closeButton?.focus()"
   >
-    <div class="relative">
-      <NuxtImg
-        :src="prize.imageUrl"
-        alt=""
-        width="800"
-        height="280"
-        class="h-44 w-full object-cover sm:h-70"
-      />
+    <template #close>
       <button
         ref="closeButton"
         type="button"
@@ -44,6 +37,15 @@ const closeButton = useTemplateRef('closeButton')
       >
         <Icon name="lucide:x" class="size-5" />
       </button>
+    </template>
+    <div class="relative">
+      <NuxtImg
+        :src="prize.imageUrl"
+        alt=""
+        width="800"
+        height="280"
+        class="h-44 w-full object-cover sm:h-70"
+      />
     </div>
 
     <div class="px-5 pt-5 pb-6 sm:px-10 sm:pt-8 sm:pb-8">

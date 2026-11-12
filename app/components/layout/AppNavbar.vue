@@ -11,7 +11,7 @@ function isActive(to: string) {
   return to === '/' ? route.path === '/' : route.path.startsWith(to)
 }
 
-const isOrderEntryActive = computed(() => isActive('/orders/submit'))
+const isOrderEntryActive = computed(() => isActive('/orders/'))
 
 watch(() => route.path, () => {
   isMobileMenuOpen.value = false

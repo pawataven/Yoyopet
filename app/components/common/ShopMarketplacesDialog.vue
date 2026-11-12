@@ -14,7 +14,7 @@ const storeList = useTemplateRef('storeList')
     class="max-w-lg"
     @opened="storeList?.querySelector('a')?.focus()"
   >
-    <div class="relative px-5 pt-6 pb-6 sm:px-8 sm:pt-8 sm:pb-8">
+    <template #close>
       <button
         type="button"
         aria-label="ปิด"
@@ -23,7 +23,8 @@ const storeList = useTemplateRef('storeList')
       >
         <Icon name="lucide:x" class="size-5" />
       </button>
-
+    </template>
+    <div class="relative px-5 pt-6 pb-6 sm:px-8 sm:pt-8 sm:pb-8">
       <h2 :id="headingId" class="pr-12 text-xl leading-tight sm:text-2xl">
         ช้อปที่ร้าน YoYo
       </h2>

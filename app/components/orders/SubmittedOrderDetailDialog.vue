@@ -39,7 +39,7 @@ const summaryRowClass = 'flex items-center justify-between gap-4'
     class="max-w-228"
     @opened="closeButton?.focus()"
   >
-    <div class="relative px-5 pt-6 pb-6 sm:px-11 sm:pt-11 sm:pb-9">
+    <template #close>
       <button
         ref="closeButton"
         type="button"
@@ -49,7 +49,8 @@ const summaryRowClass = 'flex items-center justify-between gap-4'
       >
         <Icon name="lucide:x" class="size-4.5 sm:size-5" />
       </button>
-
+    </template>
+    <div class="relative px-5 pt-6 pb-6 sm:px-11 sm:pt-11 sm:pb-9">
       <template v-if="orderDetail">
         <header class="flex items-center gap-3 pr-12 sm:gap-4">
           <img

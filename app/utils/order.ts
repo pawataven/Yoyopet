@@ -1,4 +1,4 @@
-import type { MarketplaceId, OrderNumberGuide, OrderRejectionReason, SubmittedOrder, SubmittedOrderDetail } from '~/types/order'
+import type { MarketplaceId, OrderNumberGuide, OrderRejectionReason, SubmittedOrder, SubmittedOrderDetail, SubmittedOrderFilter, SubmittedOrderStatus } from '~/types/order'
 
 // TODO: confirm each marketplace's menu path and sample screen with the YoYo team
 export const orderNumberGuides: Record<MarketplaceId, OrderNumberGuide> = {
@@ -119,4 +119,9 @@ export function buildOrderTimeline(order: SubmittedOrderDetail, marketplaceName:
       state: order.status === 'approved' ? 'done' : 'upcoming'
     }
   ]
+}
+
+export function submittedOrderFilterOf(status: SubmittedOrderStatus): Exclude<SubmittedOrderFilter, 'all'> {
+  if (status === 'approved' || status === 'rejected') return status
+  return 'pending'
 }

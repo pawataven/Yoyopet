@@ -35,7 +35,7 @@ const headingId = useId()
 
 <template>
   <ModalDialog v-model:open="isOpen" :aria-labelledby="headingId" class="max-w-160">
-    <div class="relative px-5 pt-6 pb-6 sm:px-10 sm:pt-9 sm:pb-10">
+    <template #close>
       <button
         type="button"
         aria-label="ปิด"
@@ -44,7 +44,8 @@ const headingId = useId()
       >
         <Icon name="lucide:x" class="size-5" />
       </button>
-
+    </template>
+    <div class="relative px-5 pt-6 pb-6 sm:px-10 sm:pt-9 sm:pb-10">
       <h2 :id="headingId" class="pr-12 text-xl leading-tight sm:text-[1.75rem]">
         ติดตามการจัดส่ง
       </h2>

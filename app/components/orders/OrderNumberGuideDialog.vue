@@ -15,7 +15,7 @@ const confirmButton = useTemplateRef<HTMLButtonElement>('confirmButton')
     class="max-w-217"
     @opened="confirmButton?.focus()"
   >
-    <div class="relative px-5 pt-6 pb-6 sm:px-10 sm:pt-10 sm:pb-8">
+    <template #close>
       <button
         type="button"
         aria-label="ปิด"
@@ -24,7 +24,8 @@ const confirmButton = useTemplateRef<HTMLButtonElement>('confirmButton')
       >
         <Icon name="lucide:x" class="size-4.5 sm:size-5" />
       </button>
-
+    </template>
+    <div class="relative px-5 pt-6 pb-6 sm:px-10 sm:pt-10 sm:pb-8">
       <h2 :id="headingId" class="pr-12 text-xl leading-tight sm:text-[1.75rem]">
         หาเลขคำสั่งซื้อได้ที่ไหน
       </h2>

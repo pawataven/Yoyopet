@@ -142,7 +142,7 @@ const labelClass = 'mb-1.5 block text-sm sm:text-base'
     @opened="nameInput?.focus()"
     @closed="resetForm"
   >
-    <form novalidate class="relative p-6 sm:p-10" @submit.prevent="handleSubmit">
+    <template #close>
       <button
         type="button"
         aria-label="ปิด"
@@ -151,7 +151,8 @@ const labelClass = 'mb-1.5 block text-sm sm:text-base'
       >
         <Icon name="lucide:x" class="size-4.5 sm:size-5" />
       </button>
-
+    </template>
+    <form novalidate class="relative p-6 sm:p-10" @submit.prevent="handleSubmit">
       <h2 :id="headingId" class="pr-12 text-xl leading-tight sm:text-[1.625rem]">
         เพิ่มสัตว์เลี้ยง
       </h2>

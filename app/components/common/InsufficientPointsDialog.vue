@@ -41,7 +41,7 @@ const buttonBaseClass = 'flex h-12 w-full items-center justify-center rounded-xl
     class="max-w-148"
     @opened="actions?.querySelector('a')?.focus()"
   >
-    <div class="relative px-5 pt-7 pb-6 text-center sm:px-10 sm:pt-9 sm:pb-10">
+    <template #close>
       <button
         type="button"
         aria-label="ปิด"
@@ -50,7 +50,8 @@ const buttonBaseClass = 'flex h-12 w-full items-center justify-center rounded-xl
       >
         <Icon name="lucide:x" class="size-5" />
       </button>
-
+    </template>
+    <div class="relative px-5 pt-7 pb-6 text-center sm:px-10 sm:pt-9 sm:pb-10">
       <div class="relative mx-auto size-24 sm:size-36">
         <span
           v-if="reward.category === 'coupon' && reward.couponValueBaht !== null"

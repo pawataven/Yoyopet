@@ -80,7 +80,7 @@ function handleSubmit() {
     @opened="handleOpened"
     @closed="handleClosed"
   >
-    <form novalidate class="relative p-6 sm:p-10" @submit.prevent="handleSubmit">
+    <template #close>
       <button
         type="button"
         aria-label="ปิด"
@@ -89,7 +89,8 @@ function handleSubmit() {
       >
         <Icon name="lucide:x" class="size-4.5 sm:size-5" />
       </button>
-
+    </template>
+    <form novalidate class="relative p-6 sm:p-10" @submit.prevent="handleSubmit">
       <h2 :id="headingId" class="pr-10 text-xl leading-tight sm:text-[1.625rem]">
         ยืนยันเบอร์โทรศัพท์
       </h2>

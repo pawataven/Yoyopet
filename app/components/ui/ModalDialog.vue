@@ -63,11 +63,48 @@ function handleBackdropClick(event: MouseEvent) {
 <template>
   <dialog
     ref="dialog"
-    class="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto overscroll-contain rounded-[1.75rem] bg-white text-ink shadow-2xl shadow-ink/20 backdrop:bg-ink/50"
+    class="m-auto w-[calc(100%-2rem)] overflow-hidden rounded-[1.75rem] bg-white text-ink shadow-2xl shadow-ink/20 backdrop:bg-ink/50"
     @cancel="handleCancel"
     @close="handleClose"
     @click="handleBackdropClick"
   >
-    <slot />
+    <!-- The close button sits outside the scroll area so it stays in the corner while the content scrolls -->
+    <div v-if="$slots.close" class="absolute inset-x-0 top-0 z-10 h-0">
+      <slot name="close" />
+    </div>
+    <div class="modal-dialog-scroll max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain">
+      <slot />
+    </div>
   </dialog>
 </template>
+
+<style scoped>
+/* Thin thumb inset from the edge, with track margins so it never runs into the rounded corners */
+.modal-dialog-scroll::-webkit-scrollbar {
+  width: 14px;
+}
+
+.modal-dialog-scroll::-webkit-scrollbar-track {
+  margin-block: 1.75rem;
+  background: transparent;
+}
+
+.modal-dialog-scroll::-webkit-scrollbar-thumb {
+  border: 4px solid transparent;
+  border-radius: 9999px;
+  background-color: color-mix(in oklab, var(--color-muted) 35%, transparent);
+  background-clip: padding-box;
+}
+
+.modal-dialog-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklab, var(--color-muted) 55%, transparent);
+}
+
+/* Chrome ignores ::-webkit-scrollbar once scrollbar-width is set, so only Firefox gets the standard properties */
+@supports not selector(::-webkit-scrollbar) {
+  .modal-dialog-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--color-muted) 35%, transparent) transparent;
+  }
+}
+</style>

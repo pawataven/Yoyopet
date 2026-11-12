@@ -5,12 +5,16 @@ import type {
   PendingOrder,
   PendingOrderStatus,
   SubmittedOrder,
-  SubmittedOrderDetail
+  SubmittedOrderDetail,
+  SubmittedOrderFilter,
+  SubmittedOrderPage,
+  SubmittedOrderQuery
 } from '~/types/order'
 
 export interface OrderRepository {
   getPendingOrders(memberId: string): Promise<PendingOrder[]>
   getRecentSubmissions(memberId: string, limit: number): Promise<SubmittedOrder[]>
+  getSubmittedOrders(memberId: string, query: SubmittedOrderQuery): Promise<SubmittedOrderPage>
   getSubmittedOrderDetail(memberId: string, orderId: string): Promise<SubmittedOrderDetail | null>
   submitOrder(memberId: string, submission: OrderSubmission, proofImage: File | null): Promise<OrderSubmissionResult>
 }
@@ -118,8 +122,62 @@ export function createMockOrderRepository(): OrderRepository {
         { id: 'item-tofu-litter', name: 'ทรายเต้าหู้ YoYo Tofu 7 ลิตร', quantity: 2, imageUrl: '/rewards/yoyo-tofu-litter-7l.jpg', totalBaht: 780 },
         { id: 'item-berry-spray', name: 'สเปรย์ Berry Cream 60 มล.', quantity: 1, imageUrl: '/rewards/berry-cream-spray-60ml.jpg', totalBaht: 110 }
       ]
+    },
+    {
+      id: 'order-tiktok-560019922',
+      marketplaceId: 'tiktok-shop',
+      orderNumber: '560019922',
+      orderedAt: '2026-10-24',
+      submittedAt: '2026-10-28T11:02',
+      spendBaht: 3170,
+      pointsMultiplier: 1.2,
+      points: 38,
+      status: 'approved',
+      rejectionReason: null,
+      expectedCreditDate: null,
+      items: [
+        { id: 'item-tofu-litter', name: 'ทรายเต้าหู้ YoYo Tofu 7 ลิตร', quantity: 6, imageUrl: '/rewards/yoyo-tofu-litter-7l.jpg', totalBaht: 2340 },
+        { id: 'item-pet-wipes', name: 'ทิชชู่เปียก Pet Wipes 80 แผ่น', quantity: 7, imageUrl: '/rewards/yoyo-pet-wipes-80.jpg', totalBaht: 830 }
+      ]
+    },
+    {
+      id: 'order-lazada-1029001234',
+      marketplaceId: 'lazada',
+      orderNumber: '1029001234',
+      orderedAt: '2026-10-11',
+      submittedAt: '2026-10-15T16:45',
+      spendBaht: 2010,
+      pointsMultiplier: 1.2,
+      points: 24,
+      status: 'approved',
+      rejectionReason: null,
+      expectedCreditDate: null,
+      items: [
+        { id: 'item-tofu-litter', name: 'ทรายเต้าหู้ YoYo Tofu 7 ลิตร', quantity: 4, imageUrl: '/rewards/yoyo-tofu-litter-7l.jpg', totalBaht: 1560 },
+        { id: 'item-berry-spray', name: 'สเปรย์ Berry Cream 60 มล.', quantity: 2, imageUrl: '/rewards/berry-cream-spray-60ml.jpg', totalBaht: 450 }
+      ]
+    },
+    {
+      id: 'order-shopee-250930MN45',
+      marketplaceId: 'shopee',
+      orderNumber: '250930MN45',
+      orderedAt: '2026-09-30',
+      submittedAt: '2026-10-02T08:30',
+      spendBaht: 1560,
+      pointsMultiplier: 1.2,
+      points: 18,
+      status: 'approved',
+      rejectionReason: null,
+      expectedCreditDate: null,
+      items: [
+        { id: 'item-tofu-litter', name: 'ทรายเต้าหู้ YoYo Tofu 7 ลิตร', quantity: 4, imageUrl: '/rewards/yoyo-tofu-litter-7l.jpg', totalBaht: 1560 }
+      ]
     }
   ]
+
+  function toSubmittedOrder({ orderedAt: _orderedAt, pointsMultiplier: _pointsMultiplier, items: _items, ...order }: SubmittedOrderDetail): SubmittedOrder {
+    return order
+  }
 
   return {
     async getPendingOrders() {
@@ -136,7 +194,26 @@ export function createMockOrderRepository(): OrderRepository {
     },
 
     async getRecentSubmissions(_memberId, limit) {
-      return submittedOrders.slice(0, limit).map(({ orderedAt: _orderedAt, pointsMultiplier: _pointsMultiplier, items: _items, ...order }) => order)
+      return submittedOrders.slice(0, limit).map(toSubmittedOrder)
+    },
+
+    async getSubmittedOrders(_memberId, { filter, search, page, pageSize }) {
+      const normalizedSearch = search.trim().toUpperCase()
+      const searchMatches = submittedOrders.filter(order => !normalizedSearch || order.orderNumber.includes(normalizedSearch))
+      const countByFilter: Record<SubmittedOrderFilter, number> = { all: 0, approved: 0, pending: 0, rejected: 0 }
+      for (const order of searchMatches) {
+        countByFilter.all++
+        countByFilter[submittedOrderFilterOf(order.status)]++
+      }
+      const filterMatches = filter === 'all'
+        ? searchMatches
+        : searchMatches.filter(order => submittedOrderFilterOf(order.status) === filter)
+      const pageStart = (page - 1) * pageSize
+      return {
+        orders: filterMatches.slice(pageStart, pageStart + pageSize).map(toSubmittedOrder),
+        totalCount: filterMatches.length,
+        countByFilter
+      }
     },
 
     async getSubmittedOrderDetail(_memberId, orderId) {

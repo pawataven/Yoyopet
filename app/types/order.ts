@@ -76,3 +76,18 @@ export interface OrderNumberGuide {
   sampleTimeline: OrderNumberGuideField[]
   steps: string[]
 }
+
+export type SubmittedOrderFilter = 'all' | 'approved' | 'pending' | 'rejected'
+
+export interface SubmittedOrderQuery {
+  filter: SubmittedOrderFilter
+  search: string
+  page: number
+  pageSize: number
+}
+
+export interface SubmittedOrderPage {
+  orders: SubmittedOrder[]
+  totalCount: number
+  countByFilter: Record<SubmittedOrderFilter, number>
+}

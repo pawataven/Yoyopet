@@ -41,7 +41,7 @@ const copyButton = useTemplateRef('copyButton')
     class="max-w-160 overflow-x-hidden"
     @opened="copyButton?.focus()"
   >
-    <div class="relative bg-primary px-5 pt-6 pb-6 text-white sm:px-8 sm:pt-8 sm:pb-7">
+    <template #close>
       <button
         type="button"
         aria-label="ปิด"
@@ -50,6 +50,8 @@ const copyButton = useTemplateRef('copyButton')
       >
         <Icon name="lucide:x" class="size-5" />
       </button>
+    </template>
+    <div class="relative bg-primary px-5 pt-6 pb-6 text-white sm:px-8 sm:pt-8 sm:pb-7">
       <div class="flex items-center gap-3">
         <img src="/logo/logo.png" alt="" class="size-8 sm:size-9">
         <span class="text-sm text-white/90">{{ typeLabel }}</span>
