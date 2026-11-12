@@ -31,7 +31,7 @@ defineProps<{
         </p>
       </div>
       <NuxtLink
-        :to="`/coupons/${coupon.id}`"
+        :to="{ path: '/coupons', query: { use: coupon.id } }"
         class="flex h-8 shrink-0 items-center self-end rounded-full border border-primary px-4 text-xs font-medium text-primary-dark transition-colors hover:bg-primary hover:text-white xl:h-10 xl:px-8.5 xl:text-base"
       >
         ใช้คูปอง

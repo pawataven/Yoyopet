@@ -19,12 +19,27 @@ export interface SubmittedOrder {
   id: string
   marketplaceId: MarketplaceId
   orderNumber: string
+  // Local date-time (YYYY-MM-DDTHH:mm)
   submittedAt: string
   spendBaht: number | null
   points: number | null
   status: SubmittedOrderStatus
   rejectionReason: OrderRejectionReason | null
   expectedCreditDate: string | null
+}
+
+export interface OrderLineItem {
+  id: string
+  name: string
+  quantity: number
+  imageUrl: string | null
+  totalBaht: number
+}
+
+export interface SubmittedOrderDetail extends SubmittedOrder {
+  orderedAt: string | null
+  pointsMultiplier: number | null
+  items: OrderLineItem[]
 }
 
 export interface OrderSubmission {

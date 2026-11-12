@@ -22,6 +22,14 @@ const isSubmittedDialogOpen = ref(false)
 const lastFailure = ref<OrderSubmissionFailure | null>(null)
 const isFailedDialogOpen = ref(false)
 const orderSubmitForm = useTemplateRef('orderSubmitForm')
+const isTermsDialogOpen = ref(false)
+const selectedOrderId = ref<string | null>(null)
+const isOrderDetailDialogOpen = ref(false)
+
+function showOrderDetail(orderId: string) {
+  selectedOrderId.value = orderId
+  isOrderDetailDialogOpen.value = true
+}
 
 watch(selectedMarketplaceId, (marketplaceId) => {
   guideMarketplaceId.value = marketplaceId
@@ -32,10 +40,9 @@ function showOrderNumberExample() {
   isGuideDialogOpen.value = true
 }
 
-async function showSubmissionStatus() {
+function showSubmissionStatus() {
   isSubmittedDialogOpen.value = false
-  await nextTick()
-  document.getElementById('recent-order-submissions')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  if (lastSubmission.value) showOrderDetail(lastSubmission.value.orderId)
 }
 
 function handleFailed(failure: OrderSubmissionFailure) {
@@ -74,6 +81,7 @@ function handleSubmitted(result: OrderSubmissionResult) {
         v-model:marketplace-id="selectedMarketplaceId"
         @submitted="handleSubmitted"
         @failed="handleFailed"
+        @show-terms="isTermsDialogOpen = true"
         @show-example="showOrderNumberExample"
       />
 
@@ -87,7 +95,7 @@ function handleSubmitted(result: OrderSubmissionResult) {
       </div>
     </div>
 
-    <RecentOrderSubmissionsTable :submissions="recentSubmissions" />
+    <RecentOrderSubmissionsTable :submissions="recentSubmissions" @select="showOrderDetail" />
     <FaqList v-if="faqs.length" :faqs="faqs" />
 
     <OrderNumberGuideDialog v-model:open="isGuideDialogOpen" v-model:marketplace-id="guideMarketplaceId" />
@@ -96,6 +104,8 @@ function handleSubmitted(result: OrderSubmissionResult) {
       :submission="lastSubmission"
       @view-status="showSubmissionStatus"
     />
+    <PointsEarningTermsDialog v-model:open="isTermsDialogOpen" :earning-rule="earningRule" />
+    <SubmittedOrderDetailDialog v-model:open="isOrderDetailDialogOpen" :order-id="selectedOrderId" />
     <OrderSubmissionFailedDialog
       v-model:open="isFailedDialogOpen"
       :failure="lastFailure"

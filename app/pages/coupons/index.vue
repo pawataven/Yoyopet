@@ -87,6 +87,20 @@ function openCouponUseDialog(coupon: MemberCoupon) {
   isCouponUseDialogOpen.value = true
 }
 
+const route = useRoute()
+const router = useRouter()
+
+// Links like /coupons?use=<id> (e.g. from the home page) open that coupon's use dialog once, then drop the query so a refresh doesn't reopen it
+onMounted(() => {
+  watch([() => route.query.use, coupons], ([couponIdToUse]) => {
+    if (typeof couponIdToUse !== 'string') return
+    const coupon = coupons.value.find(memberCoupon => memberCoupon.id === couponIdToUse && memberCoupon.status === 'active')
+    if (!coupon) return
+    openCouponUseDialog(coupon)
+    router.replace({ query: { ...route.query, use: undefined } })
+  }, { immediate: true })
+})
+
 async function showUsageGuide() {
   isCouponUseDialogOpen.value = false
   // The dialog locks page scroll until it has closed

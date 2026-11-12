@@ -50,7 +50,7 @@ watch(() => route.path, () => {
 
         <template v-if="member">
           <NuxtLink
-            to="/points"
+            to="/points/history"
             class="flex h-(--nav-control-height) items-center gap-2 rounded-full bg-white/15 px-(--nav-pill-px) text-(length:--nav-control-font-size) font-medium whitespace-nowrap transition-colors hover:bg-white/25"
           >
             <Icon name="lucide:star" class="size-(--nav-icon-size) text-gold" />

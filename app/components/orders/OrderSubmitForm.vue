@@ -8,6 +8,7 @@ const emit = defineEmits<{
   submitted: [result: OrderSubmissionResult]
   failed: [failure: OrderSubmissionFailure]
   showExample: []
+  showTerms: []
 }>()
 
 const selectedMarketplaceId = defineModel<MarketplaceId>('marketplaceId', { required: true })
@@ -246,7 +247,7 @@ const stepTitleClass = 'flex items-center gap-2.5 font-heading text-lg font-medi
         >
         <span>
           ยืนยันว่าเป็นคำสั่งซื้อของฉันเอง และยอมรับ
-          <NuxtLink to="/help/how-to-earn" class="font-semibold text-primary-dark underline-offset-2 hover:underline">เงื่อนไขการสะสมแต้ม</NuxtLink>
+          <button type="button" class="font-semibold text-primary-dark underline-offset-2 hover:underline" @click="emit('showTerms')">เงื่อนไขการสะสมแต้ม</button>
         </span>
       </label>
       <p v-if="ownershipError" :id="`${fieldId}-ownership-error`" class="mt-1.5 text-sm text-primary-dark xl:text-base">

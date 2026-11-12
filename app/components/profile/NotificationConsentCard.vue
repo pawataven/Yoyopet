@@ -14,7 +14,7 @@ const preferenceRows: { key: keyof NotificationPreferences, label: string }[] = 
 </script>
 
 <template>
-  <section aria-labelledby="notification-consent-heading" class="rounded-[1.25rem] border bg-white p-5 xl:p-10">
+  <section id="notification-settings" aria-labelledby="notification-consent-heading" class="scroll-mt-24 xl:scroll-mt-32 rounded-[1.25rem] border bg-white p-5 xl:p-10">
     <h2 id="notification-consent-heading" class="text-xl leading-tight xl:text-[1.625rem]">
       การแจ้งเตือนผ่าน LINE และความยินยอม
     </h2>

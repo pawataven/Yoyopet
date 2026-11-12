@@ -3,7 +3,7 @@ const { supportChat } = useAppConfig()
 </script>
 
 <template>
-  <section aria-labelledby="contact-support-heading" class="mt-8 flex flex-col gap-4 rounded-[1.25rem] border bg-white p-5 sm:flex-row sm:items-center xl:mt-10 xl:min-h-34 xl:gap-7.5 xl:py-4 xl:pr-8 xl:pl-9">
+  <section id="contact-support" aria-labelledby="contact-support-heading" class="mt-8 scroll-mt-24 xl:scroll-mt-32 flex flex-col gap-4 rounded-[1.25rem] border bg-white p-5 sm:flex-row sm:items-center xl:mt-10 xl:min-h-34 xl:gap-7.5 xl:py-4 xl:pr-8 xl:pl-9">
     <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary-dark xl:size-18" aria-hidden="true">
       <Icon name="lucide:users" class="size-6 xl:size-7" />
     </span>

@@ -1,30 +1,15 @@
 <script setup lang="ts">
-import type { OrderRejectionReason, SubmittedOrder, SubmittedOrderStatus } from '~/types/order'
+import type { SubmittedOrder } from '~/types/order'
 
 defineProps<{
   submissions: SubmittedOrder[]
 }>()
 
+const emit = defineEmits<{
+  select: [orderId: string]
+}>()
+
 const { marketplaceStores } = useAppConfig()
-
-const statusAppearance: Record<Exclude<SubmittedOrderStatus, 'rejected'>, { label: string, class: string }> = {
-  'approved': { label: 'อนุมัติแล้ว', class: 'bg-success/10 text-success' },
-  'in-return-window': { label: 'รอพ้นระยะคืนสินค้า', class: 'bg-gold/25 text-pending' },
-  'verifying': { label: 'กำลังตรวจสอบ', class: 'bg-gold/25 text-pending' }
-}
-
-const rejectionReasonLabels: Record<OrderRejectionReason, string> = {
-  duplicate: 'เลขซ้ำ',
-  cancelled: 'ยกเลิกคำสั่งซื้อ'
-}
-
-function getStatusAppearance(order: SubmittedOrder) {
-  if (order.status !== 'rejected') return statusAppearance[order.status]
-  return {
-    label: order.rejectionReason ? `ไม่ผ่าน: ${rejectionReasonLabels[order.rejectionReason]}` : 'ไม่ผ่าน',
-    class: 'bg-primary-soft text-primary-dark'
-  }
-}
 
 function getMarketplaceStore(order: SubmittedOrder) {
   return marketplaceStores.find(store => store.id === order.marketplaceId)
@@ -69,7 +54,12 @@ const headerCellClass = 'pt-4 pb-3 font-normal xl:pt-6 xl:pb-4'
           </tr>
         </thead>
         <tbody>
-          <tr v-for="order in submissions" :key="order.id" class="border-b text-sm last:border-b-0 xl:text-base">
+          <tr
+            v-for="order in submissions"
+            :key="order.id"
+            class="cursor-pointer border-b text-sm transition-colors last:border-b-0 hover:bg-cream xl:text-base"
+            @click="emit('select', order.id)"
+          >
             <td class="py-3 pr-4">
               <span class="flex items-center gap-2.5 whitespace-nowrap xl:gap-3">
                 <img
@@ -85,7 +75,14 @@ const headerCellClass = 'pt-4 pb-3 font-normal xl:pt-6 xl:pb-4'
               </span>
             </td>
             <td class="py-3 pr-4 font-semibold whitespace-nowrap">
-              {{ order.orderNumber }}
+              <button
+                type="button"
+                :aria-label="`ดูรายละเอียดคำสั่งซื้อ ${order.orderNumber}`"
+                class="rounded hover:text-primary-dark hover:underline focus-visible:ring-4 focus-visible:ring-primary-soft focus-visible:outline-none"
+                @click.stop="emit('select', order.id)"
+              >
+                {{ order.orderNumber }}
+              </button>
             </td>
             <td class="hidden py-3 pr-4 whitespace-nowrap text-muted md:table-cell">
               {{ formatThaiShortDate(order.submittedAt) }}
@@ -103,8 +100,8 @@ const headerCellClass = 'pt-4 pb-3 font-normal xl:pt-6 xl:pb-4'
               <span v-else class="text-muted" aria-label="ไม่มีแต้ม">–</span>
             </td>
             <td class="py-3 pl-6 xl:pl-15">
-              <span class="inline-flex h-6 items-center rounded-full px-3 text-xs font-semibold whitespace-nowrap xl:h-7 xl:text-sm" :class="getStatusAppearance(order).class">
-                {{ getStatusAppearance(order).label }}
+              <span class="inline-flex h-6 items-center rounded-full px-3 text-xs font-semibold whitespace-nowrap xl:h-7 xl:text-sm" :class="getSubmittedOrderStatusBadge(order).class">
+                {{ getSubmittedOrderStatusBadge(order).label }}
               </span>
             </td>
           </tr>

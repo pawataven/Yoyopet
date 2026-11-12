@@ -1,4 +1,4 @@
-import type { MarketplaceId, OrderNumberGuide } from '~/types/order'
+import type { MarketplaceId, OrderNumberGuide, OrderRejectionReason, SubmittedOrder, SubmittedOrderDetail } from '~/types/order'
 
 // TODO: confirm each marketplace's menu path and sample screen with the YoYo team
 export const orderNumberGuides: Record<MarketplaceId, OrderNumberGuide> = {
@@ -54,4 +54,69 @@ export const orderNumberGuides: Record<MarketplaceId, OrderNumberGuide> = {
       'คัดลอก "หมายเลขคำสั่งซื้อ" มากรอก'
     ]
   }
+}
+
+export const orderRejectionReasonLabels: Record<OrderRejectionReason, string> = {
+  duplicate: 'เลขซ้ำ',
+  cancelled: 'ยกเลิกคำสั่งซื้อ'
+}
+
+const pendingBadgeClass = 'bg-gold/25 text-pending'
+
+export function getSubmittedOrderStatusBadge(order: SubmittedOrder) {
+  switch (order.status) {
+    case 'approved':
+      return { label: 'อนุมัติแล้ว', class: 'bg-success/10 text-success' }
+    case 'in-return-window':
+      return { label: 'รอพ้นระยะคืนสินค้า', class: pendingBadgeClass }
+    case 'verifying':
+      return { label: 'กำลังตรวจสอบ', class: pendingBadgeClass }
+    case 'rejected':
+      return {
+        label: order.rejectionReason ? `ไม่ผ่าน: ${orderRejectionReasonLabels[order.rejectionReason]}` : 'ไม่ผ่าน',
+        class: 'bg-primary-soft text-primary-dark'
+      }
+  }
+}
+
+export type OrderTimelineStepState = 'done' | 'current' | 'upcoming' | 'failed'
+
+export interface OrderTimelineStep {
+  title: string
+  caption: string | null
+  state: OrderTimelineStepState
+}
+
+export function buildOrderTimeline(order: SubmittedOrderDetail, marketplaceName: string): OrderTimelineStep[] {
+  const submittedStep: OrderTimelineStep = {
+    title: 'ส่งเลขคำสั่งซื้อแล้ว',
+    caption: formatThaiShortDateTime(order.submittedAt),
+    state: 'done'
+  }
+
+  if (order.status === 'rejected') {
+    return [submittedStep, {
+      title: 'ไม่ผ่านการตรวจสอบ',
+      caption: order.rejectionReason ? orderRejectionReasonLabels[order.rejectionReason] : null,
+      state: 'failed'
+    }]
+  }
+
+  const isVerifying = order.status === 'verifying'
+  return [
+    submittedStep,
+    isVerifying
+      ? { title: 'กำลังตรวจสอบคำสั่งซื้อ', caption: 'ภายใน 24 ชม.', state: 'current' }
+      : { title: 'ตรวจสอบคำสั่งซื้อแล้ว', caption: `ยืนยันกับ ${marketplaceName} สำเร็จ`, state: 'done' },
+    {
+      title: 'รอพ้นระยะคืนสินค้า',
+      caption: order.expectedCreditDate ? `ถึง ${formatThaiShortDate(order.expectedCreditDate)}` : null,
+      state: order.status === 'approved' ? 'done' : order.status === 'in-return-window' ? 'current' : 'upcoming'
+    },
+    {
+      title: 'แต้มเข้าบัญชี',
+      caption: order.points ? `+${formatNumber(order.points)} แต้ม` : null,
+      state: order.status === 'approved' ? 'done' : 'upcoming'
+    }
+  ]
 }
