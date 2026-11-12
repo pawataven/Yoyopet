@@ -111,13 +111,19 @@ export function formatRelativeTimeThai(isoDate: string, now = new Date()) {
 const BANGKOK_PROVINCE = 'กรุงเทพมหานคร'
 
 // Bangkok addresses use แขวง/เขต; every other province uses ต./อ./จ.
-export function formatThaiAddress(address: ShippingAddress) {
+// Split as "street + subdistrict" and "district + province + postcode", the way Thai labels are usually written
+export function formatThaiAddressLines(address: ShippingAddress): [string, string] {
   const isBangkok = address.province === BANGKOK_PROVINCE
   return [
-    address.addressLine,
-    isBangkok ? `แขวง${address.subdistrict}` : `ต.${address.subdistrict}`,
-    isBangkok ? `เขต${address.district}` : `อ.${address.district}`,
-    isBangkok ? 'กรุงเทพฯ' : `จ.${address.province}`,
-    address.postalCode
-  ].join(' ')
+    `${address.addressLine} ${isBangkok ? `แขวง${address.subdistrict}` : `ต.${address.subdistrict}`}`,
+    [
+      isBangkok ? `เขต${address.district}` : `อ.${address.district}`,
+      isBangkok ? 'กรุงเทพฯ' : `จ.${address.province}`,
+      address.postalCode
+    ].join(' ')
+  ]
+}
+
+export function formatThaiAddress(address: ShippingAddress) {
+  return formatThaiAddressLines(address).join(' ')
 }

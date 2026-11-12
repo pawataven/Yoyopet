@@ -11,3 +11,7 @@ export interface ShippingAddress {
   postalCode: string
   isDefault: boolean
 }
+
+export type ShippingAddressInput = Omit<ShippingAddress, 'id'>
+
+export const MAX_SHIPPING_ADDRESSES = 5

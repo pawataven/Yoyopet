@@ -40,7 +40,7 @@ const notificationChannelsLabel = computed(() => {
 
 const accountItems = computed<AccountMenuItem[]>(() => [
   { label: 'ข้อมูลส่วนตัว', icon: 'lucide:user', to: '/account/personal-info' },
-  { label: 'ที่อยู่จัดส่ง', icon: 'lucide:map-pin', to: '/profile#shipping-addresses', value: `${addresses.value.length} ที่อยู่` },
+  { label: 'ที่อยู่จัดส่ง', icon: 'lucide:map-pin', to: '/account/addresses', value: `${addresses.value.length} ที่อยู่` },
   { label: 'สัตว์เลี้ยงของฉัน', icon: 'lucide:paw-print', to: '/pets', value: `${pets.value.length} ตัว` },
   {
     label: 'ชวนเพื่อน',
