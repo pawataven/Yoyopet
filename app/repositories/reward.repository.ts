@@ -1,9 +1,75 @@
-import type { Reward, RewardRedemption } from '~/types/reward'
+import type { Reward, RewardDetail, RewardRedemption, RewardRedemptionResult } from '~/types/reward'
 
 export interface RewardRepository {
   getRecommendedRewards(): Promise<Reward[]>
   getRewards(): Promise<Reward[]>
+  getRewardDetail(rewardId: string): Promise<RewardDetail | null>
+  // Same group first, then the closest point cost
+  getSimilarRewards(rewardId: string, limit: number): Promise<Reward[]>
   getRecentRedemptions(memberId: string, limit: number): Promise<RewardRedemption[]>
+  // Points are deducted by the backend in the same transaction that reserves stock; delivery rewards need an address
+  redeemReward(memberId: string, rewardId: string, quantity: number, shippingAddressId: string | null): Promise<RewardRedemptionResult>
+}
+
+export class RewardRedemptionError extends Error {
+  constructor(readonly reason: 'not_found' | 'insufficient_points' | 'out_of_stock' | 'missing_address') {
+    super(reason)
+  }
+}
+
+const MOCK_MEMBER_POINTS = 1280
+const MOCK_DEFAULT_STOCK = 50
+
+type MockRewardDetailFields = Partial<Omit<RewardDetail, keyof Reward>>
+
+const MOCK_REWARD_DETAILS: Record<string, MockRewardDetailFields> = {
+  'yoyo-tofu-litter-7l': {
+    tagline: 'ทรายแมวเต้าหู้ธรรมชาติ จับตัวเป็นก้อนภายใน 3 วินาที',
+    // TODO: replace the repeated photo with the real product gallery (front, back, texture, flavours)
+    imageUrls: [
+      '/rewards/yoyo-tofu-litter-7l.jpg',
+      '/rewards/yoyo-tofu-litter-7l.jpg',
+      '/rewards/yoyo-tofu-litter-7l.jpg',
+      '/rewards/yoyo-tofu-litter-7l.jpg'
+    ],
+    sizeLabel: '7 ลิตร (2.0 กก.)',
+    stockRemaining: 32,
+    highlights: [
+      'ผลิตจากกากถั่วเหลืองธรรมชาติ 100% ทิ้งลงชักโครกได้',
+      'ดูดซับเร็ว จับตัวเป็นก้อนใน 3 วินาที ลดกลิ่นอับชื้น',
+      'ฝุ่นน้อย ปลอดภัยต่อแมวและเจ้าของ'
+    ]
+  },
+  'yoyo-tofu-litter-7l-twin-pack': {
+    tagline: 'ทรายแมวเต้าหู้ธรรมชาติ แพ็กคู่สุดคุ้ม',
+    sizeLabel: '7 ลิตร × 2 ถุง',
+    stockRemaining: 18
+  },
+  'yoyo-pet-wipes-80': {
+    tagline: 'ทิชชู่เปียกสำหรับสัตว์เลี้ยง อ่อนโยน ไม่มีแอลกอฮอล์',
+    sizeLabel: '80 แผ่น'
+  },
+  'berry-cream-spray-60ml': {
+    tagline: 'สเปรย์น้ำหอมกลิ่นเบอร์รี่ครีม หอมนาน อ่อนโยนต่อขน',
+    sizeLabel: '60 มล.',
+    stockRemaining: 12
+  }
+}
+
+function toRewardDetail(reward: Reward): RewardDetail {
+  const isCoupon = reward.category === 'coupon'
+  return {
+    ...reward,
+    tagline: isCoupon ? 'ใช้เป็นส่วนลดตอนสั่งซื้อที่ร้าน YoYo ทุกช่องทาง' : null,
+    brand: 'yoyoPet',
+    imageUrls: reward.imageUrl ? [reward.imageUrl] : [],
+    sizeLabel: null,
+    stockRemaining: MOCK_DEFAULT_STOCK,
+    fulfillment: isCoupon ? 'coupon' : 'delivery',
+    deliveryLeadTime: isCoupon ? null : '3–5 วันทำการ',
+    highlights: [],
+    ...MOCK_REWARD_DETAILS[reward.id]
+  }
 }
 
 // TODO: imageUrl null items still need product photos
@@ -38,6 +104,34 @@ export function createMockRewardRepository(): RewardRepository {
 
     async getRewards() {
       return MOCK_REWARDS
+    },
+
+    async getRewardDetail(rewardId) {
+      const reward = MOCK_REWARDS.find(candidate => candidate.id === rewardId)
+      return reward ? toRewardDetail(reward) : null
+    },
+
+    async getSimilarRewards(rewardId, limit) {
+      const reward = MOCK_REWARDS.find(candidate => candidate.id === rewardId)
+      if (!reward) return []
+      const similarityScore = (candidate: Reward) =>
+        (candidate.group === reward.group ? 0 : 1_000_000) + Math.abs(candidate.pointsCost - reward.pointsCost)
+      return MOCK_REWARDS
+        .filter(candidate => candidate.id !== rewardId)
+        .toSorted((a, b) => similarityScore(a) - similarityScore(b))
+        .slice(0, limit)
+    },
+
+    // Mock only: validates and reports the result, but doesn't change the mock member balance or stock
+    async redeemReward(_memberId, rewardId, quantity, shippingAddressId) {
+      const reward = MOCK_REWARDS.find(candidate => candidate.id === rewardId)
+      if (!reward) throw new RewardRedemptionError('not_found')
+      const rewardDetail = toRewardDetail(reward)
+      if (rewardDetail.fulfillment === 'delivery' && !shippingAddressId) throw new RewardRedemptionError('missing_address')
+      const pointsSpent = reward.pointsCost * quantity
+      if (pointsSpent > MOCK_MEMBER_POINTS) throw new RewardRedemptionError('insufficient_points')
+      if (quantity > rewardDetail.stockRemaining) throw new RewardRedemptionError('out_of_stock')
+      return { redemptionId: `redemption-${Date.now()}`, pointsSpent, remainingPoints: MOCK_MEMBER_POINTS - pointsSpent }
     },
 
     async getRecentRedemptions(_memberId, limit) {

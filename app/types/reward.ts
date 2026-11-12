@@ -13,6 +13,25 @@ export interface Reward {
   couponValueBaht: number | null
 }
 
+export type RewardFulfillment = 'coupon' | 'delivery'
+
+export interface RewardDetail extends Reward {
+  tagline: string | null
+  brand: string
+  imageUrls: string[]
+  sizeLabel: string | null
+  stockRemaining: number
+  fulfillment: RewardFulfillment
+  deliveryLeadTime: string | null
+  highlights: string[]
+}
+
+export interface RewardRedemptionResult {
+  redemptionId: string
+  pointsSpent: number
+  remainingPoints: number
+}
+
 export type RewardRedemptionStatus = 'preparing' | 'shipping' | 'delivered' | 'ready_to_use' | 'used'
 
 export interface RewardRedemption {

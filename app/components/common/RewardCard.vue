@@ -59,7 +59,9 @@ const isCatalog = computed(() => props.variant === 'catalog')
         class="line-clamp-2 font-sans text-sm font-normal text-ink"
         :class="isCatalog ? 'mt-0.5 xl:mt-1 xl:text-[1.0625rem]' : 'mt-3 xl:mt-5 xl:text-xl'"
       >
-        {{ reward.name }}
+        <NuxtLink :to="`/rewards/${reward.id}`" class="hover:text-primary-dark hover:underline">
+          {{ reward.name }}
+        </NuxtLink>
       </h3>
 
       <div class="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
