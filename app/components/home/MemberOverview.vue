@@ -24,7 +24,7 @@ const { dashboard } = useMemberDashboard()
       </p>
     </header>
 
-    <div class="mt-6 grid gap-6 xl:mt-8 xl:grid-cols-[686fr_970fr]">
+    <div class="mt-6 grid grid-cols-1 gap-6 xl:mt-8 xl:grid-cols-[minmax(0,686fr)_minmax(0,970fr)]">
       <PointsCard
         :points="member.points"
         :member-code="member.memberCode"

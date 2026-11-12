@@ -220,7 +220,7 @@ const primaryButtonClass = 'flex h-12 w-full items-center justify-center gap-2 r
           {{ errorMessage }}
         </p>
 
-        <div class="mt-6 grid gap-3 sm:mt-7 sm:grid-cols-2 sm:gap-4">
+        <div class="mt-6 grid grid-cols-1 gap-3 sm:mt-7 sm:grid-cols-2 sm:gap-4">
           <button type="button" :disabled="isRedeeming" :class="outlineButtonClass" class="max-sm:order-2" @click="isOpen = false">
             ยกเลิก
           </button>
@@ -336,7 +336,7 @@ const primaryButtonClass = 'flex h-12 w-full items-center justify-center gap-2 r
           {{ errorMessage }}
         </p>
 
-        <div class="mt-6 grid gap-3 sm:mt-9 sm:grid-cols-2 sm:gap-4">
+        <div class="mt-6 grid grid-cols-1 gap-3 sm:mt-9 sm:grid-cols-2 sm:gap-4">
           <button type="button" :disabled="isRedeeming" :class="outlineButtonClass" class="max-sm:order-2" @click="isOpen = false">
             ยกเลิก
           </button>

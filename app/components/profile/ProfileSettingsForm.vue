@@ -75,7 +75,7 @@ const saveStatusMessage = computed(() => {
 
 <template>
   <!-- One grid for the summary and the form, so the summary card and the personal-info card share the first row's height -->
-  <form class="grid gap-6 xl:grid-cols-[406fr_1264fr]" @submit.prevent="handleSubmit">
+  <form class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,406fr)_minmax(0,1264fr)]" @submit.prevent="handleSubmit">
     <slot name="summary" />
 
     <PersonalInfoCard

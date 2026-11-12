@@ -34,7 +34,7 @@ useSeoMeta({
         class="mt-5 aspect-2/1 w-full rounded-[1.25rem] object-cover object-top xl:mt-13 xl:aspect-1680/544 xl:rounded-[1.75rem]"
       />
 
-      <div class="mt-6 grid gap-4 xl:mt-16 xl:grid-cols-[969fr_687fr] xl:gap-6">
+      <div class="mt-6 grid grid-cols-1 gap-4 xl:mt-16 xl:grid-cols-[minmax(0,969fr)_minmax(0,687fr)] xl:gap-6">
         <CampaignDetailsCard :highlights="campaign.highlights" :title="campaign.title" />
         <CampaignCountdownCard :starts-on="campaign.startsOn" :ends-on="campaign.endsOn" />
       </div>

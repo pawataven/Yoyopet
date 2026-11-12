@@ -26,8 +26,8 @@ const isMemberCardOpen = ref(false)
     </div>
 
     <div class="mt-2 flex items-end justify-between gap-4 xl:mt-3">
-      <p class="flex items-baseline gap-4 xl:gap-6">
-        <span class="font-number text-[4.5rem] leading-none font-semibold xl:text-[7rem]">{{ formatNumber(points) }}</span>
+      <p class="flex min-w-0 items-baseline gap-3 min-[360px]:gap-4 xl:gap-6">
+        <span class="font-number text-[3.75rem] leading-none min-[360px]:text-[4.5rem] font-semibold xl:text-[7rem]">{{ formatNumber(points) }}</span>
         <span class="text-xl xl:text-[1.625rem]">แต้ม</span>
       </p>
       <button

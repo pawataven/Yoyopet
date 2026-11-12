@@ -34,7 +34,7 @@ onMounted(() => {
       </p>
     </header>
 
-    <ul class="mt-6 grid gap-4 md:grid-cols-2 xl:mt-8 xl:grid-cols-3 xl:gap-6">
+    <ul class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:mt-8 xl:grid-cols-3 xl:gap-6">
       <li v-for="pet in pets" :key="pet.id" class="flex">
         <PetProfileCard :pet="pet" :is-birthday-month="birthdayCoupon?.petId === pet.id" class="w-full" />
       </li>

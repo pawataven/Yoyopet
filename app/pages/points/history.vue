@@ -46,7 +46,7 @@ const filteredTransactions = computed(() =>
       <PointHistoryDateRangePicker v-model="dateRange" :today="today" />
     </div>
 
-    <div class="mt-6 grid items-start gap-6 xl:mt-9 xl:grid-cols-[minmax(0,1fr)_34rem]">
+    <div class="mt-6 grid grid-cols-1 items-start gap-6 xl:mt-9 xl:grid-cols-[minmax(0,1fr)_34rem]">
       <PointHistoryMonthGroups v-if="filteredTransactions.length" :transactions="filteredTransactions" />
       <p v-else-if="!isLoading" class="rounded-[1.25rem] border bg-white py-14 text-center text-sm text-muted xl:text-lg">
         ไม่มีรายการในช่วงเวลานี้

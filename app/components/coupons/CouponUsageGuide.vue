@@ -12,7 +12,7 @@ function usageSteps(storeName: string) {
       วิธีใช้คูปอง
     </h2>
 
-    <ul class="mt-4 grid gap-3 md:grid-cols-3 xl:mt-6 xl:gap-6">
+    <ul class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3 xl:mt-6 xl:gap-6">
       <li v-for="store in marketplaceStores" :key="store.id" class="rounded-[1.25rem] border bg-white p-5 xl:px-8 xl:py-7">
         <div class="flex items-center gap-3 xl:gap-5">
           <img :src="store.logoUrl" alt="" width="56" height="56" loading="lazy" class="size-10 shrink-0 rounded-xl xl:size-14">

@@ -20,7 +20,7 @@ const headerCellClass = 'pt-4 pb-3 font-normal xl:pt-6 xl:pb-4'
 </script>
 
 <template>
-  <div class="overflow-x-auto rounded-[1.25rem] border bg-white px-4 xl:px-8">
+  <div class="relative overflow-x-auto rounded-[1.25rem] border bg-white px-4 xl:px-8">
     <table class="w-full text-left">
       <thead>
         <tr class="border-b text-xs text-muted xl:text-sm">

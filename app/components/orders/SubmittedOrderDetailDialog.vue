@@ -78,7 +78,7 @@ const summaryRowClass = 'flex items-center justify-between gap-4'
           </span>
         </header>
 
-        <dl class="mt-5 grid gap-x-10 gap-y-3 border-t pt-5 text-sm sm:mt-6 sm:grid-cols-2 sm:gap-y-4 sm:pt-6 sm:text-base">
+        <dl class="mt-5 grid grid-cols-1 gap-x-10 gap-y-3 border-t pt-5 text-sm sm:mt-6 sm:grid-cols-2 sm:gap-y-4 sm:pt-6 sm:text-base">
           <div :class="summaryRowClass">
             <dt class="text-muted">
               วันที่สั่งซื้อ

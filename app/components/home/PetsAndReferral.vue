@@ -12,7 +12,7 @@ async function handleClaimBirthdayCoupon() {
 </script>
 
 <template>
-  <div class="page-container mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+  <div class="page-container mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
     <MyPetsCard :pets="pets" />
     <template v-if="birthdayCoupon">
       <PetBirthdayCard

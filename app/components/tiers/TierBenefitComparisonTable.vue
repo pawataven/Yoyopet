@@ -14,7 +14,7 @@ defineProps<{
       เปรียบเทียบสิทธิ์
     </h2>
 
-    <div class="mt-4 overflow-x-auto rounded-[1.25rem] border bg-white px-4 py-2 xl:mt-6 xl:px-8 xl:py-1.5">
+    <div class="relative mt-4 overflow-x-auto rounded-[1.25rem] border bg-white px-4 py-2 xl:mt-6 xl:px-8 xl:py-1.5">
       <table class="w-full min-w-[36rem] border-separate border-spacing-0 text-sm xl:text-[1.0625rem]">
         <thead>
           <tr>

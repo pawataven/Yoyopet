@@ -86,7 +86,7 @@ const radioGroupName = useId()
       เพิ่มที่อยู่ใหม่
     </NuxtLink>
 
-    <div class="mt-8 grid gap-3 sm:mt-16 sm:grid-cols-2 sm:gap-4">
+    <div class="mt-8 grid grid-cols-1 gap-3 sm:mt-16 sm:grid-cols-2 sm:gap-4">
       <button
         type="button"
         class="flex h-12 w-full items-center justify-center rounded-xl border-2 border-primary text-base font-semibold text-primary-dark transition-colors hover:bg-primary-soft max-sm:order-2 sm:h-14 sm:text-lg"

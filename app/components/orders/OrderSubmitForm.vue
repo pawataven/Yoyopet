@@ -118,7 +118,7 @@ const stepTitleClass = 'flex items-center gap-2.5 font-heading text-lg font-medi
         <span :class="stepNumberClass" aria-hidden="true">1</span>
         เลือกช่องทางที่ซื้อ
       </legend>
-      <div class="mt-3 grid gap-2.5 sm:grid-cols-3 xl:mt-4 xl:gap-3">
+      <div class="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3 xl:mt-4 xl:gap-3">
         <label
           v-for="store in marketplaceStores"
           :key="store.id"

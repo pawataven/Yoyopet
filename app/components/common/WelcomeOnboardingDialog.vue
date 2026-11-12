@@ -88,7 +88,7 @@ const labelClass = 'mb-1.5 block text-sm xl:text-base'
         กรอกข้อมูลอีกนิดเพื่อเริ่มใช้งาน
       </p>
 
-      <div class="mt-6 grid gap-x-4 gap-y-5 sm:mt-7 sm:grid-cols-2 sm:gap-y-6">
+      <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-5 sm:mt-7 sm:grid-cols-2 sm:gap-y-6">
         <div>
           <label :for="`${fieldId}-first-name`" :class="labelClass">ชื่อ</label>
           <input

@@ -137,7 +137,7 @@ function showMoreRewards() {
       :expiring-points="dashboard.expiringPoints"
     />
 
-    <div class="mt-8 grid items-start gap-6 xl:mt-17 xl:grid-cols-[25rem_minmax(0,1fr)]">
+    <div class="mt-8 grid grid-cols-1 items-start gap-6 xl:mt-17 xl:grid-cols-[25rem_minmax(0,1fr)]">
       <div class="space-y-6 xl:space-y-8">
         <RewardFilterPanel
           v-model:redeemable-only="isRedeemableOnly"

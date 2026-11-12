@@ -23,7 +23,7 @@ function tierCaption(level: TierLevel, index: number) {
 
 <template>
   <section aria-label="ระดับสมาชิกทั้งหมด" class="mt-6 xl:mt-16">
-    <ol class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-6">
+    <ol class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-6">
       <li
         v-for="(level, index) in tierLevels"
         :key="level.name"

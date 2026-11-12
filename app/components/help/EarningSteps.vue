@@ -13,7 +13,7 @@ const earningSteps = [
       สะสมแต้มง่าย ๆ 4 ขั้นตอน
     </h2>
 
-    <ol class="mt-4 grid gap-4 sm:grid-cols-2 xl:mt-6 xl:grid-cols-4 xl:gap-6">
+    <ol class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:mt-6 xl:grid-cols-4 xl:gap-6">
       <li
         v-for="(step, index) in earningSteps"
         :key="step.title"

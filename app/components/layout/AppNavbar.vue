@@ -3,19 +3,14 @@ const navItems = mainNavItems
 
 const { member, isLoggedIn, isLoading } = useMember()
 const route = useRoute()
-const isMobileMenuOpen = ref(false)
 
 const formattedPoints = computed(() => (member.value?.points ?? 0).toLocaleString('th-TH'))
 
 function isActive(to: string) {
-  return to === '/' ? route.path === '/' : route.path.startsWith(to)
+  return isNavPathActive(route.path, to)
 }
 
 const isOrderEntryActive = computed(() => isActive('/orders/'))
-
-watch(() => route.path, () => {
-  isMobileMenuOpen.value = false
-})
 </script>
 
 <template>
@@ -41,7 +36,7 @@ watch(() => route.path, () => {
           v-if="isLoggedIn"
           to="/orders/submit"
           :aria-current="isOrderEntryActive ? 'page' : undefined"
-          class="hidden h-(--nav-control-height) items-center gap-2.5 rounded-full px-(--nav-button-px) text-(length:--nav-control-font-size) font-medium whitespace-nowrap transition-colors md:flex"
+          class="hidden h-(--nav-control-height) items-center gap-2.5 rounded-full px-(--nav-button-px) text-(length:--nav-control-font-size) font-medium whitespace-nowrap transition-colors xl:flex"
           :class="isOrderEntryActive ? 'bg-cocoa text-white' : 'bg-white text-ink hover:bg-primary-soft'"
         >
           <OrderEntryIcon class="size-(--nav-icon-size) shrink-0" :class="isOrderEntryActive ? 'text-white' : 'text-primary-dark'" />
@@ -83,56 +78,8 @@ watch(() => route.path, () => {
           <span class="sm:hidden">เข้าสู่ระบบ</span>
           <span class="hidden sm:inline">เข้าสู่ระบบ / สมัครสมาชิก</span>
         </NuxtLink>
-
-        <button
-          type="button"
-          class="flex size-(--nav-bell-size) shrink-0 items-center justify-center rounded-full transition-colors hover:bg-white/15 xl:hidden"
-          :aria-expanded="isMobileMenuOpen"
-          aria-controls="mobile-menu"
-          :aria-label="isMobileMenuOpen ? 'ปิดเมนู' : 'เปิดเมนู'"
-          @click="isMobileMenuOpen = !isMobileMenuOpen"
-        >
-          <Icon :name="isMobileMenuOpen ? 'lucide:x' : 'lucide:menu'" class="size-5" />
-        </button>
       </div>
     </div>
-
-    <Transition
-      enter-active-class="transition duration-150 ease-out"
-      enter-from-class="-translate-y-2 opacity-0"
-      leave-active-class="transition duration-100 ease-in"
-      leave-to-class="-translate-y-2 opacity-0"
-    >
-      <nav
-        v-if="isMobileMenuOpen"
-        id="mobile-menu"
-        aria-label="เมนูหลัก (มือถือ)"
-        class="page-container border-t border-white/15 bg-primary pb-4 xl:hidden"
-      >
-        <ul class="flex flex-col py-2">
-          <li v-for="item in navItems" :key="item.to">
-            <NuxtLink
-              :to="item.to"
-              :aria-current="isActive(item.to) ? 'page' : undefined"
-              class="block rounded-lg px-3 py-3 text-base font-medium transition-colors hover:bg-white/15"
-              :class="{ 'bg-white/15': isActive(item.to) }"
-            >
-              {{ item.label }}
-            </NuxtLink>
-          </li>
-        </ul>
-        <NuxtLink
-          v-if="isLoggedIn"
-          to="/orders/submit"
-          :aria-current="isOrderEntryActive ? 'page' : undefined"
-          class="flex h-11 items-center justify-center gap-2 rounded-full text-sm font-medium md:hidden"
-          :class="isOrderEntryActive ? 'bg-cocoa text-white' : 'bg-white text-ink'"
-        >
-          <OrderEntryIcon class="size-4 shrink-0" :class="isOrderEntryActive ? 'text-white' : 'text-primary-dark'" />
-          กรอกเลขออเดอร์
-        </NuxtLink>
-      </nav>
-    </Transition>
   </header>
 </template>
 

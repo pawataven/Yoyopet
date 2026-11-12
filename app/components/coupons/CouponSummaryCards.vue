@@ -14,7 +14,7 @@ const summaryItems = computed(() => [
 
 <template>
   <section aria-label="สรุปคูปอง" class="mt-6 xl:mt-10">
-    <dl class="grid gap-3 sm:grid-cols-3 xl:gap-6">
+    <dl class="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:gap-6">
       <div
         v-for="item in summaryItems"
         :key="item.label"

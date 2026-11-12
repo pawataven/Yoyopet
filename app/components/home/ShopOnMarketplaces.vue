@@ -11,7 +11,7 @@ const { marketplaceStores } = useAppConfig()
       ซื้อช่องทางไหนก็สะสมแต้มได้ เก็บเลขคำสั่งซื้อไว้กรอกนะ
     </p>
 
-    <ul class="mt-4 grid gap-3 md:grid-cols-3 xl:mt-5 xl:gap-6">
+    <ul class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3 xl:mt-5 xl:gap-6">
       <li v-for="store in marketplaceStores" :key="store.id">
         <a
           :href="store.storeUrl"

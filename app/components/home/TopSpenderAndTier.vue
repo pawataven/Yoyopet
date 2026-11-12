@@ -6,7 +6,7 @@ const { tierLevels } = useTierLevels()
 </script>
 
 <template>
-  <div class="page-container mt-12 grid gap-6 xl:mt-20 xl:grid-cols-[972fr_684fr]">
+  <div class="page-container mt-12 grid grid-cols-1 gap-6 xl:mt-20 xl:grid-cols-[minmax(0,972fr)_minmax(0,684fr)]">
     <TopSpenderCard
       v-if="leaderboard"
       :leaderboard="leaderboard"

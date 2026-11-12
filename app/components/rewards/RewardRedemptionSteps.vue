@@ -13,7 +13,7 @@ const redemptionSteps = [
       วิธีแลกของรางวัล
     </h2>
 
-    <ol class="mt-4 grid gap-3 sm:grid-cols-2 xl:mt-6 xl:grid-cols-4 xl:gap-6">
+    <ol class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:mt-6 xl:grid-cols-4 xl:gap-6">
       <li v-for="(step, index) in redemptionSteps" :key="step.title" class="rounded-[1.25rem] bg-cream p-5 xl:px-8 xl:pt-8 xl:pb-7">
         <div class="flex items-start justify-between">
           <span class="flex size-11 items-center justify-center rounded-full bg-white text-primary xl:size-16" aria-hidden="true">

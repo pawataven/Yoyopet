@@ -57,7 +57,7 @@ const monthOptions = computed(() => months.value.map((month, index) => ({
     </header>
 
     <template v-if="leaderboard">
-      <div class="mt-6 grid gap-6 xl:mt-10 xl:grid-cols-[972fr_684fr]">
+      <div class="mt-6 grid grid-cols-1 gap-6 xl:mt-10 xl:grid-cols-[minmax(0,972fr)_minmax(0,684fr)]">
         <TopSpenderPodium :leaderboard="leaderboard" />
         <TopSpenderPrizesCard
           :prizes="leaderboard.prizes"
@@ -68,7 +68,7 @@ const monthOptions = computed(() => months.value.map((month, index) => ({
         />
       </div>
 
-      <div class="mt-6 grid items-start gap-6 xl:grid-cols-[1112fr_544fr]">
+      <div class="mt-6 grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1112fr)_minmax(0,544fr)]">
         <TopSpenderRankingTable
           :entries="leaderboard.entries"
           :rewarded-rank-count="leaderboard.rewardedRankCount"
@@ -76,7 +76,7 @@ const monthOptions = computed(() => months.value.map((month, index) => ({
           :member-display-name="member?.displayName ?? null"
           :member-tier="member?.tier ?? null"
         />
-        <div class="grid gap-6">
+        <div class="grid grid-cols-1 gap-6">
           <MyTopSpenderStandingCard
             v-if="leaderboard.myStanding"
             :standing="leaderboard.myStanding"

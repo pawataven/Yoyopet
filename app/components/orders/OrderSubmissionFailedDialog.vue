@@ -63,7 +63,7 @@ const failureDescription = computed(() =>
         </ul>
       </div>
 
-      <div class="mt-5 grid gap-3 sm:mt-7 sm:gap-4">
+      <div class="mt-5 grid grid-cols-1 gap-3 sm:mt-7 sm:gap-4">
         <button
           ref="retryButton"
           type="button"

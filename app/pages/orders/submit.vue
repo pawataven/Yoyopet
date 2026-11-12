@@ -75,7 +75,7 @@ function handleSubmitted(result: OrderSubmissionResult) {
       </p>
     </header>
 
-    <div class="mt-6 grid items-start gap-4 lg:grid-cols-[minmax(0,970fr)_minmax(0,686fr)] xl:mt-8 xl:gap-6">
+    <div class="mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,970fr)_minmax(0,686fr)] xl:mt-8 xl:gap-6">
       <OrderSubmitForm
         ref="orderSubmitForm"
         v-model:marketplace-id="selectedMarketplaceId"
@@ -85,7 +85,7 @@ function handleSubmitted(result: OrderSubmissionResult) {
         @show-example="showOrderNumberExample"
       />
 
-      <div class="grid gap-4 xl:gap-6">
+      <div class="grid grid-cols-1 gap-4 xl:gap-6">
         <OrderEarningRateCard
           v-if="earningRule"
           :earning-rule="earningRule"

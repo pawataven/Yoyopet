@@ -12,7 +12,7 @@ defineProps<{
       ผู้ชนะเดือนที่ผ่านมา
     </h2>
 
-    <ul class="mt-4 grid gap-3 md:grid-cols-3 xl:mt-6 xl:gap-6">
+    <ul class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3 xl:mt-6 xl:gap-6">
       <li v-for="monthWinners in pastWinners" :key="monthWinners.month" class="rounded-[1.25rem] border bg-white p-5 xl:px-8 xl:py-7">
         <h3 class="font-sans text-base font-semibold xl:text-xl">
           {{ formatThaiLongMonthYear(monthWinners.month) }}

@@ -178,7 +178,7 @@ const searchInputId = useId()
         </div>
       </div>
 
-      <ul v-if="visibleCoupons.length || isRedeemMoreCardVisible" class="mt-5 grid gap-4 lg:grid-cols-2 xl:mt-6 xl:gap-6">
+      <ul v-if="visibleCoupons.length || isRedeemMoreCardVisible" class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2 xl:mt-6 xl:gap-6">
         <li v-for="coupon in visibleCoupons" :key="coupon.id" class="flex">
           <CouponListCard :coupon="coupon" class="w-full" @apply="openCouponUseDialog" />
         </li>
@@ -223,7 +223,7 @@ const searchInputId = useId()
           ดูทั้งหมด ›
         </button>
       </div>
-      <ul class="mt-4 grid gap-4 lg:grid-cols-2 xl:mt-6 xl:gap-6">
+      <ul class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2 xl:mt-6 xl:gap-6">
         <li v-for="coupon in recentHistoryCoupons" :key="coupon.id" class="flex">
           <CouponListCard :coupon="coupon" class="w-full" />
         </li>

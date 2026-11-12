@@ -36,7 +36,7 @@ const labelClass = 'mb-1.5 block text-sm xl:text-[1.0625rem]'
       ข้อมูลส่วนตัว
     </h2>
 
-    <div class="mt-5 grid gap-x-6 gap-y-5 sm:grid-cols-2 xl:mt-4 xl:gap-y-7">
+    <div class="mt-5 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 xl:mt-4 xl:gap-y-7">
       <div>
         <label :for="`${fieldId}-first-name`" :class="labelClass">ชื่อ</label>
         <input

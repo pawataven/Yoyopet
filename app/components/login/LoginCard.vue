@@ -1,4 +1,10 @@
 <script setup lang="ts">
+const { variant = 'card' } = defineProps<{
+  variant?: 'card' | 'sheet'
+}>()
+
+const isSheet = computed(() => variant === 'sheet')
+
 const route = useRoute()
 const { signInWithLine, requestPhoneOtp, verifyPhoneOtp } = useAuth()
 const { isOnboardingRequired, refresh: refreshOnboardingStatus } = useMemberOnboarding()
@@ -24,7 +30,11 @@ const fieldId = useId()
 const termsCheckbox = useTemplateRef<HTMLInputElement>('termsCheckbox')
 const phoneInput = useTemplateRef<HTMLInputElement>('phoneInput')
 
-const consents = computed(() => ({ acceptedTerms: acceptedTerms.value, marketingOptIn: marketingOptIn.value }))
+// The sheet design has no consent checkboxes: continuing counts as accepting the terms, and marketing stays opted out
+const consents = computed(() => ({
+  acceptedTerms: isSheet.value || acceptedTerms.value,
+  marketingOptIn: !isSheet.value && marketingOptIn.value
+}))
 
 watch(acceptedTerms, (isAccepted) => {
   if (isAccepted) termsError.value = ''
@@ -38,7 +48,7 @@ function handlePhoneInput(event: Event) {
 }
 
 function ensureTermsAccepted() {
-  if (acceptedTerms.value) return true
+  if (consents.value.acceptedTerms) return true
   termsError.value = 'กรุณายอมรับเงื่อนไขการเป็นสมาชิกและนโยบายความเป็นส่วนตัวก่อน'
   termsCheckbox.value?.focus()
   return false
@@ -124,19 +134,36 @@ async function handleChangePhone() {
 </script>
 
 <template>
-  <section aria-labelledby="login-heading" class="flex flex-col rounded-[1.25rem] border bg-white p-5 xl:p-10">
-    <h2 id="login-heading" class="text-xl leading-tight xl:text-[1.75rem]">
-      เข้าสู่ระบบ / สมัครสมาชิก
-    </h2>
-    <p class="mt-1 text-sm text-muted xl:text-base">
-      สมัครฟรี ใช้เวลาไม่ถึง 1 นาที
-    </p>
+  <section
+    :aria-labelledby="`${fieldId}-heading`"
+    class="flex flex-col bg-white"
+    :class="isSheet
+      ? 'rounded-t-[1.75rem] px-5 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]'
+      : 'rounded-[1.25rem] border p-5 xl:p-10'"
+  >
+    <template v-if="isSheet">
+      <h2 :id="`${fieldId}-heading`" class="text-xl leading-tight">
+        ยินดีต้อนรับสู่ YoYo Member
+      </h2>
+      <p class="mt-1 text-sm text-muted">
+        สมัครฟรี รับทันที 50 แต้ม + คูปองลด 5%
+      </p>
+    </template>
+    <template v-else>
+      <h2 :id="`${fieldId}-heading`" class="text-xl leading-tight xl:text-[1.75rem]">
+        เข้าสู่ระบบ / สมัครสมาชิก
+      </h2>
+      <p class="mt-1 text-sm text-muted xl:text-base">
+        สมัครฟรี ใช้เวลาไม่ถึง 1 นาที
+      </p>
+    </template>
 
-    <div class="mt-6 xl:mt-7">
+    <div :class="isSheet ? 'mt-5' : 'mt-6 xl:mt-7'">
       <button
         type="button"
         :disabled="isSigningInWithLine"
-        class="relative flex h-12 w-full items-center justify-center rounded-xl bg-line-green text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60 xl:h-15.5 xl:text-lg"
+        class="relative flex h-12 w-full items-center justify-center bg-line-green text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+        :class="isSheet ? 'rounded-full' : 'rounded-xl xl:h-15.5 xl:text-lg'"
         @click="handleLineSignIn"
       >
         <span class="absolute left-4 flex size-7 items-center justify-center rounded-lg bg-white font-number text-sm font-semibold text-line-green xl:left-5 xl:size-8 xl:text-base" aria-hidden="true">
@@ -146,28 +173,44 @@ async function handleChangePhone() {
         เข้าสู่ระบบด้วย LINE
       </button>
 
-      <div class="my-5 flex items-center gap-4 text-xs text-muted xl:my-6 xl:text-sm" role="separator" aria-label="หรือ">
+      <div class="flex items-center gap-4 text-xs text-muted" :class="isSheet ? 'my-4' : 'my-5 xl:my-6 xl:text-sm'" role="separator" aria-label="หรือ">
         <span class="h-px flex-1 bg-border" />
         หรือ
         <span class="h-px flex-1 bg-border" />
       </div>
 
       <form novalidate @submit.prevent="handleRequestOtp">
-        <label :for="`${fieldId}-phone`" class="mb-1.5 block text-sm xl:text-[1.0625rem]">เบอร์โทรศัพท์</label>
-        <input
-          :id="`${fieldId}-phone`"
-          ref="phoneInput"
-          :value="phone"
-          type="tel"
-          inputmode="tel"
-          autocomplete="tel-national"
-          placeholder="08X-XXX-XXXX"
-          :aria-invalid="phoneError ? 'true' : undefined"
-          :aria-describedby="phoneError ? `${fieldId}-phone-error` : undefined"
-          class="h-12 w-full rounded-xl border-2 bg-white px-4 text-base transition-colors placeholder:text-muted/60 focus:border-primary focus:outline-none xl:h-14.5 xl:px-5 xl:text-lg"
-          :class="phoneError ? 'border-primary' : 'border-muted/25'"
-          @input="handlePhoneInput"
+        <label
+          :for="`${fieldId}-phone`"
+          :class="isSheet ? 'sr-only' : 'mb-1.5 block text-sm xl:text-[1.0625rem]'"
+        >เบอร์โทรศัพท์</label>
+        <div
+          class="flex h-12 items-center border-2 bg-white transition-colors focus-within:border-primary"
+          :class="[
+            phoneError ? 'border-primary' : 'border-muted/25',
+            isSheet ? 'rounded-full' : 'rounded-xl xl:h-14.5'
+          ]"
         >
+          <span
+            v-if="isSheet"
+            class="flex h-6 shrink-0 items-center border-r border-muted/25 pr-3 pl-5 text-sm font-semibold"
+            aria-hidden="true"
+          >+66</span>
+          <input
+            :id="`${fieldId}-phone`"
+            ref="phoneInput"
+            :value="phone"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel-national"
+            :placeholder="isSheet ? 'เบอร์โทรศัพท์' : '08X-XXX-XXXX'"
+            :aria-invalid="phoneError ? 'true' : undefined"
+            :aria-describedby="phoneError ? `${fieldId}-phone-error` : undefined"
+            class="h-full min-w-0 flex-1 rounded-[inherit] bg-transparent text-base placeholder:text-muted/60 focus:outline-none"
+            :class="isSheet ? 'px-3' : 'px-4 xl:px-5 xl:text-lg'"
+            @input="handlePhoneInput"
+          >
+        </div>
         <p v-if="phoneError" :id="`${fieldId}-phone-error`" class="mt-2 text-sm text-primary-dark">
           {{ phoneError }}
         </p>
@@ -175,45 +218,60 @@ async function handleChangePhone() {
         <button
           type="submit"
           :disabled="isRequestingOtp"
-          class="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 xl:mt-5 xl:h-14 xl:text-lg"
+          class="mt-4 flex h-12 w-full items-center justify-center gap-2 text-base font-semibold text-white transition-colors disabled:opacity-60"
+          :class="isSheet ? 'rounded-full bg-cocoa hover:bg-ink' : 'rounded-xl bg-primary hover:bg-primary-dark xl:mt-5 xl:h-14 xl:text-lg'"
         >
           <Icon v-if="isRequestingOtp" name="lucide:loader-circle" class="size-5 animate-spin" />
           ขอรหัส OTP
         </button>
       </form>
 
-      <hr class="mt-6 xl:mt-7">
-
-      <div class="mt-5 space-y-3 text-sm xl:mt-6 xl:space-y-4 xl:text-base">
-        <label class="flex cursor-pointer items-start gap-3">
-          <input
-            ref="termsCheckbox"
-            v-model="acceptedTerms"
-            type="checkbox"
-            :aria-invalid="termsError ? 'true' : undefined"
-            :aria-describedby="termsError ? `${fieldId}-terms-error` : undefined"
-            class="mt-0.5 size-4.5 shrink-0 cursor-pointer accent-primary xl:size-5"
-          >
-          <span>
-            ยอมรับ
-            <NuxtLink to="/terms/membership" target="_blank" class="font-semibold text-primary-dark hover:underline">เงื่อนไขการเป็นสมาชิก</NuxtLink>
-            และ
-            <NuxtLink to="/privacy" target="_blank" class="font-semibold text-primary-dark hover:underline">นโยบายความเป็นส่วนตัว</NuxtLink>
-          </span>
-        </label>
-        <p v-if="termsError" :id="`${fieldId}-terms-error`" class="text-sm text-primary-dark">
+      <template v-if="isSheet">
+        <p v-if="termsError" role="alert" class="mt-3 text-center text-sm text-primary-dark">
           {{ termsError }}
         </p>
+        <p class="mt-5 text-center text-xs text-muted">
+          การเข้าสู่ระบบถือว่ายอมรับ
+          <NuxtLink to="/terms/membership" target="_blank" class="text-ink underline underline-offset-2">เงื่อนไข</NuxtLink>
+          และ
+          <NuxtLink to="/privacy" target="_blank" class="text-ink underline underline-offset-2">นโยบายความเป็นส่วนตัว</NuxtLink>
+        </p>
+      </template>
 
-        <label class="flex cursor-pointer items-start gap-3">
-          <input
-            v-model="marketingOptIn"
-            type="checkbox"
-            class="mt-0.5 size-4.5 shrink-0 cursor-pointer accent-primary xl:size-5"
-          >
-          <span>ยินยอมรับข่าวสารและโปรโมชันจาก YoYo (ไม่บังคับ)</span>
-        </label>
-      </div>
+      <template v-else>
+        <hr class="mt-6 xl:mt-7">
+
+        <div class="mt-5 space-y-3 text-sm xl:mt-6 xl:space-y-4 xl:text-base">
+          <label class="flex cursor-pointer items-start gap-3">
+            <input
+              ref="termsCheckbox"
+              v-model="acceptedTerms"
+              type="checkbox"
+              :aria-invalid="termsError ? 'true' : undefined"
+              :aria-describedby="termsError ? `${fieldId}-terms-error` : undefined"
+              class="mt-0.5 size-4.5 shrink-0 cursor-pointer accent-primary xl:size-5"
+            >
+            <span>
+              ยอมรับ
+              <NuxtLink to="/terms/membership" target="_blank" class="font-semibold text-primary-dark hover:underline">เงื่อนไขการเป็นสมาชิก</NuxtLink>
+              และ
+              <NuxtLink to="/privacy" target="_blank" class="font-semibold text-primary-dark hover:underline">นโยบายความเป็นส่วนตัว</NuxtLink>
+            </span>
+          </label>
+          <p v-if="termsError" :id="`${fieldId}-terms-error`" class="text-sm text-primary-dark">
+            {{ termsError }}
+          </p>
+
+          <label class="flex cursor-pointer items-start gap-3">
+            <input
+              v-model="marketingOptIn"
+              type="checkbox"
+              class="mt-0.5 size-4.5 shrink-0 cursor-pointer accent-primary xl:size-5"
+            >
+            <span>ยินยอมรับข่าวสารและโปรโมชันจาก YoYo (ไม่บังคับ)</span>
+          </label>
+        </div>
+      </template>
     </div>
 
     <OtpVerificationDialog
@@ -229,7 +287,7 @@ async function handleChangePhone() {
       @resend="sendOtp"
       @change-phone="handleChangePhone"
     />
-    <aside class="mt-6 flex gap-3 rounded-2xl bg-cream p-4 xl:mt-8 xl:gap-3.5 xl:px-6 xl:py-5">
+    <aside v-if="!isSheet" class="mt-6 flex gap-3 rounded-2xl bg-cream p-4 xl:mt-8 xl:gap-3.5 xl:px-6 xl:py-5">
       <Icon name="lucide:info" class="mt-0.5 size-4.5 shrink-0 text-muted xl:size-5" />
       <div>
         <p class="text-sm font-semibold xl:text-base">

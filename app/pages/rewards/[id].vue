@@ -55,7 +55,7 @@ useSeoMeta({
         </p>
       </header>
 
-      <div class="mt-6 grid items-start gap-8 lg:grid-cols-2 xl:mt-8 xl:grid-cols-[minmax(0,829fr)_minmax(0,688fr)] xl:gap-40">
+      <div class="mt-6 grid grid-cols-1 items-start gap-8 lg:grid-cols-2 xl:mt-8 xl:grid-cols-[minmax(0,829fr)_minmax(0,688fr)] xl:gap-40">
         <RewardGallery :reward="rewardDetail" />
         <RewardRedeemPanel
           v-model:quantity="quantity"
