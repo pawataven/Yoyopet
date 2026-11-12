@@ -16,8 +16,8 @@ export const orderNumberGuides: Record<MarketplaceId, OrderNumberGuide> = {
     ],
     steps: [
       'เปิดแอป Shopee › ฉัน › การซื้อของฉัน',
-      'เลือกคำสั่งซื้อสินค้า YoYo ที่ได้รับแล้ว',
-      'คัดลอก "หมายเลขคำสั่งซื้อ" มากรอก'
+      'แตะคำสั่งซื้อสินค้า YoYo ที่ "สำเร็จแล้ว"',
+      'เลื่อนลงล่างสุด คัดลอก "หมายเลขคำสั่งซื้อ"'
     ]
   },
   'tiktok-shop': {

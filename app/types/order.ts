@@ -11,6 +11,22 @@ export interface PendingOrder {
   expectedCreditDate: string | null
 }
 
+export type SubmittedOrderStatus = 'approved' | PendingOrderStatus | 'rejected'
+
+export type OrderRejectionReason = 'duplicate' | 'cancelled'
+
+export interface SubmittedOrder {
+  id: string
+  marketplaceId: MarketplaceId
+  orderNumber: string
+  submittedAt: string
+  spendBaht: number | null
+  points: number | null
+  status: SubmittedOrderStatus
+  rejectionReason: OrderRejectionReason | null
+  expectedCreditDate: string | null
+}
+
 export interface OrderSubmission {
   marketplaceId: MarketplaceId
   orderNumber: string

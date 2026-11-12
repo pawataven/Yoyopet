@@ -11,6 +11,7 @@ export function useOrderSubmission() {
   const { order: orderRepository } = useRepositories()
   const { userId } = useAuth()
   const { refresh: refreshPendingOrders } = usePendingOrders()
+  const { refresh: refreshRecentSubmissions } = useRecentOrderSubmissions()
 
   const isSubmitting = ref(false)
   const errorMessage = ref<string | null>(null)
@@ -21,7 +22,7 @@ export function useOrderSubmission() {
     errorMessage.value = null
     try {
       const result = await orderRepository.submitOrder(userId.value, submission, proofImage)
-      await refreshPendingOrders()
+      await Promise.all([refreshPendingOrders(), refreshRecentSubmissions()])
       return result
     } catch (error) {
       errorMessage.value = error instanceof OrderSubmissionError

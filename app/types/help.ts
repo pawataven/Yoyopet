@@ -1,3 +1,5 @@
+export type FaqTopic = 'general' | 'order-entry'
+
 export interface FaqItem {
   id: string
   question: string

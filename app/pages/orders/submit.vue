@@ -10,10 +10,12 @@ useSeoMeta({
 
 const { earningRule } = usePointsEarningRule()
 const { member } = useMember()
+const { recentSubmissions } = useRecentOrderSubmissions()
+const { faqs } = useFaqs('order-entry')
 
 const selectedMarketplaceId = ref<MarketplaceId>('shopee')
 const guideMarketplaceId = ref<MarketplaceId>('shopee')
-const guideCard = useTemplateRef<ComponentPublicInstance>('guideCard')
+const isGuideDialogOpen = ref(false)
 
 const lastSubmission = ref<OrderSubmissionResult | null>(null)
 const isSubmittedDialogOpen = ref(false)
@@ -24,7 +26,7 @@ watch(selectedMarketplaceId, (marketplaceId) => {
 
 function showOrderNumberExample() {
   guideMarketplaceId.value = selectedMarketplaceId.value
-  guideCard.value?.$el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  isGuideDialogOpen.value = true
 }
 
 function handleSubmitted(result: OrderSubmissionResult) {
@@ -59,10 +61,14 @@ function handleSubmitted(result: OrderSubmissionResult) {
           :earning-rule="earningRule"
           :member-tier="member?.tier ?? null"
         />
-        <OrderNumberGuideCard ref="guideCard" v-model:marketplace-id="guideMarketplaceId" />
+        <OrderNumberGuideCard v-model:marketplace-id="guideMarketplaceId" />
       </div>
     </div>
 
+    <RecentOrderSubmissionsTable :submissions="recentSubmissions" />
+    <FaqList v-if="faqs.length" :faqs="faqs" />
+
+    <OrderNumberGuideDialog v-model:open="isGuideDialogOpen" v-model:marketplace-id="guideMarketplaceId" />
     <OrderSubmittedDialog v-model:open="isSubmittedDialogOpen" :submission="lastSubmission" />
   </div>
 </template>
