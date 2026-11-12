@@ -34,7 +34,7 @@ const headerCellClass = 'pt-4 pb-3 font-normal xl:pt-6 xl:pb-4'
 </script>
 
 <template>
-  <section aria-labelledby="recent-order-submissions-heading" class="mt-12 xl:mt-17">
+  <section id="recent-order-submissions" aria-labelledby="recent-order-submissions-heading" class="mt-12 scroll-mt-24 xl:mt-17 xl:scroll-mt-32">
     <div class="flex items-center justify-between gap-4">
       <h2 id="recent-order-submissions-heading" class="text-2xl leading-tight xl:text-[2.25rem]">
         รายการที่ส่งล่าสุด

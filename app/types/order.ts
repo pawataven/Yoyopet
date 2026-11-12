@@ -36,6 +36,8 @@ export interface OrderSubmissionResult {
   orderId: string
   marketplaceId: MarketplaceId
   orderNumber: string
+  estimatedPoints: number | null
+  expectedCreditDate: string | null
 }
 
 export interface OrderNumberGuideField {

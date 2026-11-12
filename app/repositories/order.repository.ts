@@ -13,6 +13,8 @@ export class OrderSubmissionError extends Error {
 }
 
 const MOCK_MIN_ORDER_NUMBER_LENGTH = 6
+const MOCK_ESTIMATED_POINTS = 12
+const MOCK_DAYS_UNTIL_CREDIT = 4
 
 function isPendingStatus(status: SubmittedOrder['status']): status is PendingOrderStatus {
   return status === 'verifying' || status === 'in-return-window'
@@ -105,18 +107,26 @@ export function createMockOrderRepository(): OrderRepository {
         throw new OrderSubmissionError('already_submitted')
       }
       const orderId = `order-${marketplaceId}-${normalizedOrderNumber}`
+      const today = new Date()
+      const expectedCreditDate = toLocalIsoDate(new Date(today.getFullYear(), today.getMonth(), today.getDate() + MOCK_DAYS_UNTIL_CREDIT))
       submittedOrders.unshift({
         id: orderId,
         marketplaceId,
         orderNumber: normalizedOrderNumber,
-        submittedAt: toLocalIsoDate(new Date()),
+        submittedAt: toLocalIsoDate(today),
         spendBaht: null,
-        points: null,
+        points: MOCK_ESTIMATED_POINTS,
         status: 'verifying',
         rejectionReason: null,
-        expectedCreditDate: null
+        expectedCreditDate
       })
-      return { orderId, marketplaceId, orderNumber: normalizedOrderNumber }
+      return {
+        orderId,
+        marketplaceId,
+        orderNumber: normalizedOrderNumber,
+        estimatedPoints: MOCK_ESTIMATED_POINTS,
+        expectedCreditDate
+      }
     }
   }
 }

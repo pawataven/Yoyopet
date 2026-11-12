@@ -29,6 +29,12 @@ function showOrderNumberExample() {
   isGuideDialogOpen.value = true
 }
 
+async function showSubmissionStatus() {
+  isSubmittedDialogOpen.value = false
+  await nextTick()
+  document.getElementById('recent-order-submissions')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
 function handleSubmitted(result: OrderSubmissionResult) {
   lastSubmission.value = result
   isSubmittedDialogOpen.value = true
@@ -69,6 +75,10 @@ function handleSubmitted(result: OrderSubmissionResult) {
     <FaqList v-if="faqs.length" :faqs="faqs" />
 
     <OrderNumberGuideDialog v-model:open="isGuideDialogOpen" v-model:marketplace-id="guideMarketplaceId" />
-    <OrderSubmittedDialog v-model:open="isSubmittedDialogOpen" :submission="lastSubmission" />
+    <OrderSubmittedDialog
+      v-model:open="isSubmittedDialogOpen"
+      :submission="lastSubmission"
+      @view-status="showSubmissionStatus"
+    />
   </div>
 </template>
