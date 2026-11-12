@@ -6,7 +6,7 @@ export const orderNumberGuides: Record<MarketplaceId, OrderNumberGuide> = {
     marketplaceId: 'shopee',
     orderNumberPath: 'ฉัน › การซื้อของฉัน › เลือกคำสั่งซื้อ › หมายเลขคำสั่งซื้อ',
     orderNumberPlaceholder: 'เช่น 250918K3PQXXXX',
-    sampleOrderNumber: '2610109JV3JJQD',
+    sampleOrderNumber: '2610109XXXXXXX',
     sampleDetails: [{ label: 'ชำระผ่าน', value: 'QR พร้อมเพย์' }],
     sampleTimeline: [
       { label: 'เวลาที่สั่งซื้อ', value: '10-10-2026 18:05' },
@@ -24,7 +24,7 @@ export const orderNumberGuides: Record<MarketplaceId, OrderNumberGuide> = {
     marketplaceId: 'tiktok-shop',
     orderNumberPath: 'โปรไฟล์ › คำสั่งซื้อของคุณ › เลือกคำสั่งซื้อ › หมายเลขคำสั่งซื้อ',
     orderNumberPlaceholder: 'เช่น 5762930114XXXXXXXX',
-    sampleOrderNumber: '576293011482736451',
+    sampleOrderNumber: '5762930XXXXXXXXXXX',
     sampleDetails: [{ label: 'วิธีการชำระเงิน', value: 'บัตรเครดิต/เดบิต' }],
     sampleTimeline: [
       { label: 'เวลาที่สั่งซื้อ', value: '10-10-2026 18:05' },
@@ -41,7 +41,7 @@ export const orderNumberGuides: Record<MarketplaceId, OrderNumberGuide> = {
     marketplaceId: 'lazada',
     orderNumberPath: 'บัญชี › คำสั่งซื้อของฉัน › เลือกคำสั่งซื้อ › หมายเลขคำสั่งซื้อ',
     orderNumberPlaceholder: 'เช่น 10293847XXXXXX',
-    sampleOrderNumber: '1029384756123456',
+    sampleOrderNumber: '10293847XXXXXXXX',
     sampleDetails: [{ label: 'ชำระผ่าน', value: 'เก็บเงินปลายทาง' }],
     sampleTimeline: [
       { label: 'สั่งซื้อเมื่อ', value: '10-10-2026 18:05' },

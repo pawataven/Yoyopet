@@ -10,7 +10,6 @@ const props = withDefaults(defineProps<{
 const selectedMarketplaceId = defineModel<MarketplaceId>('marketplaceId', { required: true })
 
 const { marketplaceStores } = useAppConfig()
-const { copiedKey, copy } = useClipboardCopy()
 
 const guidePanelId = useId()
 const guide = computed(() => orderNumberGuides[selectedMarketplaceId.value])
@@ -51,15 +50,17 @@ const rowClass = computed(() => [
         <div :class="rowClass">
           <span class="font-semibold" :class="isLarge ? 'text-base sm:text-[1.625rem]' : 'xl:text-lg'">หมายเลขคำสั่งซื้อ</span>
           <span class="flex min-w-0 items-center gap-2">
-            <span class="truncate font-number font-semibold" :class="isLarge && 'sm:text-xl'">{{ guide.sampleOrderNumber }}</span>
-            <button
-              type="button"
-              class="shrink-0 rounded-md border border-muted/40 px-2 py-0.5 text-xs transition-colors hover:bg-cream"
+            <span class="truncate font-number font-semibold" :class="isLarge && 'sm:text-xl'">
+              <span class="sr-only">ตัวอย่าง </span>{{ guide.sampleOrderNumber }}
+            </span>
+            <!-- Illustrates the marketplace's own copy button; the sample number is fake, so this one does nothing -->
+            <span
+              aria-hidden="true"
+              class="shrink-0 rounded-md border border-muted/40 px-2 py-0.5 text-xs"
               :class="isLarge ? 'sm:border-2 sm:px-3 sm:text-lg' : 'xl:text-[0.9375rem]'"
-              @click="copy(guide.sampleOrderNumber)"
             >
-              {{ copiedKey === guide.sampleOrderNumber ? 'คัดลอกแล้ว' : 'คัดลอก' }}
-            </button>
+              คัดลอก
+            </span>
           </span>
         </div>
         <dl class="space-y-2 text-muted" :class="isLarge ? 'mt-4 sm:mt-7' : 'mt-3 xl:mt-5'">
