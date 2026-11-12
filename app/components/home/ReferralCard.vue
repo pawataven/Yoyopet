@@ -1,32 +1,14 @@
 <script setup lang="ts">
 import type { ReferralSummary } from '~/types/referral'
 
-const COPIED_FEEDBACK_MS = 2000
-
 const props = defineProps<{
   referral: ReferralSummary
 }>()
 
-const hasCopied = ref(false)
-let copiedFeedbackTimer: ReturnType<typeof setTimeout> | undefined
+const { copiedKey, copy } = useClipboardCopy()
+const hasCopied = computed(() => copiedKey.value !== null)
 
-async function copyReferralCode() {
-  try {
-    await navigator.clipboard.writeText(props.referral.referralCode)
-    hasCopied.value = true
-    clearTimeout(copiedFeedbackTimer)
-    copiedFeedbackTimer = setTimeout(() => (hasCopied.value = false), COPIED_FEEDBACK_MS)
-  } catch {
-    hasCopied.value = false
-  }
-}
-
-onBeforeUnmount(() => clearTimeout(copiedFeedbackTimer))
-
-const lineShareUrl = computed(() => {
-  const message = `สมัครสมาชิก YoyoPet ด้วยโค้ด ${props.referral.referralCode} รับ ${props.referral.friendRewardPoints} แต้ม`
-  return `https://line.me/R/share?text=${encodeURIComponent(message)}`
-})
+const lineShareUrl = computed(() => buildLineShareUrl(props.referral))
 </script>
 
 <template>
@@ -51,7 +33,7 @@ const lineShareUrl = computed(() => {
           type="button"
           :aria-label="hasCopied ? 'คัดลอกโค้ดแล้ว' : 'คัดลอกโค้ดชวนเพื่อน'"
           class="flex size-9 items-center justify-center rounded-xl text-muted transition-colors hover:bg-primary-soft hover:text-primary-dark"
-          @click="copyReferralCode"
+          @click="copy(referral.referralCode)"
         >
           <Icon :name="hasCopied ? 'lucide:check' : 'lucide:copy'" class="size-4.5" :class="hasCopied && 'text-success'" />
         </button>
