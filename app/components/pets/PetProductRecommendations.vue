@@ -15,7 +15,13 @@ const { recommendations } = usePetProductRecommendations()
 
     <ul class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4 xl:mt-5 xl:gap-6">
       <li v-for="product in recommendations" :key="product.id" class="flex">
-        <PetProductCard :product="product" class="w-full" />
+        <ProductCard
+          :name="product.name"
+          :image-url="product.imageUrl"
+          :shop-url="product.shopUrl"
+          :eyebrow="`สำหรับ${product.petName}`"
+          class="w-full"
+        />
       </li>
     </ul>
   </section>

@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import type { Reward } from '~/types/reward'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   reward: Reward
   memberPoints: number
-}>()
+  variant?: 'featured' | 'catalog'
+}>(), {
+  variant: 'featured'
+})
 
 const pointsShort = computed(() => Math.max(0, props.reward.pointsCost - props.memberPoints))
 const canRedeem = computed(() => pointsShort.value === 0)
+const isCatalog = computed(() => props.variant === 'catalog')
 </script>
 
 <template>
-  <article class="flex flex-col rounded-[1.25rem] border bg-white p-3 xl:p-4">
+  <article class="flex flex-col rounded-[1.25rem] border bg-white p-3" :class="isCatalog ? 'xl:p-3.5' : 'xl:p-4'">
     <div class="relative">
       <CouponArtwork
         v-if="reward.category === 'coupon' && reward.couponValueBaht !== null"
@@ -32,6 +36,14 @@ const canRedeem = computed(() => pointsShort.value === 0)
         <Icon name="lucide:gift" class="size-10" />
       </div>
 
+      <span
+        v-if="isCatalog && reward.badge"
+        class="absolute top-2 left-2 flex h-6 items-center rounded-full px-3 text-xs font-semibold xl:top-3 xl:left-3 xl:h-7 xl:text-sm"
+        :class="rewardBadgeAppearance[reward.badge].class"
+      >
+        {{ rewardBadgeAppearance[reward.badge].label }}
+      </span>
+
       <div v-if="!canRedeem" class="absolute inset-0 flex items-center justify-center rounded-xl bg-white/40">
         <span class="flex size-11 items-center justify-center rounded-full bg-ink/80 text-white xl:size-14">
           <Icon name="lucide:lock" class="size-5 xl:size-6" />
@@ -39,18 +51,27 @@ const canRedeem = computed(() => pointsShort.value === 0)
       </div>
     </div>
 
-    <div class="flex flex-1 flex-col px-1 pb-1 xl:px-2 xl:pb-2">
-      <h3 class="mt-3 line-clamp-2 font-sans text-sm font-normal text-ink xl:mt-5 xl:text-xl">
+    <div class="flex flex-1 flex-col px-1 pb-1 xl:px-2" :class="isCatalog ? 'xl:pb-1' : 'xl:pb-2'">
+      <p v-if="isCatalog" class="mt-3 text-xs text-muted xl:mt-5 xl:text-sm">
+        {{ rewardGroupLabels[reward.group] }}
+      </p>
+      <h3
+        class="line-clamp-2 font-sans text-sm font-normal text-ink"
+        :class="isCatalog ? 'mt-0.5 xl:mt-1 xl:text-[1.0625rem]' : 'mt-3 xl:mt-5 xl:text-xl'"
+      >
         {{ reward.name }}
       </h3>
 
       <div class="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
-        <p class="text-base font-semibold xl:text-[1.625rem]" :class="canRedeem ? 'text-primary-dark' : 'text-muted'">
+        <p
+          class="text-base font-semibold"
+          :class="[canRedeem ? 'text-primary-dark' : 'text-muted', isCatalog ? 'xl:text-[1.375rem]' : 'xl:text-[1.625rem]']"
+        >
           {{ formatNumber(reward.pointsCost) }} แต้ม
         </p>
         <span
-          class="flex h-6 items-center rounded-full px-2.5 text-xs font-medium xl:h-8.5 xl:px-4 xl:text-sm"
-          :class="canRedeem ? 'bg-line-green/10 text-success' : 'bg-border/70 text-muted'"
+          class="flex h-6 items-center rounded-full px-2.5 text-xs font-medium xl:px-4 xl:text-sm"
+          :class="[canRedeem ? 'bg-line-green/10 text-success' : 'bg-border/70 text-muted', isCatalog ? 'xl:h-7.5' : 'xl:h-8.5']"
         >
           {{ canRedeem ? 'แลกได้' : `ขาดอีก ${formatNumber(pointsShort)}` }}
         </span>
@@ -59,7 +80,8 @@ const canRedeem = computed(() => pointsShort.value === 0)
       <NuxtLink
         v-if="canRedeem"
         :to="`/rewards/${reward.id}`"
-        class="mt-3 flex h-10 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark xl:h-13 xl:text-lg"
+        class="mt-3 flex h-10 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark"
+        :class="isCatalog ? 'xl:h-12.5 xl:text-base' : 'xl:h-13 xl:text-lg'"
       >
         แลกเลย
       </NuxtLink>
@@ -67,7 +89,8 @@ const canRedeem = computed(() => pointsShort.value === 0)
         v-else
         type="button"
         disabled
-        class="mt-3 flex h-10 cursor-not-allowed items-center justify-center rounded-xl bg-border/70 text-sm font-semibold text-muted xl:h-13 xl:text-lg"
+        class="mt-3 flex h-10 cursor-not-allowed items-center justify-center rounded-xl bg-border/70 text-sm font-semibold text-muted"
+        :class="isCatalog ? 'xl:h-12.5 xl:text-base' : 'xl:h-13 xl:text-lg'"
       >
         แต้มยังไม่พอ
       </button>

@@ -1,5 +1,6 @@
 import { createMockAddressRepository } from './address.repository'
 import { createMockBannerRepository } from './banner.repository'
+import { createMockCampaignRepository } from './campaign.repository'
 import { createMockCouponRepository } from './coupon.repository'
 import { createMockHelpRepository } from './help.repository'
 import { createMockLeaderboardRepository } from './leaderboard.repository'
@@ -21,6 +22,7 @@ const mockNotificationRepository = createMockNotificationRepository()
 export function useRepositories() {
   return {
     banner: createMockBannerRepository(),
+    campaign: createMockCampaignRepository(),
     reward: createMockRewardRepository(),
     leaderboard: createMockLeaderboardRepository(),
     help: createMockHelpRepository(),

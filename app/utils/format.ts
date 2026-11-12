@@ -39,6 +39,24 @@ export function formatThaiDateRange({ from, to }: { from: string, to: string }) 
   return `${fromLabel} – ${formatThaiShortDate(to)}`
 }
 
+const thaiDayFormatter = new Intl.DateTimeFormat('th-TH-u-ca-gregory', { day: 'numeric' })
+const thaiShortMonthYearFormatter = new Intl.DateTimeFormat('th-TH-u-ca-gregory', { month: 'short', year: 'numeric' })
+const thaiLongMonthYearFormatter = new Intl.DateTimeFormat('th-TH-u-ca-gregory', { month: 'long', year: 'numeric' })
+const thaiLongDateFormatter = new Intl.DateTimeFormat('th-TH-u-ca-gregory', { day: 'numeric', month: 'long', year: 'numeric' })
+
+// Same month: "1–30 พ.ย. 2026" (short) or "1 – 30 พฤศจิกายน 2026" (long); otherwise both dates in full
+export function formatThaiDateSpan(from: string, to: string, monthStyle: 'short' | 'long' = 'short') {
+  const isSameMonth = from.slice(0, 7) === to.slice(0, 7)
+  if (!isSameMonth) {
+    return monthStyle === 'long'
+      ? `${thaiLongDateFormatter.format(new Date(from))} – ${thaiLongDateFormatter.format(new Date(to))}`
+      : formatThaiDateRange({ from, to })
+  }
+  const monthYearFormatter = monthStyle === 'long' ? thaiLongMonthYearFormatter : thaiShortMonthYearFormatter
+  const days = `${thaiDayFormatter.format(new Date(from))}${monthStyle === 'long' ? ' – ' : '–'}${thaiDayFormatter.format(new Date(to))}`
+  return `${days} ${monthYearFormatter.format(new Date(to))}`
+}
+
 export function toLocalIsoDate(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
