@@ -26,6 +26,7 @@ const { member } = useMember()
 const memberPoints = computed(() => member.value?.points ?? 0)
 const quantity = ref(1)
 const isRedeemDialogOpen = ref(false)
+const isInsufficientPointsDialogOpen = ref(false)
 
 watch(rewardId, () => {
   quantity.value = 1
@@ -61,6 +62,7 @@ useSeoMeta({
           :reward="rewardDetail"
           :member-points="memberPoints"
           @redeem="isRedeemDialogOpen = true"
+          @insufficient-points="isInsufficientPointsDialogOpen = true"
         />
       </div>
 
@@ -91,6 +93,11 @@ useSeoMeta({
         :reward="rewardDetail"
         :quantity="quantity"
         :member-points="memberPoints"
+      />
+      <InsufficientPointsDialog
+        v-model:open="isInsufficientPointsDialogOpen"
+        :reward="rewardDetail"
+        :quantity="quantity"
       />
     </template>
 

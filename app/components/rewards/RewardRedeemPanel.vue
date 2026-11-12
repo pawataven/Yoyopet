@@ -8,6 +8,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   redeem: [quantity: number]
+  insufficientPoints: []
 }>()
 
 const quantity = defineModel<number>('quantity', { required: true })
@@ -104,10 +105,10 @@ const stepButtonClass = 'flex size-9 items-center justify-center rounded-full te
     <div class="mt-5 space-y-3 xl:mt-7">
       <button
         type="button"
-        :disabled="!canRedeem"
+        :disabled="isOutOfStock"
         class="flex h-12 w-full items-center justify-center rounded-xl text-base font-semibold transition-colors xl:h-14 xl:text-lg"
-        :class="canRedeem ? 'bg-primary text-white hover:bg-primary-dark' : 'cursor-not-allowed bg-border text-muted'"
-        @click="emit('redeem', quantity)"
+        :class="canRedeem ? 'bg-primary text-white hover:bg-primary-dark' : isOutOfStock ? 'cursor-not-allowed bg-border text-muted' : 'bg-border text-muted hover:bg-border/70'"
+        @click="canRedeem ? emit('redeem', quantity) : emit('insufficientPoints')"
       >
         {{ isOutOfStock ? 'ของรางวัลหมดแล้ว' : canRedeem ? 'แลกเลย' : 'แต้มยังไม่พอ' }}
       </button>

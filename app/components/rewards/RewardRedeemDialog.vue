@@ -11,19 +11,26 @@ const isOpen = defineModel<boolean>('open', { required: true })
 
 const { redeem, isRedeeming, errorMessage, clearError } = useRewardRedemption()
 const { addresses, defaultAddressId } = useShippingAddresses()
+const { copiedKey, copy } = useClipboardCopy()
 
 const redemptionResult = ref<RewardRedemptionResult | null>(null)
 const selectedAddressId = ref<string | null>(null)
 const isChoosingAddress = ref(false)
 
 const needsShippingAddress = computed(() => props.reward.fulfillment === 'delivery')
+const isCouponReward = computed(() => props.reward.category === 'coupon' && props.reward.couponValueBaht !== null)
+const couponConditions = computed(() => [
+  props.reward.couponMinSpendBaht ? `ขั้นต่ำ ${formatNumber(props.reward.couponMinSpendBaht)} บาท` : 'ไม่มีขั้นต่ำ',
+  props.reward.couponValidDays ? `ใช้ได้ ${props.reward.couponValidDays} วันหลังแลก` : null,
+  props.quantity > 1 ? `จำนวน ${props.quantity} ใบ` : null
+].filter(Boolean).join(' · '))
 const selectedAddress = computed(() => addresses.value.find(address => address.id === selectedAddressId.value) ?? null)
 const totalPointsCost = computed(() => props.reward.pointsCost * props.quantity)
 const canConfirm = computed(() => !isRedeeming.value && (!needsShippingAddress.value || selectedAddress.value !== null))
 
 const headingId = useId()
 const confirmButton = useTemplateRef('confirmButton')
-const successLink = useTemplateRef<{ $el: HTMLElement }>('successLink')
+const successActions = useTemplateRef('successActions')
 
 watch(isOpen, (open) => {
   if (!open) return
@@ -33,12 +40,17 @@ watch(isOpen, (open) => {
   clearError()
 })
 
+function applyAddress(addressId: string) {
+  selectedAddressId.value = addressId
+  isChoosingAddress.value = false
+}
+
 async function confirmRedemption() {
   if (!canConfirm.value) return
   redemptionResult.value = await redeem(props.reward.id, props.quantity, needsShippingAddress.value ? selectedAddressId.value : null)
   if (redemptionResult.value) {
     await nextTick()
-    successLink.value?.$el.focus()
+    successActions.value?.querySelector('a')?.focus()
   }
 }
 
@@ -51,7 +63,7 @@ const primaryButtonClass = 'flex h-12 w-full items-center justify-center gap-2 r
     v-model:open="isOpen"
     :dismissible="!isRedeeming"
     :aria-labelledby="headingId"
-    class="max-w-[52rem]"
+    :class="isCouponReward || redemptionResult ? 'max-w-148' : 'max-w-208'"
     @opened="confirmButton?.focus()"
   >
     <div class="relative px-5 pt-6 pb-6 sm:px-10 sm:pt-9 sm:pb-10">
@@ -66,34 +78,161 @@ const primaryButtonClass = 'flex h-12 w-full items-center justify-center gap-2 r
       </button>
 
       <template v-if="redemptionResult">
-        <div class="pt-4 text-center">
-          <span class="mx-auto flex size-16 items-center justify-center rounded-full bg-success/10 text-success" aria-hidden="true">
-            <Icon name="lucide:check" class="size-8" />
-          </span>
-          <h2 :id="headingId" class="mt-5 text-xl leading-tight sm:text-[1.75rem]">
-            แลกสำเร็จ
+        <div class="pt-2 text-center sm:pt-3">
+          <SuccessCheckmark />
+          <h2 :id="headingId" class="mt-5 text-xl leading-tight sm:mt-7 sm:text-[1.75rem]">
+            {{ redemptionResult.coupons.length ? 'แลกคูปองสำเร็จ!' : 'แลกสำเร็จ!' }}
           </h2>
-          <p class="mt-2 text-sm text-muted sm:text-base">
-            {{ reward.fulfillment === 'coupon'
-              ? 'คูปองเข้า "คูปองของฉัน" แล้ว ใช้ได้ทันที'
-              : `เราจะจัดส่งให้ภายใน ${reward.deliveryLeadTime ?? '3–5 วันทำการ'}` }}
-          </p>
-          <p class="mt-1 text-sm text-muted sm:text-base">
-            แต้มคงเหลือ {{ formatNumber(redemptionResult.remainingPoints) }} แต้ม
+          <p class="mt-1.5 text-sm text-muted sm:text-base">
+            <template v-if="redemptionResult.coupons.length">
+              {{ reward.name }} เข้า "คูปองของฉัน" แล้ว
+            </template>
+            <template v-else>
+              เราจะจัดส่งภายใน {{ reward.deliveryLeadTime ?? '3–5 วันทำการ' }}
+            </template>
           </p>
         </div>
-        <div class="mt-7 grid gap-3 sm:mt-9 sm:grid-cols-2 sm:gap-4">
-          <button type="button" :class="outlineButtonClass" @click="isOpen = false">
-            ปิด
-          </button>
+
+        <template v-if="!redemptionResult.coupons.length">
+          <div class="mt-6 flex items-center gap-4 rounded-2xl bg-cream p-3 sm:mt-8 sm:gap-5 sm:p-4">
+            <NuxtImg
+              v-if="reward.imageUrls[0]"
+              :src="reward.imageUrls[0]"
+              alt=""
+              width="192"
+              height="128"
+              class="size-16 shrink-0 rounded-xl bg-white object-cover sm:size-24"
+            />
+            <span v-else class="flex size-16 shrink-0 items-center justify-center rounded-xl bg-white text-primary sm:size-24" aria-hidden="true">
+              <Icon name="lucide:gift" class="size-7" />
+            </span>
+            <div class="min-w-0">
+              <p class="font-semibold sm:text-lg">
+                {{ reward.name }}<template v-if="quantity > 1">
+                  × {{ quantity }}
+                </template>
+              </p>
+              <p class="mt-0.5 text-xs text-muted sm:mt-1 sm:text-sm">
+                เลขที่การแลก {{ redemptionResult.referenceCode }}
+              </p>
+              <p class="mt-0.5 text-sm font-semibold text-primary-dark sm:mt-1 sm:text-base">
+                − {{ formatNumber(redemptionResult.pointsSpent) }} แต้ม
+              </p>
+            </div>
+          </div>
+          <p v-if="selectedAddress" class="mt-4 text-xs text-muted sm:mt-5 sm:text-sm">
+            จัดส่งถึง: {{ formatThaiAddress(selectedAddress) }}
+          </p>
+        </template>
+
+        <ul v-if="redemptionResult.coupons.length" class="mt-6 space-y-4 sm:mt-8">
+          <li v-for="coupon in redemptionResult.coupons" :key="coupon.code">
+            <div class="flex items-center justify-between gap-3 rounded-2xl border-2 border-dashed border-primary/30 bg-cream py-3 pr-3 pl-5 sm:py-3.5 sm:pr-4 sm:pl-8">
+              <span class="truncate font-number text-xl font-semibold tracking-wide text-primary-dark sm:text-[1.75rem]">{{ coupon.code }}</span>
+              <button
+                type="button"
+                class="flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border-2 border-primary bg-white px-5 text-sm font-semibold text-primary-dark transition-colors hover:bg-primary-soft sm:h-13 sm:px-8 sm:text-base"
+                @click="copy(coupon.code)"
+              >
+                <Icon v-if="copiedKey === coupon.code" name="lucide:check" class="size-4" />
+                {{ copiedKey === coupon.code ? 'คัดลอกแล้ว' : 'คัดลอก' }}
+              </button>
+            </div>
+            <p class="mt-3 text-center text-xs text-muted sm:mt-4 sm:text-sm">
+              ใช้ได้ถึง {{ formatThaiShortDate(coupon.expiresAt) }} ·
+              {{ coupon.minSpendBaht ? `ขั้นต่ำ ${formatNumber(coupon.minSpendBaht)} บาท` : 'ไม่มีขั้นต่ำ' }}
+            </p>
+          </li>
+        </ul>
+        <span class="sr-only" aria-live="polite">{{ copiedKey ? `คัดลอกโค้ด ${copiedKey} แล้ว` : '' }}</span>
+
+        <div ref="successActions" class="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
           <NuxtLink
-            ref="successLink"
-            :to="reward.fulfillment === 'coupon' ? '/coupons' : '/rewards'"
+            v-if="redemptionResult.coupons.length"
+            to="/coupons"
             :class="primaryButtonClass"
             @click="isOpen = false"
           >
-            {{ reward.fulfillment === 'coupon' ? 'ดูคูปองของฉัน' : 'กลับหน้าของรางวัล' }}
+            ดูคูปองของฉัน
           </NuxtLink>
+          <NuxtLink
+            v-else
+            to="/rewards/history"
+            :class="primaryButtonClass"
+            @click="isOpen = false"
+          >
+            ติดตามการจัดส่ง
+          </NuxtLink>
+          <NuxtLink to="/rewards" :class="outlineButtonClass" @click="isOpen = false">
+            {{ redemptionResult.coupons.length ? 'แลกของรางวัลต่อ' : 'กลับหน้าของรางวัล' }}
+          </NuxtLink>
+        </div>
+        <p class="mt-5 text-center text-xs text-muted sm:mt-6 sm:text-sm">
+          แต้มคงเหลือ {{ formatNumber(redemptionResult.remainingPoints) }} แต้ม
+        </p>
+      </template>
+
+      <RewardAddressPicker
+        v-else-if="isChoosingAddress"
+        :addresses="addresses"
+        :selected-address-id="selectedAddressId"
+        :heading-id="headingId"
+        @apply="applyAddress"
+        @cancel="isChoosingAddress = false"
+        @navigate="isOpen = false"
+      />
+
+      <template v-else-if="isCouponReward">
+        <h2 :id="headingId" class="pr-12 text-xl leading-tight sm:text-[1.75rem]">
+          ยืนยันการแลกคูปอง
+        </h2>
+
+        <CouponArtwork :value-baht="reward.couponValueBaht!" class="mt-5 aspect-15/8 w-full sm:mt-6" />
+
+        <p class="mt-5 font-semibold sm:mt-6 sm:text-lg">
+          {{ reward.name }}
+        </p>
+        <p class="mt-0.5 text-xs text-muted sm:text-sm">
+          {{ couponConditions }}
+        </p>
+
+        <dl class="mt-4 space-y-2 rounded-2xl bg-border/40 px-5 py-4 text-sm sm:mt-5 sm:px-6 sm:text-base">
+          <div class="flex justify-between gap-4">
+            <dt class="text-muted">
+              ใช้แลก
+            </dt>
+            <dd class="font-semibold text-primary-dark">
+              − {{ formatNumber(totalPointsCost) }} แต้ม
+            </dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-muted">
+              เหลือหลังแลก
+            </dt>
+            <dd class="font-semibold">
+              {{ formatNumber(memberPoints - totalPointsCost) }} แต้ม
+            </dd>
+          </div>
+        </dl>
+
+        <p v-if="errorMessage" role="alert" class="mt-3 rounded-xl bg-primary-soft px-4 py-3 text-sm text-primary-dark">
+          {{ errorMessage }}
+        </p>
+
+        <div class="mt-6 grid gap-3 sm:mt-7 sm:grid-cols-2 sm:gap-4">
+          <button type="button" :disabled="isRedeeming" :class="outlineButtonClass" class="max-sm:order-2" @click="isOpen = false">
+            ยกเลิก
+          </button>
+          <button
+            ref="confirmButton"
+            type="button"
+            :disabled="!canConfirm"
+            :class="primaryButtonClass"
+            @click="confirmRedemption"
+          >
+            <Icon v-if="isRedeeming" name="lucide:loader-circle" class="size-5 animate-spin" />
+            ยืนยันแลก
+          </button>
         </div>
       </template>
 
@@ -103,15 +242,8 @@ const primaryButtonClass = 'flex h-12 w-full items-center justify-center gap-2 r
         </h2>
 
         <div class="mt-5 flex items-center gap-4 border-b pb-5 sm:mt-7 sm:gap-6 sm:pb-6">
-          <span
-            v-if="reward.category === 'coupon' && reward.couponValueBaht !== null"
-            class="flex size-16 shrink-0 items-center justify-center rounded-xl bg-primary font-number text-xl font-semibold text-white sm:size-24 sm:text-[1.75rem]"
-            aria-hidden="true"
-          >
-            {{ formatNumber(reward.couponValueBaht) }}
-          </span>
           <NuxtImg
-            v-else-if="reward.imageUrls[0]"
+            v-if="reward.imageUrls[0]"
             :src="reward.imageUrls[0]"
             alt=""
             width="192"
@@ -140,7 +272,7 @@ const primaryButtonClass = 'flex h-12 w-full items-center justify-center gap-2 r
               ที่อยู่จัดส่ง
             </h3>
             <button
-              v-if="addresses.length && !isChoosingAddress"
+              v-if="addresses.length"
               type="button"
               class="text-sm font-semibold text-primary-dark hover:underline sm:text-base"
               @click="isChoosingAddress = true"
@@ -149,34 +281,7 @@ const primaryButtonClass = 'flex h-12 w-full items-center justify-center gap-2 r
             </button>
           </div>
 
-          <fieldset v-if="isChoosingAddress" class="mt-3 space-y-2.5">
-            <legend class="sr-only">
-              เลือกที่อยู่จัดส่ง
-            </legend>
-            <label
-              v-for="address in addresses"
-              :key="address.id"
-              class="flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3.5 transition-colors has-checked:border-primary/50 has-checked:bg-cream has-focus-visible:ring-4 has-focus-visible:ring-primary-soft sm:px-6 sm:py-4"
-            >
-              <input
-                v-model="selectedAddressId"
-                type="radio"
-                name="redeem-shipping-address"
-                :value="address.id"
-                class="mt-1 size-4 accent-primary"
-                @change="isChoosingAddress = false"
-              >
-              <span class="min-w-0 text-sm sm:text-base">
-                <span class="block font-semibold">{{ address.recipientName }} · {{ address.phone }}</span>
-                <span class="mt-0.5 block text-muted">{{ formatThaiAddress(address) }}</span>
-              </span>
-            </label>
-            <NuxtLink to="/profile" class="inline-block pt-1 text-sm font-semibold text-primary-dark hover:underline" @click="isOpen = false">
-              เพิ่มหรือแก้ไขที่อยู่ในหน้าโปรไฟล์ ›
-            </NuxtLink>
-          </fieldset>
-
-          <div v-else-if="selectedAddress" class="mt-3 flex items-start gap-3 rounded-2xl border border-primary/40 bg-cream px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
+          <div v-if="selectedAddress" class="mt-3 flex items-start gap-3 rounded-2xl border border-primary/40 bg-cream px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
             <Icon name="lucide:truck" class="mt-0.5 size-5 shrink-0 text-primary-dark sm:size-6" />
             <div class="min-w-0 text-sm sm:text-base">
               <p class="font-semibold sm:text-lg">

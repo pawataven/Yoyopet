@@ -1,4 +1,5 @@
-import type { Reward, RewardDetail, RewardRedemption, RewardRedemptionResult } from '~/types/reward'
+import type { RedeemedCoupon, Reward, RewardDetail, RewardRedemption, RewardRedemptionResult } from '~/types/reward'
+import { toLocalIsoDate } from '~/utils/format'
 
 export interface RewardRepository {
   getRecommendedRewards(): Promise<Reward[]>
@@ -19,6 +20,8 @@ export class RewardRedemptionError extends Error {
 
 const MOCK_MEMBER_POINTS = 1280
 const MOCK_DEFAULT_STOCK = 50
+const MOCK_COUPON_VALID_DAYS = 30
+const MOCK_COUPON_MIN_SPEND_MULTIPLIER = 6
 
 type MockRewardDetailFields = Partial<Omit<RewardDetail, keyof Reward>>
 
@@ -56,6 +59,19 @@ const MOCK_REWARD_DETAILS: Record<string, MockRewardDetailFields> = {
   }
 }
 
+const MOCK_COUPON_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+
+function createMockCoupon(rewardDetail: RewardDetail): RedeemedCoupon {
+  const suffix = Array.from({ length: 4 }, () => MOCK_COUPON_CODE_ALPHABET[Math.floor(Math.random() * MOCK_COUPON_CODE_ALPHABET.length)]).join('')
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + (rewardDetail.couponValidDays ?? MOCK_COUPON_VALID_DAYS))
+  return {
+    code: `YY${rewardDetail.couponValueBaht ?? ''}-${suffix}`,
+    expiresAt: toLocalIsoDate(expiresAt),
+    minSpendBaht: rewardDetail.couponMinSpendBaht
+  }
+}
+
 function toRewardDetail(reward: Reward): RewardDetail {
   const isCoupon = reward.category === 'coupon'
   return {
@@ -68,6 +84,8 @@ function toRewardDetail(reward: Reward): RewardDetail {
     fulfillment: isCoupon ? 'coupon' : 'delivery',
     deliveryLeadTime: isCoupon ? null : '3–5 วันทำการ',
     highlights: [],
+    couponMinSpendBaht: isCoupon && reward.couponValueBaht ? reward.couponValueBaht * MOCK_COUPON_MIN_SPEND_MULTIPLIER : null,
+    couponValidDays: isCoupon ? MOCK_COUPON_VALID_DAYS : null,
     ...MOCK_REWARD_DETAILS[reward.id]
   }
 }
@@ -131,7 +149,14 @@ export function createMockRewardRepository(): RewardRepository {
       const pointsSpent = reward.pointsCost * quantity
       if (pointsSpent > MOCK_MEMBER_POINTS) throw new RewardRedemptionError('insufficient_points')
       if (quantity > rewardDetail.stockRemaining) throw new RewardRedemptionError('out_of_stock')
-      return { redemptionId: `redemption-${Date.now()}`, pointsSpent, remainingPoints: MOCK_MEMBER_POINTS - pointsSpent }
+      const today = toLocalIsoDate(new Date())
+      return {
+        redemptionId: `redemption-${Date.now()}`,
+        referenceCode: `RW-${today.slice(2, 4)}${today.slice(5, 7)}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+        pointsSpent,
+        remainingPoints: MOCK_MEMBER_POINTS - pointsSpent,
+        coupons: rewardDetail.fulfillment === 'coupon' ? Array.from({ length: quantity }, () => createMockCoupon(rewardDetail)) : []
+      }
     },
 
     async getRecentRedemptions(_memberId, limit) {

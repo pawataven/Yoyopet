@@ -37,7 +37,12 @@ const pointRangeMax = computed(() => {
   return Math.max(POINT_RANGE_ROUNDING, Math.ceil(highestCost / POINT_RANGE_ROUNDING) * POINT_RANGE_ROUNDING)
 })
 
-const isRedeemableOnly = ref(false)
+// ?redeemable=1 comes from the "not enough points" dialog's shortcut to rewards the member can already afford
+const route = useRoute()
+const isRedeemableOnly = ref(route.query.redeemable === '1')
+watch(() => route.query.redeemable, (redeemable) => {
+  if (redeemable === '1') isRedeemableOnly.value = true
+})
 const minPoints = ref(0)
 // null means "no upper limit", so the slider stays at the end while the catalog (and its max) is still loading
 const maxPointsSelection = ref<number | null>(null)

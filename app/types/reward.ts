@@ -24,12 +24,25 @@ export interface RewardDetail extends Reward {
   fulfillment: RewardFulfillment
   deliveryLeadTime: string | null
   highlights: string[]
+  couponMinSpendBaht: number | null
+  // Days the coupon stays usable after redemption
+  couponValidDays: number | null
+}
+
+export interface RedeemedCoupon {
+  code: string
+  expiresAt: string
+  minSpendBaht: number | null
 }
 
 export interface RewardRedemptionResult {
   redemptionId: string
+  // Shown to members and support staff, e.g. RW-2611-0042
+  referenceCode: string
   pointsSpent: number
   remainingPoints: number
+  // One coupon per redeemed quantity; empty for delivered products
+  coupons: RedeemedCoupon[]
 }
 
 export type RewardRedemptionStatus = 'preparing' | 'shipping' | 'delivered' | 'ready_to_use' | 'used'

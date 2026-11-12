@@ -12,6 +12,15 @@ const props = withDefaults(defineProps<{
 const pointsShort = computed(() => Math.max(0, props.reward.pointsCost - props.memberPoints))
 const canRedeem = computed(() => pointsShort.value === 0)
 const isCatalog = computed(() => props.variant === 'catalog')
+
+// Mounted on first open so a catalog of cards doesn't render one dialog each up front
+const hasOpenedInsufficientPointsDialog = ref(false)
+const isInsufficientPointsDialogOpen = ref(false)
+
+function openInsufficientPointsDialog() {
+  hasOpenedInsufficientPointsDialog.value = true
+  isInsufficientPointsDialogOpen.value = true
+}
 </script>
 
 <template>
@@ -90,12 +99,18 @@ const isCatalog = computed(() => props.variant === 'catalog')
       <button
         v-else
         type="button"
-        disabled
-        class="mt-3 flex h-10 cursor-not-allowed items-center justify-center rounded-xl bg-border/70 text-sm font-semibold text-muted"
+        class="mt-3 flex h-10 items-center justify-center rounded-xl bg-border/70 text-sm font-semibold text-muted transition-colors hover:bg-border"
         :class="isCatalog ? 'xl:h-12.5 xl:text-base' : 'xl:h-13 xl:text-lg'"
+        @click="openInsufficientPointsDialog"
       >
         แต้มยังไม่พอ
       </button>
     </div>
+
+    <InsufficientPointsDialog
+      v-if="hasOpenedInsufficientPointsDialog"
+      v-model:open="isInsufficientPointsDialogOpen"
+      :reward="reward"
+    />
   </article>
 </template>
