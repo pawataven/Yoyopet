@@ -1,12 +1,18 @@
-import type { Pet, PetBirthdayCoupon } from '~/types/pet'
+import type { NewPet, Pet, PetBirthdayCoupon } from '~/types/pet'
 
 export interface PetRepository {
   getPets(memberId: string): Promise<Pet[]>
+  addPet(memberId: string, newPet: NewPet, photo: File | null): Promise<Pet>
   getCurrentBirthdayCoupon(memberId: string): Promise<PetBirthdayCoupon | null>
   claimBirthdayCoupon(memberId: string, petId: string): Promise<PetBirthdayCoupon>
 }
 
 export function createMockPetRepository(): PetRepository {
+  let pets: Pet[] = [
+    { id: 'pet-mali', name: 'มะลิ', species: 'dog', breed: 'โกลเด้น รีทรีฟเวอร์', sex: 'female', birthDate: '2026-07-12', weightKg: 8.5, photoUrl: '/pets/mali-golden-retriever.jpg' },
+    { id: 'pet-khanompang', name: 'ขนมปัง', species: 'cat', breed: 'วิเชียรมาศ', sex: 'male', birthDate: '2025-10-01', weightKg: 4.2, photoUrl: '/pets/khanompang-siamese-cat.jpg' }
+  ]
+
   let birthdayCoupon: PetBirthdayCoupon = {
     petId: 'pet-mali',
     petName: 'มะลิ',
@@ -19,10 +25,18 @@ export function createMockPetRepository(): PetRepository {
 
   return {
     async getPets() {
-      return [
-        { id: 'pet-mali', name: 'มะลิ', breed: 'โกลเด้น', birthDate: '2026-07-01', photoUrl: '/pets/mali-golden-retriever.jpg' },
-        { id: 'pet-khanompang', name: 'ขนมปัง', breed: 'วิเชียรมาศ', birthDate: '2025-08-15', photoUrl: '/pets/khanompang-siamese-cat.jpg' }
-      ]
+      return pets
+    },
+
+    // Mock only: a blob URL lives in this browser tab, the real upload goes to storage
+    async addPet(_memberId, newPet, photo) {
+      const pet: Pet = {
+        ...newPet,
+        id: `pet-${Date.now()}`,
+        photoUrl: photo ? URL.createObjectURL(photo) : null
+      }
+      pets = [...pets, pet]
+      return pet
     },
 
     async getCurrentBirthdayCoupon() {

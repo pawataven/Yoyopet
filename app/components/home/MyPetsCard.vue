@@ -23,7 +23,7 @@ const visiblePets = computed(() => props.pets.slice(0, MAX_VISIBLE_PETS))
 
     <ul class="mt-5 mb-5 grid grid-cols-3 xl:mt-7">
       <li v-for="pet in visiblePets" :key="pet.id" class="flex flex-col items-center text-center">
-        <NuxtImg
+        <PetPhoto
           v-if="pet.photoUrl"
           :src="pet.photoUrl"
           :alt="pet.name"
@@ -39,13 +39,13 @@ const visiblePets = computed(() => props.pets.slice(0, MAX_VISIBLE_PETS))
           {{ pet.name }}
         </p>
         <p class="text-xs text-muted xl:text-sm">
-          {{ pet.breed }}<template v-if="pet.birthDate">
+          {{ pet.breed ?? petSpeciesLabels[pet.species] }}<template v-if="pet.birthDate">
             · {{ formatPetAge(pet.birthDate) }}
           </template>
         </p>
       </li>
       <li class="flex flex-col items-center text-center">
-        <NuxtLink to="/pets/new" class="group flex flex-col items-center">
+        <NuxtLink :to="{ path: '/pets', query: { add: '1' } }" class="group flex flex-col items-center">
           <span class="flex size-18 items-center justify-center rounded-full border-2 border-dashed border-primary/50 text-primary-dark transition-colors group-hover:bg-primary-soft xl:size-24">
             <Icon name="lucide:plus" class="size-6 xl:size-7" />
           </span>
