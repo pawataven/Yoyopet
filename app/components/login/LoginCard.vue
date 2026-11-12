@@ -138,11 +138,11 @@ async function handleChangePhone() {
     :aria-labelledby="`${fieldId}-heading`"
     class="flex flex-col bg-white"
     :class="isSheet
-      ? 'rounded-t-[1.75rem] px-5 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]'
+      ? 'rounded-t-[1.75rem] px-4 pt-6 pb-[calc(1.75rem+env(safe-area-inset-bottom))]'
       : 'rounded-[1.25rem] border p-5 xl:p-10'"
   >
     <template v-if="isSheet">
-      <h2 :id="`${fieldId}-heading`" class="text-xl leading-tight">
+      <h2 :id="`${fieldId}-heading`" class="text-[1.375rem] leading-tight">
         ยินดีต้อนรับสู่ YoYo Member
       </h2>
       <p class="mt-1 text-sm text-muted">
@@ -187,15 +187,23 @@ async function handleChangePhone() {
         <div
           class="flex h-12 items-center border-2 bg-white transition-colors focus-within:border-primary"
           :class="[
-            phoneError ? 'border-primary' : 'border-muted/25',
+            phoneError ? 'border-primary' : isSheet ? 'border-border' : 'border-muted/25',
             isSheet ? 'rounded-full' : 'rounded-xl xl:h-14.5'
           ]"
         >
-          <span
-            v-if="isSheet"
-            class="flex h-6 shrink-0 items-center border-r border-muted/25 pr-3 pl-5 text-sm font-semibold"
-            aria-hidden="true"
-          >+66</span>
+          <div v-if="isSheet" class="relative flex h-6 shrink-0 items-center border-r border-border">
+            <label :for="`${fieldId}-country-code`" class="sr-only">รหัสประเทศ</label>
+            <!-- Only Thai mobiles are supported (see isValidThaiMobile), so +66 is the sole option -->
+            <select
+              :id="`${fieldId}-country-code`"
+              class="h-full cursor-pointer appearance-none rounded-l-full bg-transparent pr-8 pl-5 text-sm font-semibold focus:outline-none"
+            >
+              <option value="+66">
+                +66
+              </option>
+            </select>
+            <Icon name="lucide:chevron-down" class="pointer-events-none absolute right-3 size-4 text-muted" aria-hidden="true" />
+          </div>
           <input
             :id="`${fieldId}-phone`"
             ref="phoneInput"
@@ -218,8 +226,8 @@ async function handleChangePhone() {
         <button
           type="submit"
           :disabled="isRequestingOtp"
-          class="mt-4 flex h-12 w-full items-center justify-center gap-2 text-base font-semibold text-white transition-colors disabled:opacity-60"
-          :class="isSheet ? 'rounded-full bg-cocoa hover:bg-ink' : 'rounded-xl bg-primary hover:bg-primary-dark xl:mt-5 xl:h-14 xl:text-lg'"
+          class="mt-4 flex h-12 w-full items-center justify-center gap-2 font-semibold text-white transition-colors disabled:opacity-60"
+          :class="isSheet ? 'rounded-full bg-cocoa text-sm hover:bg-ink' : 'rounded-xl bg-primary text-base hover:bg-primary-dark xl:mt-5 xl:h-14 xl:text-lg'"
         >
           <Icon v-if="isRequestingOtp" name="lucide:loader-circle" class="size-5 animate-spin" />
           ขอรหัส OTP

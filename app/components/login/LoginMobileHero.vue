@@ -11,7 +11,7 @@ const selectedLanguage = ref('th')
       width="960"
       height="540"
       preload
-      class="absolute inset-0 -z-10 size-full object-cover object-right"
+      class="absolute inset-0 -z-10 size-full object-cover object-[86%_center]"
     />
 
     <div class="flex items-center justify-between px-4 pt-[calc(1rem+env(safe-area-inset-top))]">
