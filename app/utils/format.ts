@@ -21,6 +21,30 @@ export function formatThaiShortMonth(isoDate: string) {
   return thaiShortMonthFormatter.format(new Date(isoDate))
 }
 
+const thaiMonthYearFormatter = new Intl.DateTimeFormat('th-TH-u-ca-gregory', { month: 'short', year: 'numeric' })
+
+export function formatThaiMonthYear(isoDate: string) {
+  return thaiMonthYearFormatter.format(new Date(isoDate))
+}
+
+const thaiDayMonthFormatter = new Intl.DateTimeFormat('th-TH-u-ca-gregory', { day: 'numeric', month: 'short' })
+
+export function formatThaiDayMonth(isoDate: string) {
+  return thaiDayMonthFormatter.format(new Date(isoDate))
+}
+
+export function formatThaiDateRange({ from, to }: { from: string, to: string }) {
+  const isSameYear = from.slice(0, 4) === to.slice(0, 4)
+  const fromLabel = isSameYear ? formatThaiDayMonth(from) : formatThaiShortDate(from)
+  return `${fromLabel} – ${formatThaiShortDate(to)}`
+}
+
+export function toLocalIsoDate(date: Date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${month}-${day}`
+}
+
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 
 export function daysUntilEndOf(isoDate: string, now = new Date()) {
