@@ -20,7 +20,7 @@ Components only call composables such as `useMember()`. They never call a reposi
 
 ## Connecting Supabase (later)
 
-1. `bun add @nuxtjs/supabase`, then add `'@nuxtjs/supabase'` to `modules` in `nuxt.config.ts`
+1. ~~Install `@nuxtjs/supabase`~~ done: the module is in `nuxt.config.ts` with `redirect: false` until step 5
 2. Fill in `NUXT_PUBLIC_SUPABASE_URL` and `NUXT_PUBLIC_SUPABASE_KEY` in `.env`
 3. `bun run types:supabase` to generate types from the real database
 4. Write `createSupabaseMemberRepository()` that implements `MemberRepository`, and swap it in at `app/repositories/index.ts`

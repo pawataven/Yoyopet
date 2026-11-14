@@ -1,7 +1,7 @@
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
-  modules: ['@nuxt/a11y', '@nuxt/fonts', '@nuxt/eslint', '@nuxt/image', '@nuxt/icon'],
+  modules: ['@nuxt/a11y', '@nuxt/fonts', '@nuxt/eslint', '@nuxt/image', '@nuxt/icon', '@nuxtjs/supabase'],
 
   devtools: { enabled: true },
 
@@ -22,6 +22,12 @@ export default defineNuxtConfig({
   },
 
   css: ['~/assets/css/main.css'],
+
+  supabase: {
+    types: '~~/shared/types/database.types.ts',
+    // Pages still guard login with the mock `auth` middleware; turn this on when useAuth() reads the real session
+    redirect: false
+  },
 
   components: [{ path: '~/components', pathPrefix: false }],
 
