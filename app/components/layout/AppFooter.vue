@@ -3,11 +3,52 @@ const { socialLinks } = useAppConfig()
 
 const footerMenuItems = [...mainNavItems, { label: 'กรอกเลขออเดอร์', to: '/orders/submit' }]
 const copyrightYear = new Date().getFullYear()
+
+const mobileFooterLinks = [
+  { label: 'วิธีสะสมแต้ม', to: '/help/how-to-earn' },
+  { label: 'คำถามที่พบบ่อย', to: '/help/how-to-earn#faq-heading' },
+  { label: 'เงื่อนไข', to: '/terms/membership' }
+]
 </script>
 
 <template>
-  <footer class="bg-cocoa text-white">
-    <div class="page-container pt-10 pb-5 xl:pt-12">
+  <footer class="bg-cream md:bg-cocoa md:text-white">
+    <div class="px-4 pt-5 pb-4 md:hidden">
+      <div class="flex items-center gap-2.5">
+        <img src="/logo/logo.png" alt="" width="64" height="64" class="size-8 rounded-lg">
+        <div>
+          <p class="font-heading text-base leading-tight font-medium">
+            YoYo Pet Shop
+          </p>
+          <p class="text-xs text-muted">
+            ศูนย์รวมสินค้าสำหรับสัตว์เลี้ยง
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center justify-between gap-3">
+        <nav aria-label="ลิงก์ช่วยเหลือ">
+          <ul class="flex flex-wrap items-center text-sm text-muted">
+            <li v-for="(link, index) in mobileFooterLinks" :key="link.to" class="flex items-center">
+              <span v-if="index > 0" class="mx-1" aria-hidden="true">·</span>
+              <NuxtLink :to="link.to" class="hover:text-ink">
+                {{ link.label }}
+              </NuxtLink>
+            </li>
+          </ul>
+        </nav>
+        <div class="flex shrink-0 items-center gap-2 text-sm">
+          <Icon name="lucide:globe" class="size-4.5 text-muted" aria-hidden="true" />
+          <p aria-label="ภาษา" class="font-semibold">
+            <span aria-current="true">ไทย</span>
+            <span class="mx-0.5" aria-hidden="true">|</span>
+            <span title="เร็วๆ นี้" class="text-muted">EN</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-container pt-10 pb-5 max-md:hidden xl:pt-12">
       <div class="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-[1fr_auto_auto_auto] md:gap-12 xl:grid-cols-[1fr_17.75rem_17.75rem_16.25rem] xl:gap-0">
         <div class="col-span-2 md:col-span-1">
           <img src="/logo/logo.png" alt="" width="80" height="80" class="size-16 xl:size-20">

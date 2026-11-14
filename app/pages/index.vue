@@ -5,7 +5,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="pb-12 xl:pb-20">
+  <div class="pb-6 md:pb-12 xl:pb-20">
     <MemberOverview />
     <PromoBannerCarousel />
     <RecommendedRewards />

@@ -50,7 +50,7 @@ const isOrderEntryActive = computed(() => isActive('/orders/'))
           >
             <Icon name="lucide:star" class="size-(--nav-icon-size) text-gold" />
             <span>
-              <span class="font-number font-semibold">{{ formattedPoints }}</span><span class="hidden sm:inline"> แต้ม</span>
+              <span class="font-number font-semibold">{{ formattedPoints }}</span> แต้ม
             </span>
           </NuxtLink>
 

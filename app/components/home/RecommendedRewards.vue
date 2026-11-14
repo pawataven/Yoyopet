@@ -27,7 +27,7 @@ const visibleRewards = computed(() => rewards.value.filter(reward => matchesFilt
 </script>
 
 <template>
-  <section v-if="rewards.length" aria-labelledby="recommended-rewards-heading" class="page-container mt-12 xl:mt-20">
+  <section v-if="rewards.length" aria-labelledby="recommended-rewards-heading" class="page-container mt-7 md:mt-12 xl:mt-20">
     <div class="flex items-center justify-between gap-4">
       <h2 id="recommended-rewards-heading" class="text-2xl leading-tight xl:text-[2.25rem]">
         ของรางวัลแนะนำ
@@ -37,7 +37,13 @@ const visibleRewards = computed(() => rewards.value.filter(reward => matchesFilt
       </NuxtLink>
     </div>
 
-    <div role="group" aria-label="กรองของรางวัล" class="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 scrollbar-none sm:mx-0 sm:px-0 xl:gap-3">
+    <ul class="-mx-4 mt-3 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 scrollbar-none md:hidden">
+      <li v-for="reward in rewards" :key="reward.id" class="flex w-39 shrink-0 snap-start">
+        <RewardCarouselCard :reward="reward" :member-points="memberPoints" class="w-full" />
+      </li>
+    </ul>
+
+    <div role="group" aria-label="กรองของรางวัล" class="mt-4 flex gap-2 overflow-x-auto scrollbar-none max-md:hidden xl:gap-3">
       <button
         v-for="filter in rewardFilters"
         :key="filter.value"
@@ -53,12 +59,12 @@ const visibleRewards = computed(() => rewards.value.filter(reward => matchesFilt
       </button>
     </div>
 
-    <ul v-if="visibleRewards.length" class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 xl:mt-8 xl:gap-6">
+    <ul v-if="visibleRewards.length" class="mt-6 grid grid-cols-2 gap-3 max-md:hidden lg:grid-cols-4 xl:mt-8 xl:gap-6">
       <li v-for="reward in visibleRewards" :key="reward.id" class="flex">
         <RewardCard :reward="reward" :member-points="memberPoints" class="w-full" />
       </li>
     </ul>
-    <p v-else class="mt-6 rounded-[1.25rem] border bg-cream px-6 py-12 text-center text-muted xl:mt-8 xl:text-lg">
+    <p v-else class="mt-6 rounded-[1.25rem] border bg-cream px-6 py-12 text-center text-muted max-md:hidden xl:mt-8 xl:text-lg">
       ยังไม่มีของรางวัลในหมวดนี้
     </p>
   </section>
