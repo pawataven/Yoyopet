@@ -22,7 +22,7 @@ Loyalty program: members earn points from Shopee / TikTok Shop / Lazada orders, 
 
 - **Business rules that change points, coupons, or money live only in a Postgres function or Edge Function.** Neither app re-implements them.
 - Only the publishable key reaches the browser. Secret and service-role keys live only in Edge Functions or `server/` code.
-- Every table an app reads has RLS. Members see `member_id = auth.uid()` rows; admin access comes from an `admin` role claim in the JWT. Frontend role checks are UX only.
+- Every table an app reads has RLS. Members see `member_id = auth.uid()` rows; admin access comes from `(select private.is_admin())` / `private.is_super_admin()` (active row in `admin_users` + TOTP `aal2`), not a JWT claim. Frontend role checks are UX only.
 - The admin app is deployed separately and access-restricted (IP allowlist, VPN, or SSO).
 
 ## Data layers (both apps)

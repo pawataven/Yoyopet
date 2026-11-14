@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_role_changes: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: number
+          new_is_active: boolean | null
+          new_role: string | null
+          old_is_active: boolean | null
+          old_role: string | null
+          user_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: never
+          new_is_active?: boolean | null
+          new_role?: string | null
+          old_is_active?: boolean | null
+          old_role?: string | null
+          user_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: never
+          new_is_active?: boolean | null
+          new_role?: string | null
+          old_is_active?: boolean | null
+          old_role?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      admin_users: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          display_name: string | null
+          email: string
+          is_active: boolean
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          display_name?: string | null
+          email: string
+          is_active?: boolean
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          display_name?: string | null
+          email?: string
+          is_active?: boolean
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       members: {
         Row: {
           avatar_url: string | null
