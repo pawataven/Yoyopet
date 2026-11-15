@@ -80,6 +80,71 @@ export type Database = {
         }
         Relationships: []
       }
+      member_orders: {
+        Row: {
+          approved_amount_baht: number | null
+          claimed_amount_baht: number | null
+          id: string
+          member_id: string
+          order_no: string
+          platform: string
+          points_available_at: string | null
+          points_awarded: number | null
+          points_multiplier: number | null
+          proof_image_path: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+          updated_at: string
+        }
+        Insert: {
+          approved_amount_baht?: number | null
+          claimed_amount_baht?: number | null
+          id?: string
+          member_id?: string
+          order_no: string
+          platform: string
+          points_available_at?: string | null
+          points_awarded?: number | null
+          points_multiplier?: number | null
+          proof_image_path?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_amount_baht?: number | null
+          claimed_amount_baht?: number | null
+          id?: string
+          member_id?: string
+          order_no?: string
+          platform?: string
+          points_available_at?: string | null
+          points_awarded?: number | null
+          points_multiplier?: number | null
+          proof_image_path?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_orders_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       members: {
         Row: {
           avatar_url: string | null
@@ -100,6 +165,7 @@ export type Database = {
           pet_ownership: string | null
           phone: string | null
           phone_verified_at: string | null
+          tier_code: string
           updated_at: string
         }
         Insert: {
@@ -121,6 +187,7 @@ export type Database = {
           pet_ownership?: string | null
           phone?: string | null
           phone_verified_at?: string | null
+          tier_code?: string
           updated_at?: string
         }
         Update: {
@@ -142,16 +209,280 @@ export type Database = {
           pet_ownership?: string | null
           phone?: string | null
           phone_verified_at?: string | null
+          tier_code?: string
           updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "members_tier_code_fkey"
+            columns: ["tier_code"]
+            isOneToOne: false
+            referencedRelation: "tiers"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      order_imports: {
+        Row: {
+          file_hash: string
+          file_name: string
+          id: string
+          imported_at: string
+          imported_by: string
+          platform: string
+          summary: Json
+        }
+        Insert: {
+          file_hash: string
+          file_name: string
+          id?: string
+          imported_at?: string
+          imported_by?: string
+          platform: string
+          summary?: Json
+        }
+        Update: {
+          file_hash?: string
+          file_name?: string
+          id?: string
+          imported_at?: string
+          imported_by?: string
+          platform?: string
+          summary?: Json
+        }
+        Relationships: []
+      }
+      platform_order_items: {
+        Row: {
+          id: number
+          platform_order_id: string
+          product_name: string
+          quantity: number
+          sku: string | null
+          total_baht: number
+        }
+        Insert: {
+          id?: never
+          platform_order_id: string
+          product_name: string
+          quantity: number
+          sku?: string | null
+          total_baht: number
+        }
+        Update: {
+          id?: never
+          platform_order_id?: string
+          product_name?: string
+          quantity?: number
+          sku?: string | null
+          total_baht?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_order_items_platform_order_id_fkey"
+            columns: ["platform_order_id"]
+            isOneToOne: false
+            referencedRelation: "member_order_reviews"
+            referencedColumns: ["platform_order_id"]
+          },
+          {
+            foreignKeyName: "platform_order_items_platform_order_id_fkey"
+            columns: ["platform_order_id"]
+            isOneToOne: false
+            referencedRelation: "platform_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_orders: {
+        Row: {
+          amount_baht: number | null
+          delivered_at: string | null
+          id: string
+          last_import_id: string
+          order_no: string
+          ordered_at: string | null
+          platform: string
+          raw_status: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_baht?: number | null
+          delivered_at?: string | null
+          id?: string
+          last_import_id: string
+          order_no: string
+          ordered_at?: string | null
+          platform: string
+          raw_status: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          amount_baht?: number | null
+          delivered_at?: string | null
+          id?: string
+          last_import_id?: string
+          order_no?: string
+          ordered_at?: string | null
+          platform?: string
+          raw_status?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_orders_last_import_id_fkey"
+            columns: ["last_import_id"]
+            isOneToOne: false
+            referencedRelation: "order_imports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      point_ledger: {
+        Row: {
+          available_at: string
+          created_at: string
+          created_by: string | null
+          id: number
+          kind: string
+          member_id: string
+          member_order_id: string | null
+          points: number
+        }
+        Insert: {
+          available_at?: string
+          created_at?: string
+          created_by?: string | null
+          id?: never
+          kind: string
+          member_id: string
+          member_order_id?: string | null
+          points: number
+        }
+        Update: {
+          available_at?: string
+          created_at?: string
+          created_by?: string | null
+          id?: never
+          kind?: string
+          member_id?: string
+          member_order_id?: string | null
+          points?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_ledger_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "point_ledger_member_order_id_fkey"
+            columns: ["member_order_id"]
+            isOneToOne: false
+            referencedRelation: "member_order_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "point_ledger_member_order_id_fkey"
+            columns: ["member_order_id"]
+            isOneToOne: false
+            referencedRelation: "member_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tiers: {
+        Row: {
+          code: string
+          min_points: number
+          name: string
+          points_multiplier: number
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          min_points: number
+          name: string
+          points_multiplier: number
+          sort_order: number
+        }
+        Update: {
+          code?: string
+          min_points?: number
+          name?: string
+          points_multiplier?: number
+          sort_order?: number
         }
         Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      member_order_reviews: {
+        Row: {
+          amount_baht: number | null
+          approved_amount_baht: number | null
+          claimed_amount_baht: number | null
+          duplicate_of_member_code: string | null
+          file_amount_baht: number | null
+          file_delivered_at: string | null
+          file_imported_at: string | null
+          file_status: string | null
+          id: string | null
+          match_result: string | null
+          member_code: string | null
+          member_id: string | null
+          member_name: string | null
+          member_phone: string | null
+          order_no: string | null
+          platform: string | null
+          platform_order_id: string | null
+          points: number | null
+          points_available_at: string | null
+          points_awarded: number | null
+          proof_image_path: string | null
+          rejection_reason: string | null
+          return_window_ends_at: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          stored_status: string | null
+          submitted_at: string | null
+          tier_name: string | null
+          tier_points_multiplier: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_orders_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      approve_member_orders: {
+        Args: {
+          amount_override_baht?: number
+          credit_mode?: string
+          order_ids: string[]
+        }
+        Returns: Json
+      }
+      calculate_order_points: {
+        Args: { amount_baht: number; points_multiplier: number }
+        Returns: number
+      }
+      order_return_window: { Args: never; Returns: string }
+      reject_member_orders: {
+        Args: { order_ids: string[]; reason: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
