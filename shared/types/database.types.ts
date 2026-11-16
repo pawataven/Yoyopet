@@ -449,6 +449,8 @@ export type Database = {
           return_window_ends_at: string | null
           review_status: string | null
           reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_name: string | null
           stored_status: string | null
           submitted_at: string | null
           tier_name: string | null
