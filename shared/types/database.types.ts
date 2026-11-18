@@ -80,6 +80,57 @@ export type Database = {
         }
         Relationships: []
       }
+      import_column_aliases: {
+        Row: {
+          alias: string
+          created_at: string
+          field: string
+          id: number
+          platform: string
+        }
+        Insert: {
+          alias: string
+          created_at?: string
+          field: string
+          id?: never
+          platform: string
+        }
+        Update: {
+          alias?: string
+          created_at?: string
+          field?: string
+          id?: never
+          platform?: string
+        }
+        Relationships: []
+      }
+      import_status_aliases: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: number
+          platform: string
+          raw_status: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: never
+          platform: string
+          raw_status: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: never
+          platform?: string
+          raw_status?: string
+          status?: string
+        }
+        Relationships: []
+      }
       member_orders: {
         Row: {
           approved_amount_baht: number | null
@@ -224,33 +275,97 @@ export type Database = {
       }
       order_imports: {
         Row: {
+          completed_at: string | null
           file_hash: string
           file_name: string
           id: string
           imported_at: string
           imported_by: string
           platform: string
+          status: string
           summary: Json
         }
         Insert: {
+          completed_at?: string | null
           file_hash: string
           file_name: string
           id?: string
           imported_at?: string
           imported_by?: string
           platform: string
+          status?: string
           summary?: Json
         }
         Update: {
+          completed_at?: string | null
           file_hash?: string
           file_name?: string
           id?: string
           imported_at?: string
           imported_by?: string
           platform?: string
+          status?: string
           summary?: Json
         }
         Relationships: []
+      }
+      order_point_events: {
+        Row: {
+          available_at: string | null
+          created_at: string
+          created_by: string | null
+          id: number
+          import_id: string | null
+          kind: string
+          member_order_id: string
+          points_after: number | null
+          points_before: number | null
+        }
+        Insert: {
+          available_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: never
+          import_id?: string | null
+          kind: string
+          member_order_id: string
+          points_after?: number | null
+          points_before?: number | null
+        }
+        Update: {
+          available_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: never
+          import_id?: string | null
+          kind?: string
+          member_order_id?: string
+          points_after?: number | null
+          points_before?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_point_events_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "order_imports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_point_events_member_order_id_fkey"
+            columns: ["member_order_id"]
+            isOneToOne: false
+            referencedRelation: "member_order_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_point_events_member_order_id_fkey"
+            columns: ["member_order_id"]
+            isOneToOne: false
+            referencedRelation: "member_orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platform_order_items: {
         Row: {
@@ -259,6 +374,7 @@ export type Database = {
           product_name: string
           quantity: number
           sku: string | null
+          status: string | null
           total_baht: number
         }
         Insert: {
@@ -267,6 +383,7 @@ export type Database = {
           product_name: string
           quantity: number
           sku?: string | null
+          status?: string | null
           total_baht: number
         }
         Update: {
@@ -275,6 +392,7 @@ export type Database = {
           product_name?: string
           quantity?: number
           sku?: string | null
+          status?: string | null
           total_baht?: number
         }
         Relationships: [
@@ -341,9 +459,28 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          platform: string
+          return_window_days: number
+          updated_at: string
+        }
+        Insert: {
+          platform: string
+          return_window_days: number
+          updated_at?: string
+        }
+        Update: {
+          platform?: string
+          return_window_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       point_ledger: {
         Row: {
-          available_at: string
+          available_at: string | null
+          cancelled_at: string | null
           created_at: string
           created_by: string | null
           id: number
@@ -353,7 +490,8 @@ export type Database = {
           points: number
         }
         Insert: {
-          available_at?: string
+          available_at?: string | null
+          cancelled_at?: string | null
           created_at?: string
           created_by?: string | null
           id?: never
@@ -363,7 +501,8 @@ export type Database = {
           points: number
         }
         Update: {
-          available_at?: string
+          available_at?: string | null
+          cancelled_at?: string | null
           created_at?: string
           created_by?: string | null
           id?: never
@@ -480,10 +619,23 @@ export type Database = {
         Args: { amount_baht: number; points_multiplier: number }
         Returns: number
       }
-      order_return_window: { Args: never; Returns: string }
+      finish_order_import: { Args: { finish_import_id: string }; Returns: Json }
+      import_order_chunk: {
+        Args: { chunk_import_id: string; chunk_orders: Json }
+        Returns: Json
+      }
+      order_return_window: { Args: { for_platform: string }; Returns: string }
       reject_member_orders: {
         Args: { order_ids: string[]; reason: string }
         Returns: Json
+      }
+      start_order_import: {
+        Args: {
+          import_file_hash: string
+          import_file_name: string
+          import_platform: string
+        }
+        Returns: string
       }
     }
     Enums: {
