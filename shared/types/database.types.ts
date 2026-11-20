@@ -135,6 +135,7 @@ export type Database = {
         Row: {
           approved_amount_baht: number | null
           claimed_amount_baht: number | null
+          decided_by_system: boolean
           id: string
           member_id: string
           order_no: string
@@ -153,6 +154,7 @@ export type Database = {
         Insert: {
           approved_amount_baht?: number | null
           claimed_amount_baht?: number | null
+          decided_by_system?: boolean
           id?: string
           member_id?: string
           order_no: string
@@ -171,6 +173,7 @@ export type Database = {
         Update: {
           approved_amount_baht?: number | null
           claimed_amount_baht?: number | null
+          decided_by_system?: boolean
           id?: string
           member_id?: string
           order_no?: string
@@ -566,12 +569,14 @@ export type Database = {
           amount_baht: number | null
           approved_amount_baht: number | null
           claimed_amount_baht: number | null
+          decided_by_system: boolean | null
           duplicate_of_member_code: string | null
           file_amount_baht: number | null
           file_delivered_at: string | null
           file_imported_at: string | null
           file_status: string | null
           id: string | null
+          is_waiting_for_file: boolean | null
           match_result: string | null
           member_code: string | null
           member_id: string | null
@@ -628,6 +633,10 @@ export type Database = {
       reject_member_orders: {
         Args: { order_ids: string[]; reason: string }
         Returns: Json
+      }
+      revoke_member_order_approval: {
+        Args: { reason: string; revoke_order_id: string }
+        Returns: undefined
       }
       start_order_import: {
         Args: {
